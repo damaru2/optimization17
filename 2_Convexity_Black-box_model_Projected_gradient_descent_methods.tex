@@ -1,0 +1,300 @@
+%! TEX root = main.tex
+
+\section{Convexity. Black-box model. Projected gradient descent methods.}
+\emph{Speaker: Anthony Caterini, 19/10/2017.}\\
+
+We want to focus first on introducing the notion of convexity, which will admit some very nice properties for optimization. In particular, convex functions always have subgradients, and any local minimum is also a global minimum. We will also introduce projected subgradient descent methods and prove convergence rates in the cases where $f$ is convex and either $L$-Lipschitz continuous or $\beta$-smooth. In these two cases, the essence of the method is the same, although the particulars are slightly different.
+
+The methods in this section relate to controlling the \emph{OPTIMIZATION} term in empirical risk minimization. We note that although the empirical risk $R$ may not be convex, we can still run the algorithms that we discuss to find local optima.
+%and develop some intuition about how far we are away from the optimal point after a certain number of iterations. 
+
+Note that in this section, we rely heavily on \cite{bubeck}, although the extension of projected gradient descent to time-varying step sizes comes from \cite[Lecture~11,~Page~5]{rigollet}.
+
+\subsection{Convexity}
+
+We begin by recalling the definition of a convex function and convex set.
+
+\begin{definition}[Convex function and set]
+A \emph{function} $f : \X \subset \R^n \rightarrow \R$ is \emph{convex} if, for all $(x, y, \gamma) \in \X \times \X \times [0,1],$
+\[
+f( (1 - \gamma) x + \gamma y ) \leq (1 - \gamma) f(x) + \gamma f(y).
+\]
+In other words, $f$ always lies below its chords. Similarly, a \emph{set} $\X \subset \R^n$ is \emph{convex} if, for all $(x, y, \gamma) \in \X \times \X \times [0,1],$
+\[
+(1 - \gamma) x + \gamma y \in \X.
+\]
+In other words, $\X$ contains all of its line segments.
+\end{definition}
+
+\subsubsection{Existence of subgradients}
+We will also define the notion of a subgradient -- useful when $f$ is not differentiable -- and show that a convex function always admits subgradients. This will be important when we introduce the projected subgradient method, as we will not assume differentiability of $f$. We will instead assume that $f$ is convex, and that we have access to a \emph{first order oracle} that can give us a subgradient of $f$ at each point.
+
+\begin{definition}[Subgradient]
+Let $\X \subset \R^n$ and $f : \X \rightarrow \R$. Then, $g \in \R^n$ is a \emph{subgradient} of $f$ at $x \in \X$ if, for any $y \in \X$, one has
+\[
+f(x) - f(y) \leq g^T (x - y).
+\]
+The set of subgradients of $f$ at $x$ is denoted $\partial f(x)$.
+\end{definition} 
+
+Note that we can rewrite the above inequality as $f(y) \geq f(x) + g^T (y - x)$. Thus, each subgradient defines a plane that supports $f$. Also notice the set of subgradients at a point at which $f$ is non-differentiable can be infinite. Conversely, we will see that, for convex and differentiable functions, the standard gradient is also a subgradient. We first mention the supporting hyperplane theorem and the definition of the epigraph before showing this.
+
+\begin{theorem}[Supporting Hyperplane Theorem]
+Let $\X$ be a convex set, and $x_0 \in \partial \X$ (the boundary of $\X$). Then, there exists $w \in \R^n$, $w \neq 0$, such that
+\[
+\forall x \in \X, w^T x \geq w^T x_0.
+\]
+\end{theorem}
+
+\begin{definition}[Epigraph]
+The \emph{epigraph} of a function $f : \X \rightarrow \R$ is
+\[
+\mbox{epi}(f) = \{(x, t) \in \X \times \R: t \geq f(x)\}.
+\]
+Also, a function is convex if and only if its epigraph is convex.
+\end{definition}
+
+\begin{proposition}[Existence of subgradients]
+Let $\X$ be convex and $f : \X \rightarrow \R$. If $\forall x \in \X, \partial f(x) \neq \emptyset,$ then $f$ is convex. Conversely, if $f$ is convex, then for any $x \in $ int$(\X), \partial f(x) \neq \emptyset$. Furthermore, if $f$ is convex and differentiable at $x$, then $\nabla f(x) \in \partial f(x)$. 
+\begin{proof}
+For the first claim, let $g \in \partial f( (1 - \gamma) x + \gamma y)$, for any $x,y \in \X$ and $\gamma \in [0,1]$. Then,
+\begin{align}
+f((1 - \gamma) x + \gamma y) &\leq f(x) + \gamma g^T (y - x), \label{eqn:subgrad_1} \\
+f((1 - \gamma) x + \gamma y) &\leq f(y) + (1 - \gamma) g^T (x - y). \label{eqn:subgrad_2}
+\end{align}
+Then, adding $(1 - \gamma) *$\eqref{eqn:subgrad_1} with $\gamma *$\eqref{eqn:subgrad_2} clearly shows that $f$ is a convex function. \\
+
+Now let us suppose that $f$ is convex. Let $x \in \X$. Clearly, $(x, f(x)) \in \partial\mbox{epi}(f)$, and $\mbox{epi}(f)$ is a convex set. Thus, by the Supporting Hyperplane Theorem, there exists $(a, b) \in \R^n \times \R$, $(a, b) \neq 0$, such that for all $(y, t) \in \mbox{epi} (f)$, 
+\begin{equation} \label{eqn:subgrad_hyperplane}
+a^T x + b f(x) \geq a^T y + bt.
+\end{equation}
+By allowing $t \rightarrow \infty$, we can see that $b \leq 0$. Also, if we assume $x \in $ int$(\X)$, then $y = x + \varepsilon a \in \X$ for small $\varepsilon > 0$. Plugging this into \eqref{eqn:subgrad_hyperplane}, we see that $b = 0$ implies $a = 0$, which is a contradiction; therefore, $b < 0$. We can now rewrite \eqref{eqn:subgrad_hyperplane} with $t = f(y)$ as 
+\[
+f(x) - f(y) \leq \frac{1}{|b|} a^T (x - y),
+\]
+i.e. $a / |b|$ is a subgradient of $f$. \\
+
+Finally, if $f$ is convex and differentiable, it is not hard to show that $\nabla f(x) \in \partial f(x)$ by definition. 
+\end{proof}
+\end{proposition}
+
+\subsubsection{first order optimality condition}
+We also have a nice first order optimality condition when dealing with convex functions.
+
+\begin{proposition}[First order optimality condition]\label{prop:fo_opt}
+Let $f$ be convex, and $\X$ be a closed set on which $f$ is differentiable. Then,
+\[
+x^* \in \argmin_{x \in \X} f(x)
+\]
+if and only if for all $y \in \X$,
+\[
+\nabla f(x^*)^T (x^* - y) \leq 0.
+\]
+\begin{proof}
+If we first assume that $\nabla f(x^*)^T(x^* - y) \leq 0$ for all $y \in \X$, then since the gradient is a subgradient,
+\[
+f(x^*) - f(y) \leq \nabla f(x^*)^T (x^* - y) \leq 0,
+\]
+i.e. $f(x^*) \leq f(y)$ for all $y \in \X$. \\
+
+Now, if we assume $x^* \in \argmin_{x \in X}f(x)$, we know that $f$ is locally non-decreasing around $x^*$. Define $h(t) = f(x^* + t(y-x^*))$ for all $y \in \X$ -- the rate of change of $f$ along the line from $x$ to $y$. We require $h'(0) \geq 0$ since $x^*$ is a minimizer. Thus,
+\[
+h'(0) = \nabla f(x^*)^T (y - x^*) \geq 0, 
+\]
+i.e. $\nabla f(x^*)^T (x^* - y) \leq 0$ for all $y \in \X$. 
+\end{proof}
+\end{proposition}
+
+We will see that the above proposition proves to be very useful when proving the convergence rates of projected gradient descent methods. Of course the above proposition holds with equality when $x^*$ is an interior point, as $\nabla f(x^*) = 0$ in this case. However, it may also be the case that $x^*$ is on the boundary of $\X$ and not necessarily a minimum in the space in which $\X$ is embedded, and this is the less-intuitive case that \autoref{prop:fo_opt} handles well.
+
+\subsection{Black-box model}
+In the black-box model of computation, we assume that we know the constraint set $\X$ but not the objective function $f : \X \rightarrow \R$. Nonetheless, we assume that we can make queries to an \emph{oracle} and receive some information about $f$ as output. Of particular interest to us is a \textbf{first order oracle}, which takes a point $x \in \X$ as input and outputs a subgradient of $f$ at $x$. Of course, if $f$ is convex, we will always be able to find a subgradient. We are interested in understanding the \emph{oracle complexity} of convex optimization -- the number of necessary and sufficient queries to the oracle to find an $\varepsilon$-approximate minima. 
+
+\subsection{Projected gradient descent methods}
+We will now move into developing projected gradient descent algorithms for constrained optimization problems of the form 
+\begin{align*}
+\min_{x \in \X} f(x),
+\end{align*}
+where $f : \X \rightarrow \R$, and $\X \subset \R^n$ is the constraint set. If $f$ is differentiable and $\X = \R^n$, we can write out the basic gradient descent method as 
+\[
+x_{t+1} = x_t - \eta \nabla f(x_t),
+\]
+for some initial point $x_1 \in \R^n$ and step size $\eta > 0$. Methods of this type can obtain an \emph{oracle complexity} that is independent of the dimension and are thus attractive in the high-dimensional setting. 
+
+However, we are interested in cases where the constraint set is a strict subset of $\R^n$ and $f$ may not be differentiable. We thus turn to a \emph{projected subgradient descent} method instead, where each iteration performs the following: take a step in the direction of a subgradient of $f$, and then project this new point back onto the constraint set $\X$. We therefore begin by defining the projection operator and describe one of its properties.
+
+Note that throughout this section, we will assume that the constraint set $\X$ is compact and convex, and is contained in a Euclidean ball of radius $B$ centred at $x_1 \in \X$. Furthermore, $\| \cdot \|$ denotes the Euclidean norm.
+
+\begin{definition}[Projection operator]
+For all $y \in \R^n$, the \emph{projection operator} on $\X$, $\Pi_{\X}$, is defined by 
+\[
+\Pi_{\X}(y) = \argmin_{x \in \X} \| x - y \|.
+\]
+\end{definition}
+
+\begin{lemma} \label{lem:proj_grad}
+Let $x \in \X$ and $y \in \R^n$. Then, 
+\[
+\left(\Pi_{\X}(y) - x\right)^T \left(\Pi_{\X}(y) - y\right) \leq 0,
+\]
+which also implies $\|\Pi_{\X}(y) - x\|^2 + \|y - \Pi_{\X}(y)\|^2 \leq \|y - x\|^2$. 
+\begin{proof}
+This is a direct consequence of \autoref{prop:fo_opt} since $\Pi_{\X}(y)$ is a minimizer of $h_{y}(z) = \| y - z \|$, and $\nabla h_y(z) = (z - y) / \|z - y \|$.
+\end{proof}
+\end{lemma}
+
+\subsubsection{$L$-Lipschitz functions}
+We now introduce projected subgradient descent for the case where the subgradients of $f(x)$ satisfy $\|g\| \leq L$, for all $x \in \X$. Note that this immediately implies $f$ is $L$-Lipschitz continuous. The algorithm consists of two update steps at every iteration $t \geq 1$:
+\begin{align*}
+y_{t+1} &= x_t - \eta_t g_t, \mbox{where } g_t \in \partial f(x_t), \\
+x_{t+1} &= \Pi_{\X}(y_{t+1}).
+\end{align*}
+We state and prove the convergence of this method in the $L$-Lipschitz case below.
+\begin{theorem}[$L$-Lipschitz Projected Subgradient Descent]
+\label{thm:projectedgradL}
+Suppose $\X$ is contained in a Euclidean ball of radius $B$ centred at $x_1$. Suppose also that for every $x \in \X$, the subgradients $g \in \partial f(x)$ satisfy $\|g\| \leq L$ and that $f$ is convex. Then, the projected subgradient descent method with $\eta_s\equiv\eta = \frac{B}{L\sqrt{t}}$ satisfies 
+\begin{equation} \label{eqn:proj_subgrad_t}
+f\left(\frac{1}{t} \sum_{s=1}^t x_s\right) - f(x^*) \leq \frac{LB}{\sqrt{t}} \quad \mbox{and} \quad f(x^o) - f(x^*) \leq \frac{LB}{\sqrt{t}},
+\end{equation}
+where $x^o \in \argmin_{x \in \{x_1, \ldots, x_t\}} f(x)$. Moreover, with $\eta_s = \frac{B}{L\sqrt{s}}$, then $\exists c > 0$ (for instance, $c=2(1+\log 2)$) such that
+\begin{equation} \label{eqn:proj_subgrad_s}
+f\left(\bigg(\sum_{s=\lceil t/2 \rceil + 1}^t \eta_s\bigg)^{-1} \sum_{s=\lceil t/2 \rceil + 1}^t \eta_s x_s\right) - f(x^*) \leq c\frac{LB}{\sqrt{t}} \quad \mbox{and} 
+\quad f(x^o) - f(x^*) \leq c\frac{LB}{\sqrt{t}}.
+\end{equation}
+\begin{proof}
+Recall that $2 a^T b = \|a\|^2 + \|b\|^2 - \|a - b\|^2.$ Then, for any $1 \leq s \leq t$, 
+\begin{align*}
+f(x_s) - f(x^*) &\leq g_s^T(x_s - x^*) \\
+&= \frac{1}{\eta} (x_s - y_{s+1})^T (x_s - x^*) \\
+&= \frac{1}{2\eta} \left( \|x_s - x^*\|^2 + \|x_s - y_{s+1}\|^2 - \|y_{s+1} - x^*\|^2\right) \\
+&= \frac{1}{2\eta} \left( \|x_s - x^*\|^2 - \|y_{s+1} - x^*\|^2 \right) + \frac{\eta}{2} \|g_s\|^2.
+\end{align*}
+Now, from \autoref{lem:proj_grad}, we know that $\| y_{s+1} - x^* \| \geq \|x_{s+1} - x^*\|$. Therefore, summing from $s = 1$ to $t$, we get
+\[
+\frac{1}{t} \sum_{s=1}^t (f(x_s) - f(x^*)) \leq \frac{1}{2 \eta t} \left( \| x_1 - x^* \|^2 - \| x_{t+1} - x^* \|^2 \right) + \frac{\eta}{2} L^2 \leq \frac{B^2}{2 \eta t} + \frac{\eta L^2 }{2}.
+\]
+Selecting $\eta = \frac{B}{L\sqrt{t}}$ to minimize the right-hand side of the above inequality gives the first result in \eqref{eqn:proj_subgrad_t} (since $f\left(\frac{1}{t}\sum_{s=1}^t x_s \right) \leq \frac{1}{t} \sum_{s=1}^t f(x_s)$ by Jensen's inequality). Clearly, $f(x^o) \leq \frac{1}{t} \sum_{s=1}^t f(x_s)$, proving the second result of \eqref{eqn:proj_subgrad_t}. \\
+
+Now consider the case of an adaptive step size $\eta_s$. The above derivation yields
+\begin{align*}
+f(x_s) - f(x^*)
+\le \frac{1}{2\eta_s} \left( \|x_s - x^*\|^2 - \|y_{s+1} - x^*\|^2 \right) + \frac{\eta_s}{2} \|g_s\|^2.
+\end{align*}
+If we want to apply the same argument as above and get a telescoping sum with cancellations, we need to take a weighted sum weighted by $\eta_s$. Namely, replacing $t^{-1}\sum_{s=1}^t$ with $(\sum_{s=1}^t \eta_s)^{-1} \sum_{s=1}^t \eta_s$ we get
+\[
+\left(\sum_{s=1}^t \eta_s\right)^{-1} \sum_{s=1}^t \eta_s \left(f(x_s) - f(x^*)\right) \leq \left(\sum_{s=1}^t \eta_s\right)^{-1} \left(\frac{B^2}{2} + \left(\sum_{s=1}^t \eta^2_s\right) \frac{L^2}{2}\right),
+\]
+which reduces to the previous result when $\eta_s\equiv\eta$.
+We want the right-hand-side to go to zero as $t$ increases, so we need both $\sum \eta_s \rightarrow \infty$ and $\frac{\sum \eta_s^2}{\sum \eta_s} \rightarrow 0$. This is the case if we take $\eta_s = \frac{K}{\sqrt{s}}$, as $\sum_{s=1}^t \eta_s \geq c_1 K \sqrt{t}$ (e.g., $c_1=1$) and $\sum_{s=1}^t \eta_s^2 \leq c_2 K^2 \log t$ (e.g., $c_2=1+1/\log 2$ if $t\ge 2$, using that $\sum_{s=1}^t 1/s \le 1+\int_{s=0}^t \frac{1}{s} ds = 1+\log t \le c_2 \log t$). We can then choose $K = \frac{B}{L}$ such that 
+\[
+\left(\sum_{s=1}^t \eta_s\right)^{-1}\sum_{s=1}^t \eta_s \left(f(x_s) - f(x^*)\right)
+\leq 
+\frac{B^2}{2c_1 K \sqrt{t}} + \frac{c_2 K L^2 \log t}{2c_1\sqrt{t}}
+\leq
+\left( \frac{1+c_2}{2c_1} \right) LB \sqrt{\frac{\log t}{t}}.
+\]
+To get rid of the log term, we note that if we only sum from $\lceil t /2 \rceil + 1$ to $t$, for $t\ge 3$, we have $\sum_{s=\lceil t /2 \rceil + 1}^t \eta_s \geq c_1' K \sqrt{t}$ (e.g., $c_1'=1/4$, as $\sum_{s=\lceil t /2 \rceil + 1}^t 1/\sqrt{s} \ge \frac{t-1}{2\sqrt{t}} = \frac{\sqrt{t}}{2}(1-1/t)\ge \frac{\sqrt{t}}{4}$) and $\sum_{s=\lceil t /2 \rceil + 1}^t \eta_s^2 \leq c_2' K^2$ (e.g., $c_2'=\log 2$ using that $\sum_{s=\lceil t /2 \rceil + 1}^t \frac{1}{s} \leq \int_{t /2}^t \frac{1}{s} ds = \log 2$). Therefore, we finally have that 
+\[
+\min_{1 \leq s \leq t} f(x_s) - f(x^*) \leq \min_{\lceil t /2 \rceil + 1 \leq s \leq t} f(x_s) - f(x^*) \leq \left(\sum_{s=\lceil t /2 \rceil + 1}^t \eta_s\right)^{-1}\sum_{s=\lceil t /2 \rceil + 1}^t \eta_s \left(f(x_s) - f(x^*)\right) \leq c\frac{LB}{\sqrt{t}},
+\]
+with $c=\left( \frac{1+c'_2}{2c'_1} \right)$, where we used that the minimum element of a set is always less or equal to a convex combination of the elements. The proof of both results in \eqref{eqn:proj_subgrad_s} follows again by Jensen's inequality.
+\end{proof}
+\end{theorem}
+
+The result of \eqref{eqn:proj_subgrad_s} is promising since we would rather use an adaptive step size than one that depends on the total number of iterations $t$, to be set and fixed in advance, i.e., prior to running the algorithm. Unfortunately, both step sizes still depend on $B$ and $L$ -- quantities which may not be known. The results in Theorem \ref{thm:projectedgradL} demonstrate that the projected subgradient method for convex and $L$-Lipschitz functions exhibits a convergence rate of $O\left(\frac{BL}{\sqrt{t}}\right)$. We can also phrase this in terms of \emph{oracle complexity}: as at each iteration we make a constant (in fact, one) number of calls to the oracle, then to achieve $\varepsilon$-convergence, we require $\frac{BL}{\sqrt{t}} \le \varepsilon$, or $t\geq \frac{B^2 L^2}{\varepsilon^2}$.
+
+\subsubsection{$\beta$-smooth functions}
+Now, we move to the case of a $\beta$-smooth convex function. Recall a function $f: \X \rightarrow \R$ is $\beta$-smooth if, for all $x,y \in \X,$ we have $\| \nabla f(x) - \nabla f(y) \| \leq \beta \| x - y \|$. We show some auxiliary results first for convex and $\beta$-smooth functions -- deferring to \cite{bubeck} for the proofs -- before deriving the convergence rate of projected subgradient descent with $\eta = \frac{1}{\beta}$.
+
+\begin{lemma} \label{lem:cvx_beta_smooth}
+Let $f : \X \rightarrow \R$ be a convex and $\beta$-smooth function. Then, for all $x, y \in \X$, we have 
+\[
+f(x) - f(y) - \nabla f(y)^T (x - y) \leq \frac{\beta}{2} \| x - y \|^2.
+\]
+\begin{proof}
+Refer to the proof in \cite[Lemma~3.4]{bubeck}.
+\end{proof}
+\end{lemma} 
+
+\begin{lemma} \label{lem:proj_beta_smooth}
+Let $x, y \in \X$, $x^+ = \Pi_{\X} \left(x - \frac{1}{\beta} \nabla f(x) \right)$, and $g_{\X}(x) = \beta (x - x^+)$. Then, we have the following:
+\[
+f(x^+) - f(y) \leq g_{\X}(x)^T (x - y) - \frac{1}{2\beta} \|g_{\X}(x)\|^2.
+\]
+\begin{proof}
+Refer to the proof in \cite[Lemma~3.6]{bubeck}.
+%From \autoref{lem:proj_grad}, we have that 
+%\[
+%\left(x^+ - \left(x - \frac{1}{\beta} \nabla f(x) \right) \right)^T (x^+ - y) \leq 0,
+%\]
+%which implies $\nabla f(x)^T (x^+ - y) \leq g_{\X}(x)^T(x^+ - y)$. Therefore, from \autoref{lem:cvx_beta_smooth}, we have
+%\begin{align*}
+%f(x^+) - f(y) &= f(x^+) - f(x) + f(x) - f(y) \\
+%&\leq \nabla f(x)^T (x^+ - x) + \frac{\beta}{2} \| x^+ - x \|^2 + \nabla f(x)^T (x - y) \\
+%&= \nabla f(x)^T (x^+ - y) + \frac{1}{2\beta} \| g_{\X} (x) \|^2 \\ 
+%&\leq g_{\X}(x)^T(x^+ - y) + \frac{1}{2\beta} \|g_{\X}(x) \|^2 \\ 
+%&= g_{\X}(x)^T \left(x^+ - y + \frac{1}{2}(x - x^+) \right) \\#
+%&= 
+%\end{align*}
+\end{proof}
+\end{lemma}
+
+\begin{theorem}[$\beta$-Smooth Projected Subgradient Descent] Let $f : \X \rightarrow \R$ be convex and $\beta$-smooth on $\X$. Also, suppose $\X$ is contained in a Euclidean ball of radius $B$ centred at $x_1$. Then, the projected subgradient descent method with $\eta = \frac{1}{\beta}$ satisfies
+\begin{equation} \label{eqn:err_beta_subgrad}
+f(x_t) - f(x^*) \leq \frac{3 \beta B^2 + f(x_1) - f(x^*)}{t}.
+\end{equation}
+\begin{proof}
+From \autoref{lem:proj_beta_smooth} and since $x_{s+1} = \Pi_{\X}(x_s - \frac{1}{\beta} \nabla f(x_s))$, we have the following:
+\begin{align*}
+f(x_{s+1}) - f(x_s) &\leq g_{\X}(x_s)^T(x_s - x_s) - \frac{1}{2 \beta} \| g_{\X}(x_s)\|^2 = - \frac{1}{2 \beta} \| g_{\X}(x_s)\|^2, \mbox{ and} \\
+f(x_{s+1}) - f(x^*) &\leq g_{\X}(x_s)^T(x - x^*) \leq \|g_{\X}(x_s) \| \cdot \| x_s - x^* \|,
+\end{align*}
+since $f(x_{s+1}) \geq f(x^*)$. Also, we can show that $\|x_s - x^*\|$ is decreasing with $s$: from \autoref{lem:proj_beta_smooth}, we have $g_{\X}(x_s)^T(x_s - x^*) \geq \frac{1}{2\beta} \|g_{\X}(x_s)\|$, and thus
+\begin{align*}
+\|x_{s+1} - x^* \|^2 &= \|x_s - \frac{1}{\beta} g_{\X}(x_s) - x^*\|^2 \\
+&= \|x_s - x^*\|^2 - \frac{2}{\beta}g_{\X}(x_s)^T(x_s - x^*) + \frac{1}{\beta^2}\|g_{\X}(x_s)\|^2 \leq \|x_s - x^*\|^2.
+\end{align*}
+We can therefore bound the difference $f(x_{s+1}) - f(x^*)$ in terms of the difference at the previous iterate:
+\begin{align*}
+f(x_{s+1}) - f(x^*) &= \left(f(x_{s+1}) - f(x_s)\right) + \left(f(x_s) - f(x^*)\right) \\
+&\leq f(x_s) - f(x^*) - \frac{1}{2 \beta} \|g_{\X}(x_s)\|^2 \\
+&\leq f(x_s) - f(x^*) - \frac{\|g_{\X}(x_s)\|^2 \|x_s - x^*\|^2}{2 \beta \|x_1 - x^*\|^2} \\
+&\leq f(x_s) - f(x^*) - \frac{\left(f(x_{s+1}) - f(x^*)\right)^2}{2 \beta \|x_1 - x^*\|^2}.
+\end{align*}
+Thus, we can prove \eqref{eqn:err_beta_subgrad} using induction. It is trivial to show the base case $t=1$. Then, assuming it is true for $t = s$, 
+\begin{align*}
+f(x_{s+1}) - f(x^*) &\leq f(x_s) - f(x^*) - \frac{\left(f(x_{s+1}) - f(x^*)\right)^2}{2 \beta \|x_1 - x^*\|^2} \\
+&\leq \frac{3 \beta B^2 + f(x_1) - f(x^*)}{s}, \mbox{ by the inductive hypothesis} \\
+&\leq \frac{3 \beta B^2 + f(x_1) - f(x^*)}{s+1}.
+\end{align*}
+Therefore, \eqref{eqn:err_beta_subgrad} is true for all $t \in \mathbb{N}$. 
+\end{proof}
+\end{theorem}
+
+The above theorem demonstrates that for $\beta$-smooth convex functions, the error in estimating the optimal function value $O\left(\frac{\beta B^2}{t}\right)$, corresponding to an oracle complexity of $O\left(\frac{\beta B^2}{\varepsilon}\right)$. We notice that the error rate decreasing faster in $t$ in this case than in the Lipschitz case, but the dependence on $B^2$ instead of $B$ is more loose, and we will see in \autoref{sec:lip_smooth_comp} that we cannot compare $\beta$ and $L$ directly. We also note here that the step size $\eta$ depends on $\beta$, which can be difficult to find in practice. As in the Lipschitz case, we again have no explicit reference to the underlying dimension $n$, although both $B$ and $\beta$ implicitly depend on $n$.
+
+\subsection{Remark on convexity, strong convexity, smoothness, and Lipschitz continuity} \label{sec:lip_smooth_comp}
+Finally, having shown convergence results for convex $\beta$-smooth and $L$-Lipschitz functions, it is important to note the geometric connection between these types of functions and convex functions. Recall the Taylor series expansion of $f(y)$ around $x$:
+\[
+f(y) \approx f(x) + \nabla f(x)^T (y - x) + \frac{1}{2} (y - x)^T \nabla^2 f(x) (y - x) + \cdots
+\]
+Convex functions are uniformly bounded \emph{below} by an hyperplane that can be constructed at any point $x$:
+\[
+f(y) \geq f(x) + \nabla f(x)^T (y - x),
+\]
+and $\alpha$-strongly convex functions are uniformly bounded \emph{below} by this hyperplane and a quadratic:
+\[
+f(y) \geq f(x) + \nabla f(x)^T (y - x) + \frac{\alpha}{2} \| y - x \|^2.
+\]
+On the other hand, $\beta$-smooth functions are uniformly bounded \emph{above} by this hyperplane and a quadratic:
+\[
+f(y) \leq f(x) + \nabla f(x)^T (y - x) + \frac{\beta}{2} \| y - x \|^2.
+\]
+Finally, $L$-Lipschitz functions are uniformly bounded \emph{above and below} by a double cone:
+\[
+f(x) - L \| y - x \| \le f(y) \leq f(x) + L \| y - x \|.
+\]
+
+Another important point to note is the relative independence of $\beta$-smoothness and Lipschitz continuity. Consider the case where $f(x) = x^2$ -- clearly, this is $\beta$-smooth for $\beta = 2$ (and $\alpha$-strongly convex with $\alpha=2$). However, it is not Lipschitz continuous, as we cannot hope to uniformly upper-bound a quadratic function by a line. On the other hand, consider the hinge function $f(x) = \max(0, 1 + x)$. It is easy to see that this is Lipschitz continuous with $L = 1$, but not $\beta$-smooth for any $\beta$. Thus, neither condition implies the other.
+
+

@@ -1,0 +1,62 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[left=20mm, right=20mm, bottom=40mm]{geometry}
+
+
+% Load Math packages
+\usepackage{amsmath, mathtools, amssymb}
+\usepackage{amsthm}
+\usepackage{color}
+
+% Define Problem environment
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{proposition}{Proposition}
+\newtheorem{fact}{Fact}
+
+% Some macros for typesetting ease
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\E}{\mathbf{E}}
+\newcommand{\R}{\mathbb{R}} % Real numbers
+\newcommand{\Prog}{{\tt{Prog}}}
+\newcommand{\Grad}{{\tt{Grad}}}
+\newcommand{\Mirr}{{\tt{Mirr}}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{hyperref}
+\def\propositionautorefname{Proposition}
+\def\lemmaautorefname{Lemma}
+
+% Start section numbering at 1
+\addtocounter{section}{0}
+
+\title{Optimization for Machine Learning}
+\author{Reading group, Fall 2017}
+\date{\today}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\include{1_Introduction}
+\include{2_Convexity_Black-box_model_Projected_gradient_descent_methods}
+\include{3_Lower_bounds_for_oracle_complexity}
+\include{4_Application_Boosting}
+\include{5_Non-Euclidean_setting_mirror_descent}
+\include{6_Acceleration_by_coupling_gradient_descent_and_mirror_descent}
+\include{7_Non-Euclidean_setting_Frank-Wolfe}
+\include{8_Stochastic_oracle_model}
+
+%next line adds the Bibliography to the contents page
+\addcontentsline{toc}{section}{Bibliography}
+
+\nocite{*}
+\bibliography{refs}        %use a bibtex bibliography file refs.bib
+\bibliographystyle{plain}  %use the plain bibliography style
+
+\end{document}
