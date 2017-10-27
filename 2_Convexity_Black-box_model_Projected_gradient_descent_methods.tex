@@ -239,7 +239,7 @@ Refer to the proof in \cite[Lemma~3.6]{bubeck}.
 \end{proof}
 \end{lemma}
 
-\begin{theorem}[$\beta$-Smooth Projected Subgradient Descent] Let $f : \X \rightarrow \R$ be convex and $\beta$-smooth on $\X$. Also, suppose $\X$ is contained in a Euclidean ball of radius $B$ centred at $x_1$. Then, the projected subgradient descent method with $\eta = \frac{1}{\beta}$ satisfies
+\begin{theorem}\label{smooth_proj_gd}[$\beta$-Smooth Projected Subgradient Descent] Let $f : \X \rightarrow \R$ be convex and $\beta$-smooth on $\X$. Also, suppose $\X$ is contained in a Euclidean ball of radius $B$ centred at $x_1$. Then, the projected subgradient descent method with $\eta = \frac{1}{\beta}$ satisfies
 \begin{equation} \label{eqn:err_beta_subgrad}
 f(x_t) - f(x^*) \leq \frac{3 \beta B^2 + f(x_1) - f(x^*)}{t}.
 \end{equation}

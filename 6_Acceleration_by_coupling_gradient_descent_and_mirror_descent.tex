@@ -1,3 +1,81 @@
 %! TEX root = main.tex
 
 \section{Acceleration by coupling gradient descent and mirror descent}
+%TODO we will only work with $\beta$-smooth functions
+We have seen as a consequence of Theorem \ref{smooth_proj_gd} that if $f$ is $\beta$-smooth then projected gradient descent needs $T = O\left( \frac{\beta R^2}{\epsilon}\right)$ iterations to obtain an $\epsilon$-minimizer. However, we derived in Theorem \ref{lower_bound_smooth} a lower bound in which the dependence on $\beta$ and $\epsilon$ was $O\left(\sqrt{\frac{\beta}{\epsilon}}\right)$. Nesterov in \cite{nesterov1983method} proposed a gradient descent method and proved that its complexity matches this lower bound. This method only works for $\|{\cdot}\|_2$. Later, in \cite{nesterov2005smooth} he generalized his method to allow arbitrary norms. Algorithms whose complexity is optimal are said to be accelerated. Nesterov's accelerated gradient descent has always been regarded as an obscure and unintuitive method whose proof uses ``magical'' algebra tricks. Since he published his seminal work in 1983, there have been several works trying to understand acceleration by proposing other accelerated methods, trying to give more intuition and showing acceleration from other points of view. For example, in \cite{bubeck} we can find a geometric interpretation of acceleration. Linear Coupling \cite{linearcoupling} (2014) is one of these methods. We think that it is one of the best methods to understand acceleration. We start giving some intuition about how gradient and mirror descent can be combined to obtain these accelerated method. We present first a simplified of linear coupling that also achieves acceleration but under more restrictive assumptions and finally, we present linear coupling. Linear coupling has the virtue that its analysis is the same for any norm.
+
+\subsection{Intuition}
+
+%TODO define x^\ast as a minimizer if it has not been defined before
+
+To understand why combining gradient and mirror descent makes sense and why it is a good idea we will note some things about both methods. We have seen in \ref{smooth_proj_gd} that projected gradient descent is defined by
+
+\begin{align*}
+    y_{t+1} &= x_t -\frac{1}{\beta} g_t, \text{ where } g_t \in \partial f(x_t) \\
+    x_{t+1} &= \Pi_{\X}(y_{t+1}). \\
+\end{align*}
+
+One should not be surprised that in the case that $\X = \R^n$ regular gradient descent in unconstrained optimization is defined by the rule $ x_{t+1} = x_t -\frac{1}{\beta} g_t$. But, why is gradient descent, constrained or not, defined in that way? Of course, it works and provides non trivial convergence rate, but proofs of this usually only define the method and prove convergence without explaining where the method comes from, specially regarding the choice of the learning rate. It can be useful to see gradient from the following point of view. Let's do it first for unconstrained gradient descent with $\|{\cdot}\|_2$ only. If we are at point $x_k \in \R^n$ and we compute the next point by moving against the gradient, the choice of $\frac{1}{\beta}$ is the best choice for the learning rate, in the sense that we can guarantee maximal local decrease for that choice of the learning rate. This is not difficult to see using the assumptions we have at hand. The smoothness assumption tells us that along the line defined by $x_k$ and $\nabla f(x_k)$, $f$ is lower bounded by a parabola with leading coefficient $\frac{\beta}{2}$ (blue graph in Figure \ref{parabolas}) whose derivative in $x_k$ coincides with the one of $f$ (restricted to the line, i.e. it is $\lVert \nabla f(x_k) \rVert$). The derivative of $x^2\beta/2 $ is $x\beta = \lVert \nabla f(x_k) \rVert$ so the distance to the minimum is ${\tt x} = \frac{1}{\beta}\lVert \nabla f(x_k) \rVert$ and it is clear now that maximal guaranteed progress is the evaluation of $x^2\beta/2 $ at $\tt{x}$, i.e. $\frac{1}{2\beta} = \lVert \nabla f(x_k) \rVert$. And we have just proved that the guaranteed decrease is maximal for that choice of the learning rate and we have computed how much. All these arguments can be written using inequalities, but hopefully this can be considered cleaner by some people. %rephrase
+Proving the rate of convergence of gradient descent given the guaranteed progress at each step is straight forward. With this picture in mind, it is also very easy to derive the rate of convergence of gradient descent in the case that $f$ is also $\mu$-strongly convex. Since this assumption lower bounds $f$ by another parabola with leading coefficient $\mu/2$, we can see that the guaranteed progress is proportional to $1/2\beta$ and $f(x_k) - f(x^\ast)$ is upper bounded by something proportional to $1/2\mu$ so after one step the value $f(x_k)-f(x^\ast)$ decreases to at least $(f(x_k)-f(x^\ast))\left(1 - \frac{\lVert \nabla f(x_k) \rVert/2\beta}{\lVert \nabla f(x_k) \rVert/2\mu}\right) = (f(x_k)-f(x^\ast))\left(1- \frac{\mu}{\beta}\right)$. And therefore $f(x_T)-f(x^\ast) \leq (f(x_0) - f(x^\ast))\left(1- \frac{\mu}{\beta}\right)^T$, so an $\epsilon$-minimizer is found in $O\left((f(x_0) - f(x^\ast))\log \frac{1}{\epsilon}\right)$ iterations.
+
+
+\begin{figure}[h!] \label{parabolas}
+\centering
+        \includegraphics[width=0.5\textwidth]{img/parabolas} 
+        \caption{Visualization of the smoothness bound (blue) and the strong convexity bound (green) of a function $f$ (black). }
+\end{figure}
+
+We make two important remarks about the previous analysis. Firstly, gradient descent uses the assumption of $\beta$-smoothness to guarantee maximal decrease if we move in the direction of the gradient and secondly, the decrease is better if the norm of the gradient is large. We will note later that the regret of mirror descent is lower when the norm of the gradient is low, and this along the second remark is what we can leverage to combine gradient and mirror descent. But let's focus first in the first remark. The maximal decrease on the objective we can guarantee from $x_k$ occurs when we minimize, as we did before with our toy example, the bound that is given by the $\beta$-smoothness assumption, which is
+\[
+    f(y) \leq f(x_k) + \langle \nabla f(x_k), y-x_k \rangle + \frac{\beta}{2} \|{y-x}\|^2,
+\]
+for every $y \in \X$. Note that for enough regular functions, smoothness condition can be derived by upper bounding a second order multivariate Taylor expansion using that the Hessian's eigenvalues are upper bounded by $\beta$. It is an easy way to remember the inequality. So we can define the next point as
+ \begin{align}\label{general_grad_descent}
+     \begin{aligned}
+     x_{k+1} := &\argmin_{y \in \X} \left\{ f(x_k) + \langle \nabla f(x_k), y-x_k \rangle  +\frac{\beta}{2}\|{y-x_k}\|^2\right\} \\
+    = &\argmin_{y \in \X} \left\{ \langle \nabla f(x_k), y-x_k \rangle  +\frac{\beta}{2}\|{y-x_k}\|^2\right\}.
+    \end{aligned}
+\end{align}
+If we take $\|{\cdot}\|_2$ and $\X = \R^n$ we are searching for the minimizer in a quadratic function $a y^t y + b^t y + c $, ($a \in \R; b, c \in \R^n$) which is $-\frac{b}{2a}$ or in our case
+\[
+    -\frac{\nabla f(x_k) - 2 x_k \beta/2}{2 \beta/2} = x_k - \frac{1}{\beta}\nabla f(x_k).
+\]
+which matches our previous analysis. Maybe the following, for a general convex set $\X$, is more interesting (we subtract constant terms inside the $\argmin$'s):
+\begin{align*}
+    \argmin_{y \in \X} \left\{ \left\|{\left(x_k - \frac{1}{\beta}\nabla f(x_k)\right) - y}\right\|^2 \right\} \stackrel{?}{=} \argmin_{y \in \X} \left\{ \langle \nabla f(x_k), y-x_k \rangle  +\frac{\beta}{2}\|{y-x_k\|}^2\right\} \\
+    \Leftrightarrow \argmin_{y \in \X} \left\{ \langle y, y\rangle - 2\left\langle y, \left(x_k - \frac{1}{\beta} \nabla f(x_k)\right)\right\rangle\right\} \stackrel{?}{=} \argmin_{y \in \X} \left\{ \langle \nabla f(x_k), y\rangle + \frac{\beta}{2}(\langle y, y\rangle - 2\langle x_k, y\rangle)\right\}. \\
+\end{align*}
+It is clear that the two $\argmin$'s of the last expression are the same, since we can obtain the left hand side by dividing by $\frac{\beta}{2}$ in the $\argmin$ of the right hand side. This means that our rule for projected gradient descent computes the point in $\X$ whose decrease guarantee given by the $\beta$-smoothness of $f$ is maximal among all the points in $\X$. Gradient descent for general norms is defined by rule (\ref{general_grad_descent}). We denote 
+
+\[
+    \Prog(x) := - \min_{y\in\X} \left\{ \langle \nabla f(x), y-x + \frac{\beta}{2} \|{y-x}\|^2\right\} \geq 0.
+\]
+
+By the definition of $x_{k+1}$ it is clear that $f(x_{k+1}) \leq f(x_k) - \Prog(x)$ (and $\Prog(x) = \frac{1}{2\beta} \|\nabla f(x)\|_\ast^2$ if $\X = \R^n$).
+
+In short, we can say that \textbf{gradient descent at each iteration maximizes the guaranteed decrease}. 
+
+Our second remark was that with $\X = \R^n$ and $\|\cdot \|_2$ the decrease is better if $\|\nabla f(x)\|$ is larger. An intuition that we will formalize later is that mirror descent for $\X = \R^n$ and $\|\cdot \|_2$ suffers from a small loss . In general we will prove that a bound for the mirror descent loss is going to have a term easy to control and something proportional to $\Prog(x)$. So when mirror descent suffers from a large loss, gradient descent decreases the objective a lot, and when gradient descent does not have a large guaranteed decrease, mirror descent's loss will be small. This is the key idea of linear coupling, it can be used to obtain a clean accelerated method.
+
+We saw last week that mirror descent tackles the dual optimization problem by constructing lower bounds to the optimum. Recall that each queried gradient $\nabla f(x)$ can be viewed as a hyperplane lower bounding the objective $f$, that is, $f (y) \geq f (x)+ \langle \nabla f (x), y-x \rangle$ for all $y$. Mirror-descent methods attempt to carefully construct a convex combination of these hyperplanes in order to yield even a stronger lower bound. From this point of view our claimed intuition about mirror descent having a small loss when $\|\nabla f(x)\|_2$ is small should be clear. 
+
+\begin{figure}[h!] \label{mirror_descent_dual_loss}
+\centering
+        \includegraphics[width=0.5\textwidth]{img/mirror_descent_dual_loss} 
+        \caption{TODO Mirror descent dual loss}
+\end{figure}
+
+It is clear that if we have several hyperplanes lower bounding the epigraph of our function we could pick a point $x$ with a small loss, that is, the difference $f(x)-f(x^\ast)$ is small. That is because the difference between the optimum and the maximum of the lower bound is small. Figure \ref{mirror_descent_dual_loss} there is a visualization of this process. In general, instead of picking the best point of the lower bound, which could need the solution of an expensive convex problem, we just take the mean of the points that we used to defined the hyperplanes and that point is good enough for the analysis. Of course this happens because mirror descent does not pick the hyperplanes naively.
+
+%TODO mention complexity of mirror descent. We use nemirovski mirror descent, check if it is the same that it is presented in week 5
+%TODO mention mirror's descent key lemma (and proof if it wasn't proved in week 5)
+
+\textbf{Thought experiment.} For sake of demonstrating the idea, suppose $\| \nabla f(x) \|_2$, the norm of the observed gradient, is \textbf{either} always $\geq K$, or always $\geq K$, where $K$ will be determined later. Under such ``wishful assumption'', we can propose the following algorithm: the norm of the gradient is always $\geq K$ perform $T$ gradient descent steps. Otherwise perform $T$ mirror descent steps. To analyze such an algorithm, suppose without loss of generality we start with some point $x_0$ whose objective distance $f(x_0 )-f(x^\ast )$ is at most $2\epsilon$, and we want to find some $x$ so that
+
+If $T$ gradient descent steps are performed, the objective decreases by at least $\frac{\|\nabla f(\cdot)\|_2^2}{2L} \geq \frac{K^2}{2L}$ per step and we only need $T \geq \Omega\left(\frac{\epsilon L}{K^2}\right)$ steps to achieve an $\epsilon$ accuracy. If $T$ mirror descent steps are performed, we need $T \geq \Omega\left(\frac{K^2}{\epsilon^2}\right)$ steps according to the mirror descent convergence. In sum, we need $T \geq \Omega\left( \max \left\{ \frac{\epsilon L}{K^2}, \frac{K^2}{\epsilon^2}\right\}\right)$ steps to converge to an $\epsilon$-minimizer. Setting K to be the magic number to balance the two terms, we only need $T \geq \Omega\left( \sqrt{\frac{L}{\epsilon}}\right)$ iterations. This means that in the general case in which $f(x_0) - f(x^\ast) \leq d $ we only need $T \geq \Omega \left(\sqrt{\frac{L}{\epsilon}}\left(\frac{\epsilon}{d} + \frac{2\epsilon}{d} + \dots + \frac{1}{2} + 1 \right)\right) = \Omega \left( \sqrt{\frac{L}{\epsilon}}\right)$.
+
+\subsection{Warm-Up Method with Fixed Step Length}
+TODO
+
+\subsection{Final Method with Variable Step Lengths}
+TODO
