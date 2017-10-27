@@ -2,3 +2,286 @@
 
 \section{Lower bounds for oracle complexity}
 
+\subsection{Week 2 Recap}
+
+Recall the objective is to minimise some convex function $f: \mathcal{X} \rightarrow \mathbb{R}$, being phrased as the following optimisation problem
+
+\begin{align}
+& \min f(x) \\
+& \text{s.t. } x \in \mathcal{X}
+\end{align}
+
+
+where $\mathcal{X}$ has the assumption $\sup_{x \in \mathcal{X}} ||x||_2 \leq R$, that is we can enclose the optimisation space inside a Euclidean ball of size $R$. The optimal will be denoted $x^{*} = \arg\min_{x  \mathcal{X}} f(x)$.  
+
+An assortment of assumptions can be placed upon $f$, the following 3 are of most interest
+
+\begin{enumerate}
+\item{L-Lipschitz: $|f(x) - f(y)| \leq L ||x-y||_2$ for any $x,y \in \mathbb{R}^n$ $(||\nabla f(x)|_2 \leq L)$.}
+\item{$\beta-$smooth: $||\nabla f(x) - \nabla f(x)||_2 \leq \beta||x-y||_x$ for any $x,y \in \mathbb{R}^n$ ($\nabla^2 f(x) \preccurlyeq \beta I$ for any $x,y \in \mathbb{R}^n$)}
+\item{$\alpha-$Strong convexity: $f(x) - f(y) \leq \nabla f(x)^T (x-y) - \frac{\alpha}{2} ||x-y||_2^2$ for any $x,y \in \mathbb{R}^n$ ($\nabla^2 f(x)  \curlyeqsucc \alpha I$) for any $x \in \mathbb{R}^n$)}.
+\end{enumerate}
+
+Recall that $\alpha-$Strong convexity may not be reasonable in applied problems where the sample size is small, due to is aligning implying the empirical covariance matrix is invertible. For more information on this look  to proposition 2 from the notes accompanying this reading group. 
+
+
+Now we recall some results from the previous chapter regarding projected gradient descent. The routine, denoting the set of sub gradients for $f(x)$ as $\partial f(x)$, is the following
+
+\begin{align}
+y_{t+1} & = x_t - \eta g_t \quad \text{where } g_t \in \partial f(x_t) \\
+x_{t+1} & = \Pi_{\mathcal{X}}(y_{t+1})
+\label{equ:ProjGradDesc}
+\end{align}
+
+where the function $\Pi_{\mathcal{X}}(y_{t+1})$ projects the point $y_{t+1}$ back into the constraint set $\mathcal{X}$. The rate at the above routine finds $x^{*}$ depends upon which of the assumptions above $f$ satisfies.  We now list down the bounds between the the sequence of points produced from the above routine and the optimal $x^{*}$ under different conditions on $f$. 
+
+
+
+
+\paragraph{L-Lipschitz and Convex} from Theorem $3.2$ from \cite{bubeck} with $\eta = \frac{R}{L \sqrt{t}}$
+
+\begin{equation}
+f\left( \frac{1}{t} \sum_{s=1}^t x_s\right) - f(x^{*}) \leq \frac{RL}{\sqrt{t}}
+\end{equation}
+
+giving a complexity of $O(RL/\sqrt{t})$ 
+
+
+\paragraph{$\beta-$Smooth and Convex} from Theorem $3.7$ in \cite{bubeck} with $\eta=
+\frac{1}{\beta}$ 
+
+\begin{equation}
+f\left( x_t \right) - f(x^{*}) \leq \frac{3 \beta ||x_1 - x^{*}||^2 + f(x_1) - f(x^*)}{t}
+\end{equation}
+
+giving a complexity of $O\left(\frac{R^2 \beta}{t}\right)$.
+
+\paragraph{L-Lipschitz and $\alpha-$strongly Convex} from Theorem $3.9$ in \cite{bubeck} with $\eta_s = \frac{2}{\alpha(s+1)}$, that is the gradient step now depends upon time, we get
+
+
+\begin{equation}
+f\left( \sum_{s=1}^t \frac{2s}{t(t+1)} x_s\right) - f(x^{*}) \leq \frac{2L^2}{\alpha (t+1)}
+\end{equation}
+
+giving a complexity of $O\left(\frac{L^2}{\alpha (t+1)}\right)$.
+
+
+\paragraph{$\beta-$Smooth and $\alpha-$strongly Convex} from Theorem $3.10$ in \cite{bubeck} with $\eta = \frac{1}{\beta}$ we have
+
+\begin{equation}
+||x_{t+1} - x^* ||^2 \leq \exp\left( - \frac{\alpha t}{\beta}\right) ||x_1 - x^*||^2
+\end{equation}
+
+
+giving a complexity of $O\left( R^2 \exp\left( - \frac{\alpha t}{\beta}\right) \right)$.
+
+
+
+
+
+\subsection{Week 3 - Lower Bounds}
+
+To prove lower complexity bounds a "sufficiently hard" $f$, satisfying the various conditions, must be found, that, when giving a black-box procedure a fixed number of first order oracle calls, will remain a fixed distance away from its optimum.  An example of a black-box procedure being the projected gradient descent of previously - taking a position and sub gradient $(x_t,g_t)$ $g_t \in \partial f(x_t)$ and returning the next position $x_{t+1} = \Pi_{\mathcal{X}}(x_t - \eta g_t)$. Recalling that a first order oracle call at $f(x)$ returns to us a sub-gradient $g \in \partial f(x)$.
+
+
+Generalising this, given a history $(x_1,g_1,\dots,x_t,g_t)$ such that $g_s \in \partial f(x_s)$, a black-box procedure will be a mapping $(x_1,g_1,\dots,x_t,g_t) \rightarrow x_{t+1}$.  Letting $x_1 = 0$, we will assume that the black-box procedure, for any $t \geq 0$, returns a position in the span of the gradients
+
+\begin{equation}
+x_{t+1} \in \text{Span}(g_1,\dots,g_t).
+\label{equ:GradSpan}
+\end{equation}
+
+
+Additionally we denote the standard basis of $\mathbb{R}^n$ as $e_1,\dots,e_n$, and the Euclidean ball of radius $R$ as $B_2(R) = \{x \in \mathbb{R}^n : ||x||<R\}$.  
+
+
+Now for any $t \leq n$ we will show there exists an $f$ that will remain bounded away from its optimal within the first $t$ calls to a black-box procedure satisfying (\ref{equ:GradSpan}).  Noting that if the number of oracle calls grows beyond the dimension $(t > n)$ Vaidya method from Chapter 2 becomes viable, achieving $\epsilon$ accuracy in $n\log(\frac{Rn}{r \epsilon})$ first order oracle calls.
+
+The remainder of this section is as follows: first lower oracle complexity bounds for various $f$ are listed, after which the proof for the $\beta-$Smooth and Convex case is provided. The proof for the $L-$Lipschitz $\alpha-$Strong Convex case being omitted due to it being similar in spirit to the $\beta-$Smooth case. After which we will find out there a gap between the rates achieved by projected gradient descent and the proven complexity lower bounds, suggesting new methods can be found in order to improve rates. Before moving on we highlight an additional source \cite[75-76]{bach} which included some interesting relevant points.
+
+
+\begin{theorem}{Lower Bound for L-Lipschitz and Convex / $\alpha-$Convex }
+
+Let  $t \leq n$, $L,R > 0$. There exists an L-Lipschitz and Convex $f$ such that for any black-box procedure satisfying (\ref{equ:GradSpan})
+
+\begin{equation}
+\min_{1 \leq s \leq t} f(x_s) - \min_{x \in B_2(R)}f(x) \geq \frac{RL}{2(1+\sqrt{t})}
+\end{equation} 
+
+thus giving oracle complexity of $\Omega\left(\frac{1}{\epsilon^2}\right)$.  Moreover if $f$ is $\alpha-$strongly  Convex  
+
+\begin{equation}
+\min_{1 \leq s \leq t} f(x_s) - \min_{x \in B_2(R)}f(x) \geq \frac{L^2}{8 \alpha t}
+\end{equation} 
+
+giving oracle complexity of $\Omega\left(\frac{1}{\epsilon}\right)$.
+
+\textit{Remark:} These rates are optimal in the case of projected gradient descent. 
+
+\textit{Proof}: See Theorem $3.13$ \cite{bubeck}.
+\end{theorem}
+
+
+
+
+
+\begin{theorem}{Lower Bound for $\beta-$Smooth and Convex}
+
+Let $t \leq (n-1)/2, \beta > 0$. There exists a $\beta-$smooth convex $f$ such that for any black-box procedure satisfying (\ref{equ:GradSpan})
+
+\begin{equation}
+\min_{1 \leq s \leq t} f(x_s) - \min_{x \in B_2(R)}f(x) \geq \frac{3\beta}{32} \frac{||x_1 - x^{*}||^2}{(t+1)^2}
+\label{equ:LowerBoundBetaSmooth}
+\end{equation} 
+
+
+giving a lower oracle  complexity  bound of $\Omega\left(\frac{1}{\sqrt{\epsilon}}\right)$.
+\label{Theorem:LowerBoundBeta}
+\end{theorem}
+
+
+\textit{Proof Adapted from \cite{bubeck} Theorem 3.14}:
+
+
+Let $A_k \in \mathbb{R}^{n \times n}$ be a matrix defined by 
+
+\begin{equation*}
+(A_k)_{i,j} = \begin{cases}
+2, & i = j,i \leq k \\
+-1, & j \in \{i-1,i+1\}, i \leq k, j \not= k+1 \\
+0, &\text{Otherwise}
+\end{cases}
+\end{equation*}
+
+which can alternatively be represented in the standard basis as
+
+\begin{equation}
+A_k = 2 \sum_{i=1}^k e_i e_i^T - \sum_{i=1}^{k-1} e_{i}e_{i+1}^T - \sum_{i=2}^{k-1}e_{i+1} e_i^T
+\label{equ:AkDecomposed}
+\end{equation}
+
+noting that $0 \preccurlyeq  A_k  \preccurlyeq 4 I_n$ since
+
+\begin{equation*}
+x^TA_kx = 2 \sum_{i=1}^k x(i)^2 -2\sum_{i=1}^{k-1}x(i)x(i+1) =
+ x(1)^2 + x(k)^2 + \sum_{i=1}^{k-1} (x(i) - x(i+1))^2.
+\end{equation*}
+
+Consider now the $\beta-$smooth convex function 
+
+\begin{equation*}
+f(x) = \frac{\beta}{8}x^T A_{2t +1} x - \frac{\beta}{4}x^T e_1
+\end{equation*}
+
+which has the sub gradient $\partial f(x) = \frac{\beta}{4} A_{2t +1} x - \frac{\beta}{4}e_1$. As $x_1=0$ we have $\partial f(x_1) = - \frac{\beta}{4}e_1$, and due to (\ref{equ:GradSpan}), $x_2 = \eta_{21}e_1$ for $\eta_{21} \in \mathbb{R}$. Next iteration we have $\partial f(x_2) = \frac{\beta}{4} \left( A_{2t+1} x_2 - e_1\right)$ which, using the representation (\ref{equ:AkDecomposed}), is now in the direction of $e_2$. To see this consider the following 
+
+
+\begin{align*}
+A_{2t+1}x_2 = \eta_{21} A_k e_1 & = \eta_{21} \left( 
+2 \sum_{i=1}^{2t+1} e_i e_i^T - \sum_{i=1}^{2t} e_{i}e_{i+1}^T - \sum_{i=2}^{2t}e_{i+1} e_i^T
+\right)e_1\\
+& = \eta_{21} \left( 
+2 e_1 - e_{2} 
+\right)
+\end{align*}
+
+as $e_i^Te_1 = 0$ if $i \not = 1$. Therefore we can deduce that $\text{Span}(e_1,\partial f(x_2)) = \text{Span}(e_1,e_2)$.  
+
+Proceeding inductively for iterations $2 \leq s \leq t$, we have $x_{s} \in \text{Span}(e_1,\dots,e_{s-1})$, and therefore $x_{s} = \sum_{i=1}^{s-1} \eta_{s-1,i} e_i$. Once again $\partial f(x_{s})$ will contain 
+
+\begin{align*}
+A_{2t+1}x_{s} & =  \left( 
+2 \sum_{i=1}^{2t+1} e_i e_i^T - \sum_{i=1}^{2t} e_{i}e_{i+1}^T - \sum_{i=2}^{2t}e_{i+1} e_i^T
+\right)
+\left( \sum_{j=1}^{s-1} \eta_{s-1,j} e_j \right)\\
+&= 
+\sum_{j=1}^{s-1} \eta_{s-1,j} \left( 
+2 \sum_{i=1}^{2t+1} e_i e_i^T - \sum_{i=1}^{2t} e_{i}e_{i+1}^T - \sum_{i=2}^{2t}e_{i+1} e_i^T
+\right) e_j\\
+&= 
+\sum_{j=1}^{s-1} \eta_{s-1,j} \left( 
+2 e_j - e_{j-1} - e_{j+1} 
+\right)
+\end{align*}
+
+which most importantly is now in the direction of $e_s$ due to element $e_{j+1}$ under the sum, meaning that $\text{Span}(e_1,\dots,e_{s-1},\partial f(x_{s})) = \text{Span}(e_1,\dots,e_s)$.  
+
+Intuitively, due to the right most sum in (\ref{equ:AkDecomposed}), one extra co-ordinate is explored per iteration.  This means, for some $s \leq t$, $x_s$ will be zero in the co-ordinates not yet to explore, that is $x_s(i) = 0$ for $i = s,\dots,n$. Therefore $x_s^T A_{2t+1}x_s = x_s^T A_s x_s$, which means the best we can do in the first $s$ iterations is find the optimal of a restricted version of $f$, namely $f_s(x)$, defined for some $k$ as 
+
+\begin{equation}
+f_k(x) = \frac{\beta}{8}xA_k x - \frac{\beta}{4} x^T e_1.
+\end{equation}
+
+The objective is to bound the difference between the optimal values of the restricted $f_s$ and global $f$, thus proving the black box method can only do so well in $t$ iterations.  Denoting $f^* = \inf_{x \in \mathcal{X}} f(x)$,  consider the following set of inequalities
+
+\begin{equation}
+f(x_s)- f^* = f_s(x_s) - f_{2t+1}^* \geq f_s^* - f_{2t + 1}^* \geq f_t^* - f_{2t + 1}^*
+\label{equ:OptimDiff}
+\end{equation}
+
+To see $f_s^* \geq f_t^*$ observe that 
+
+\begin{align*}
+f_t(x) & = \sum_{i=1}^s x(i) - 2 \sum_{i=1}^{s-1} x(i)x(i+1) + 2 \sum_{i=s+1}^t x(i)^2 - 2 \sum_{i=s}^{t-1}x(i)x(i+1) \\
+&= f_s(x) + x(s+1)^2+ x(t)^2 + \sum_{i=s+1}^{t-1} (x(i) - x(i+1))^2 - 2x(s)x(s+1)
+\end{align*}
+
+
+which when plugging in the optimal point for $f_s$ can attain $f_t(x_s^*) = f_s(x_s^*) = f^*_s$ as $x_s^*(i) = 0$ for $i = s+1,\dots,n$. 
+
+We must now explicitly find the minimiser $x^*_k$ for $f_k$, its norm, and the corresponding objective $f_k^*$.  To find $x_k^*$ we have $\partial f_k(x) = 0 \implies A_k x = e_1$, and since $x_k^* \in \text{Span}(e_1,\dots,e_k)$, the solution becomes $x_k^*(i) = 1  - \frac{i}{k+1}$ for $i=1,\dots,k$. We then immediately get
+
+\begin{equation}
+f_k^* = - \frac{\beta}{8}\left( 1 - \frac{1}{k+1}\right).
+\label{equ:OptimVal}
+\end{equation}
+
+With the norm of $x_s^*$ then becoming 
+
+\begin{equation}
+||x_k^*|| = \sum_{i=1}^k \left( 1 - \frac{i}{k+1}\right)^2 = \sum_{i=1}^k \left( \frac{i}{k=1}\right)^2 \leq \frac{k+1}{3}.
+\label{equ:Normx}
+\end{equation}
+
+Finally bringing together (\ref{equ:OptimDiff}), (\ref{equ:OptimVal}), (\ref{equ:Normx}) we get
+
+\begin{equation*}
+f(x_s)- f^* \geq f_t^* - f_{2t + 1}^* = \frac{\beta}{8}\left( \frac{1}{t+1} - \frac{1}{2t + 2}\right) \geq \frac{3 \beta}{32} \frac{||x_{2t + 1}^*||^2}{(t+1)^2}
+\end{equation*}
+
+noting that as the right hand side does not depending upon $x_s$, a minimum can be taken. \qed
+
+
+To make comparison between the lower bound rates as well as those obtained by projected gradient descent, we look to oracle complexities contained in Figure \ref{tab:RatesUpperVsLower}.  
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{ c|c|c|c| } 
+& & Upper Bound (PGD) & Lower Bound \\
+\hline
+\multirow{2}{4em}{Convex} & $L-$Lipschitz 
+& $O\left(\frac{1}{\epsilon^2} \right)$ & 
+$\Omega\left(\frac{1}{\epsilon^2} \right)$  \\ 
+
+& $\beta-$Smooth & $O\left(\frac{1}{\epsilon}\right)$  & 
+$\Omega\left( \frac{1}{\sqrt{\epsilon}} \right) $ \\ 
+\hline
+\multirow{2}{4em}{$\alpha-$Strong Convex} & $L-$Lipschitz 
+& $O\left( \frac{1}{\epsilon}\right)$ & 
+$ \Omega\left( \frac{1}{\epsilon} \right) $ \\ 
+& $\beta-$Smooth & $O\left(\frac{\beta}{\alpha}\log\left( \epsilon^{-1} \right)\right) $ & 
+$\Omega\left(\sqrt{\frac{\beta}{\alpha}}\log\left( \epsilon^{-1} \right)\right)  $  \\ 
+\end{tabular}
+\caption{Oracle complexity- order of iterations $t$ required for $f(x_t) - f^* \leq \epsilon$. Source for lower bound in the $\beta-$Smooth $\alpha-$Strong Convex case from Theorem $3.15$ \cite{buc}.  Upper Bound is oracle complexity of (PGD) Projected Gradient Descent. }
+\label{tab:RatesUpperVsLower}
+\end{center}
+\end{figure}
+
+Observe that there is a gap in the upper and lower bounds in the case of $\beta-$smooth functions, specifically an order $\frac{1}{\sqrt{\epsilon}}$ and $\sqrt{\frac{\beta}{\alpha}}$ for Convex and $\alpha-$Strong Convex functions respectively.  This suggests there are more optimal black box procedure over projected gradient descent that could close the complexity gap. 
+
+
+
+
+
+
+
