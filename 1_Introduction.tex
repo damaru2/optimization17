@@ -235,9 +235,9 @@ $$
 $$
 where $\mathcal{R}$ is the Rademacher complexity defined as
 $$
-	\mathcal{R}:=\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i R_i(x) ,
+	\mathcal{R}:=\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i R_i(x) ,
 $$
-with $\varepsilon_1,\ldots,\varepsilon_n$ i.i.d.\ Rademacher random variables uniform in $\{-1,1\}$, independent of $Z_1,\ldots,Z_n$. 
+with $\epsilon_1,\ldots,\epsilon_n$ i.i.d.\ Rademacher random variables uniform in $\{-1,1\}$, independent of $Z_1,\ldots,Z_n$. 
 \end{proposition}
 
 \begin{proof}
@@ -251,9 +251,9 @@ The proof uses the standard machinery of symmetrization. Let $\mathcal{D}':=\{Z_
 	&=
 	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m ( R_i'(x) - R_i(x) )\\
 	&=
-	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \varepsilon_i (R_i'(x) - R_i(x)) \quad \text{by symmetrization}\\
+	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \epsilon_i (R_i'(x) - R_i(x)) \quad \text{by symmetrization}\\
 	&=
-	2\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \varepsilon_i R_i(x).
+	2\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \epsilon_i R_i(x).
 \end{align*}
 \end{proof}
 
@@ -269,37 +269,37 @@ $$
 \end{proposition}
 
 \begin{proof}
-Note that there are two independent sources of randomness in the definition of $\mathcal{R}$. One comes from the Rademacher random variables $\varepsilon_1,\ldots,\varepsilon_m$, the other comes from the data $\mathcal{D}:=(Z_1,\dots,Z_m)$ itself. By the tower property we can isolate the effect of the Rademacher random variables and work conditionally on $\mathcal{D}$. That is,
+Note that there are two independent sources of randomness in the definition of $\mathcal{R}$. One comes from the Rademacher random variables $\epsilon_1,\ldots,\epsilon_m$, the other comes from the data $\mathcal{D}:=(Z_1,\dots,Z_m)$ itself. By the tower property we can isolate the effect of the Rademacher random variables and work conditionally on $\mathcal{D}$. That is,
 \begin{align*}
 	\mathcal{R} 
-	&= \mathbf{E} \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i R_i(x) \bigg| \mathcal{D}\bigg].
+	&= \mathbf{E} \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i R_i(x) \bigg| \mathcal{D}\bigg].
 \end{align*}
 If for each $i\in\{1,\ldots,m\}$ we define the functions $\varphi_i(u) := \ell(u,Y_i) - \ell(0,Y_i)$, we have
 \begin{align*}
-	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i R_i(x) \bigg| \mathcal{D} \bigg]
-	&= \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i [R_i(0) + R_i(x)-R_i(0)] \bigg| \mathcal{D} \bigg]\\
-	&\le \mathbf{E} \bigg[ \frac{1}{m}\sum_{i=1}^m\varepsilon_i R_i(0) \bigg| \mathcal{D} \bigg]
-	+ \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i [\ell(x^T\Phi(W_i),Y_i)-\ell(0,Y_i)] \bigg| \mathcal{D} \bigg]\\
-	&= \frac{1}{m}\sum_{i=1}^m \mathbf{E} [\varepsilon_i | \mathcal{D}] R_i(0) + 
-	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg]\\
-	&= \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg],
+	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i R_i(x) \bigg| \mathcal{D} \bigg]
+	&= \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i [R_i(0) + R_i(x)-R_i(0)] \bigg| \mathcal{D} \bigg]\\
+	&\le \mathbf{E} \bigg[ \frac{1}{m}\sum_{i=1}^m\epsilon_i R_i(0) \bigg| \mathcal{D} \bigg]
+	+ \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i [\ell(x^T\Phi(W_i),Y_i)-\ell(0,Y_i)] \bigg| \mathcal{D} \bigg]\\
+	&= \frac{1}{m}\sum_{i=1}^m \mathbf{E} [\epsilon_i | \mathcal{D}] R_i(0) + 
+	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg]\\
+	&= \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg],
 \end{align*}
-where for the last equality we used that by the independence between $\varepsilon_1,\ldots,\varepsilon_m$ and $\mathcal{D}$ we have $\mathbf{E} [\varepsilon_i | \mathcal{D}]=\mathbf{E} \varepsilon_i = 0$. As the function $z\rightarrow \ell(z,y)$ is $L_\textrm{loss}$-Lipschitz for any $y\in\mathcal{Y}$, also each function $\varphi_i$ is $L_\textrm{loss}$-Lipschitz. By the contraction property of Rademacher complexities (indeed, one of the reason why this notion of complexity is convenient to use), we have
+where for the last equality we used that by the independence between $\epsilon_1,\ldots,\epsilon_m$ and $\mathcal{D}$ we have $\mathbf{E} [\epsilon_i | \mathcal{D}]=\mathbf{E} \epsilon_i = 0$. As the function $z\rightarrow \ell(z,y)$ is $L_\textrm{loss}$-Lipschitz for any $y\in\mathcal{Y}$, also each function $\varphi_i$ is $L_\textrm{loss}$-Lipschitz. By the contraction property of Rademacher complexities (indeed, one of the reason why this notion of complexity is convenient to use), we have
 $$
-	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg]
+	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg]
 	\le
-	2L_\textrm{loss}\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i) \bigg| \mathcal{D} \bigg].
+	2L_\textrm{loss}\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i x^T\Phi(W_i) \bigg| \mathcal{D} \bigg].
 $$
 Hence, using that $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$
 \begin{align*}
 	\mathcal{R} 
-	&\le 2L_\textrm{loss}\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)\\
-	&\le 2L_\textrm{loss}\mathbf{E} \sup_{x\in\mathcal{X}} \| x \|_2\bigg\|\frac{1}{m}\sum_{i=1}^m\varepsilon_i \Phi(W_i)\bigg\|_2 \quad \text{by Cauchy-Schwarz}\\
-	&\le 2L_\textrm{loss}B\mathbf{E} \sqrt{\bigg\|\frac{1}{m}\sum_{i=1}^m\varepsilon_i \Phi(W_i)\bigg\|_2^2}
-	\le 2L_\textrm{loss}B \sqrt{ \mathbf{E} \bigg\|\frac{1}{m}\sum_{i=1}^m\varepsilon_i \Phi(W_i)\bigg\|_2^2} \quad \text{by Jensen's inequality}\\
-	&= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E} \sum_{j=1}^n \bigg(\sum_{i=1}^m \varepsilon_i \Phi(W_i)_j\bigg)^2 } 
-	= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E} \sum_{j=1}^n \sum_{i=1}^m (\varepsilon_i \Phi(W_i)_j)^2 } \quad \text{by the independence of the $\varepsilon$'s}\\
-	&= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E}  \sum_{i=1}^m \varepsilon_i^2 \| \Phi(W_i)\|^2_2 }
+	&\le 2L_\textrm{loss}\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i x^T\Phi(W_i)\\
+	&\le 2L_\textrm{loss}\mathbf{E} \sup_{x\in\mathcal{X}} \| x \|_2\bigg\|\frac{1}{m}\sum_{i=1}^m\epsilon_i \Phi(W_i)\bigg\|_2 \quad \text{by Cauchy-Schwarz}\\
+	&\le 2L_\textrm{loss}B\mathbf{E} \sqrt{\bigg\|\frac{1}{m}\sum_{i=1}^m\epsilon_i \Phi(W_i)\bigg\|_2^2}
+	\le 2L_\textrm{loss}B \sqrt{ \mathbf{E} \bigg\|\frac{1}{m}\sum_{i=1}^m\epsilon_i \Phi(W_i)\bigg\|_2^2} \quad \text{by Jensen's inequality}\\
+	&= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E} \sum_{j=1}^n \bigg(\sum_{i=1}^m \epsilon_i \Phi(W_i)_j\bigg)^2 } 
+	= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E} \sum_{j=1}^n \sum_{i=1}^m (\epsilon_i \Phi(W_i)_j)^2 } \quad \text{by the independence of the $\epsilon$'s}\\
+	&= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E}  \sum_{i=1}^m \epsilon_i^2 \| \Phi(W_i)\|^2_2 }
 	\le \frac{2GL_\textrm{loss}B}{\sqrt{m}} \quad \text{as $\|\Phi(W)\|_2\le G$ a.s.}\\
 \end{align*}
 \end{proof}
@@ -375,15 +375,15 @@ As we discuss earlier, for applications in machine learning the assumption of $\
 
 These results are sometimes called \emph{dimension-free}, since as presented the rates do not depend explicitly on the ambient dimension $n$. However, the dependence on the dimension enters implicit in the constants: note that $B$ is the radius of the constraint set $\mathcal{X}\subseteq \mathbb{R}^n$, and that the parameters $L$, $\alpha$, and $\beta$, are defined in terms of the Euclidean norm in $\mathbb{R}^n$. The terminology dimension-free is used in \cite{bubeck} to differentiate the rates achieved by subgradient descent methods from the rates obtained by ellipsoid methods (Chapter 2 in \cite{bubeck}), which we will not cover in this reading group.
 	
-We can also phrase these results in terms of \emph{oracle complexity}, namely, the number of queries to the oracle that are \emph{sufficient} to find an $\varepsilon$-approximate minima of a convex function:
+We can also phrase these results in terms of \emph{oracle complexity}, namely, the number of queries to the oracle that are \emph{sufficient} to find an $\epsilon$-approximate minima of a convex function:
 \begin{center}
  \begin{tabular}{|c | c | c|}
  \hline
  & $L$-Lipschitz & $\beta$-smooth\\
  \hline
- Convex & $O(B^2L^2/\varepsilon^2)$ & $O(B^2\beta/\varepsilon)$\\
+ Convex & $O(B^2L^2/\epsilon^2)$ & $O(B^2\beta/\epsilon)$\\
  \hline
- $\alpha$-strongly convex & $O(L^2/(\alpha \varepsilon))$ & $O((\beta/\alpha)\log{(B^2/\varepsilon)})$\\
+ $\alpha$-strongly convex & $O(L^2/(\alpha \epsilon))$ & $O((\beta/\alpha)\log{(B^2/\epsilon)})$\\
  \hline
 \end{tabular}
 \end{center}
@@ -400,7 +400,7 @@ Here the constants are explicit, and they match the ones in Proposition \ref{pro
 \subsubsection*{Week 3: Lower bounds for oracle complexity.}
 Readings: Parts of Chapter 3 in \cite{bubeck}. Details are below.\\
 
-We see that within the first order oracle model one can prove lower-bounds for the amount of calls to the oracle that are \emph{needed} to achieve a certain accuracy $\varepsilon$.
+We see that within the first order oracle model one can prove lower-bounds for the amount of calls to the oracle that are \emph{needed} to achieve a certain accuracy $\epsilon$.
 In the non-smooth case we show that the rates achieved by subgradient descent methods, i.e., $O(BL/\sqrt{t})$ for convex functions and $O(L^2/(\alpha t))$ for $\alpha$-strongly convex functions, can not be improved (\textbf{Theorem 3.13 in \cite{bubeck}; we will only cover the proof of the first statement for convex $L$-Lipschitz functions}).
 On the other hand, in the smooth case we prove oracle-complexity lower bounds that are better than the ones achieved by subgradient methods, namely, $O(D^2\beta/t^2)$ for smooth functions (\textbf{Theorem 3.14 in \cite{bubeck}}) and $O(D^2\exp(-t\sqrt{\alpha/\beta}))$ for smooth and strongly convex functions (Theorem 3.15 in \cite{bubeck}), where $D$ is the diameter of $\mathcal{X}$, i.e., $D:=\max_{x,y\in\mathcal{X}}\|x-y\|_2$. To recap, the optimal rates are:
 \begin{center}
