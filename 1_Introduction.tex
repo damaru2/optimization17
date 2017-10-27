@@ -196,8 +196,8 @@ Fix $k\in\{1,\ldots,m\}$ and let $z=(z_1,\ldots,z_{k-1},z_k,z_{k+1},\ldots,z_m)$
 where $R^z_i(x) := \ell(x^T\Phi(w_i),y_i)$. If $h(z) - h(z') \ge 0$ and we let $\tilde x\in\mathcal{X}$ be the maximizer of $\sup_{x\in\mathcal{X}} ( r(x)- \frac{1}{m} \sum_{i=1}^m R^z_i(x) )$ (note that the supremum is attained by the Extreme Value Theorem), we have
 \begin{align*}
 	h(z) - h(z') 
-	&= \bigg( g(\tilde x)- \frac{1}{m} \sum_{i=1}^m R^z_i(\tilde x) \bigg) - \sup_{x\in\mathcal{X}} \bigg( r(x)- \frac{1}{m} \sum_{i=1}^m R^{z'}_i(x) \bigg)\\
-	&\le \bigg( g(\tilde x)- \frac{1}{m} \sum_{i=1}^m R^z_i(\tilde x) \bigg) - \bigg( g(\tilde x)- \frac{1}{m} \sum_{i=1}^m R^{z'}_i(\tilde x) \bigg)\\
+	&= \bigg( r(\tilde x)- \frac{1}{m} \sum_{i=1}^m R^z_i(\tilde x) \bigg) - \sup_{x\in\mathcal{X}} \bigg( r(x)- \frac{1}{m} \sum_{i=1}^m R^{z'}_i(x) \bigg)\\
+	&\le \bigg( r(\tilde x)- \frac{1}{m} \sum_{i=1}^m R^z_i(\tilde x) \bigg) - \bigg( r(\tilde x)- \frac{1}{m} \sum_{i=1}^m R^{z'}_i(\tilde x) \bigg)\\
 	&= \frac{1}{m} ( R^z_k(\tilde x) - R^{z'}_k(\tilde x) )
 	\le \frac{2}{m} \sup_{x\in\mathcal{X},z\in\mathcal{Z}} | R^z_k(x) |.
 \end{align*}

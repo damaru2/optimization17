@@ -10,7 +10,7 @@ Assume that we want to solve the following problem:
 	\end{aligned}
 	\label{def:stochastic problem}
 \end{align}
-where $f$ is a convex function, possibly not known. The first order \emph{stochastic} oracle model defines the framework where given $x\in\mathcal{X}$ an oracle yields back an independent random variable $G$ that is an unbiased estimator of a subgradient at $x$, namely, $\E[G] \in \partial f(x)$.
+where $f$ is a convex function, possibly not known. The first order \emph{stochastic} oracle model defines the framework where given $x\in\mathcal{X}$ an oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $x$, namely, $\E[G] \in \partial f(x)$. If $X$ is a random variable, the oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $X$ conditionally on $X$, namely, $\E[G|X] \in \partial f(X)$.
 
 \subsubsection*{$L$-Lipschitz functions}
 We analyze the behavior of the projected gradient descent algorithm to solve problem \eqref{def:stochastic problem} when we replace exact knowledge of subgradients of $f$ with unbiased estimates of them. For a given initial point $X_1\in\X$, possibly random, and a given collection of step sizes $\eta_1,\eta_2,\ldots$, the stochastic projected gradient descent is defined by the sequence of random variables generated according to the following update:
@@ -18,9 +18,9 @@ We analyze the behavior of the projected gradient descent algorithm to solve pro
 Y_{s+1} &= X_s - \eta_s G_s,\\
 X_{s+1} &= \Pi_{\X}(Y_{s+1}).
 \end{align*}
-Here, conditionally on $X_s$, the random variable $G_s$ is independent of the previous iterates $X_1,\ldots,X_{s-1}$ and is an unbiased estimator of the subgradient of the function $f$ at $X_s$, namely,
+Here, conditionally on $X_s$, the random variable $G_s$ is an unbiased estimator of the subgradient of the function $f$ at $X_s$, namely,
 $$
-	\E[G_s|X_1,\ldots,X_s] = \E[G_s|X_s] \in\partial f(X_s).
+	\E[G_s|X_s] \in\partial f(X_s).
 $$
 We state and prove the convergence of this method in the $L$-Lipschitz case.
 
@@ -36,55 +36,45 @@ Let $f$ be convex. Suppose $\X$ is contained in a Euclidean ball of radius $B$ c
 For any $1 \leq s \leq t$ we have
 \begin{align*}
 	f(X_s) - f(x^*)
-	%&\leq \partial f(X_s)^T(X_s - x^*) 
 	\le \E [G_s|X_s]^T(X_s - x^*)
 	= \E [G_s^T(X_s - x^*)|X_s].
 \end{align*}
 Proceeding as in the proof of Theorem \ref{thm:projectedgradL}, we find
 \begin{align*}
 	G_s^T(X_s - x^*)
-%	&= \frac{1}{\eta} (X_s - Y_{s+1})^T (X_s - x^*) \\
-%	&= \frac{1}{2\eta} \left( \|X_s - x^*\|^2 + \|X_s - Y_{s+1}\|^2 - \|Y_{s+1} - x^*\|^2\right) \\
-%	&= \frac{1}{2\eta} \left( \|X_s - x^*\|^2 - \|Y_{s+1} - x^*\|^2 \right) + \frac{\eta}{2} \|G_s\|^2\\
 	\le \frac{1}{2\eta} \left( \|X_s - x^*\|^2 - \|X_{s+1} - x^*\|^2 \right) + \frac{\eta}{2} \|G_s\|^2.
 \end{align*}
 Taking the expectation, we get
 \begin{align*}
 	\E f(X_s) - f(x^*) &\leq 
-	\E G_s^T(X_s - x^*) 
+	\E [G_s^T(X_s - x^*)]
 	\le \frac{1}{2\eta} \left( \E\|X_s - x^*\|^2 - \E\|X_{s+1} - x^*\|^2 \right) + \frac{\eta}{2} \E[\|G_s\|^2],
 \end{align*}
-and using the assumption $\E[\|G_s\|^2]\le L$ we get
+and using the assumption $\E[\|G_s\|^2]\le L^2$ we get
 \[
 \frac{1}{t} \sum_{s=1}^t (\E f(X_s) - f(x^*)) \leq \frac{1}{2 \eta t} \left( \E\| X_1 - x^* \|^2 - \E\| X_{t+1} - x^* \|^2 \right) + \frac{\eta}{2} L^2 \leq \frac{B^2}{2 \eta t} + \frac{\eta L^2 }{2}.
 \]
 Selecting $\eta = \frac{B}{L\sqrt{t}}$ to minimize the right-hand side of the above inequality gives the first result in \eqref{eqn:proj_subgrad_t} (since $f\left(\frac{1}{t}\sum_{s=1}^t X_s \right) \leq \frac{1}{t} \sum_{s=1}^t f(X_s)$ by Jensen's inequality).
 \end{proof}
 
-Theorem \ref{thm:projectedgradLstoch} shows that, in expectation, the stochastic projected subgradient descent method yields the same convergence guarantees as the deterministic counterpart analyzed in Theorem \ref{thm:projectedgradL}.  In particular, the oracle complexity is the same\footnote{Note that different notions of accuracy are used, however, as we consider the expected value of the stochastic method.}: to get an accuracy $\varepsilon$, both methods requires access to $O(1/\varepsilon^2)$ calls to their respective oracles. The main advantage of the stochastic version lies in the fact that in some applications the \emph{computational} complexity involved in having access to a stochastic oracle can be much cheaper than in the determinist case. We now show that the stochastic model yields substantial computational saving in the examples of machine learning.
+Theorem \ref{thm:projectedgradLstoch} shows that, in expectation, the stochastic projected subgradient descent method yields the same convergence guarantees as the deterministic counterpart analyzed in Theorem \ref{thm:projectedgradL}.  In particular, the oracle complexity is the same\footnote{Note that different notions of accuracy are used, however, as we consider the expected value of the stochastic method.}: to get an accuracy $\varepsilon$, both methods requires $O(1/\varepsilon^2)$ calls to their respective oracles. The main advantage of the stochastic version lies in the fact that in some applications the \emph{computational} complexity involved in having access to a stochastic oracle is much cheaper than in the determinist case. We now show that the stochastic model yields substantial computational saving in machine learning.
 
 \subsection{Multiple passes over the data}
 TO DO.
 
 \subsection{Single pass over the data}
-We now show how we can deal with expected risk minimization in the first order stochastic oracle model.
-Let us go back to the original problem that motivates us in Section \ref{sec:intro}, namely, the expected risk minimization:
+We now show how the first order stochastic oracle model allows us to deal directly with expected risk minimization without invoking the empirical risk minimization paradigm.
+Let us recall the original problem that motivates us in Section \ref{sec:intro}, namely, the expected risk minimization:
 \begin{align*}
 	\begin{aligned}
 		\text{minimize }\quad   & r(x) = \E\ell(x^T\Phi(W),Y) \\
 		\text{subject to }\quad & x\in \mathcal{X}.
 	\end{aligned}
 \end{align*}
-%Note that this is a generalization of the linear predictor case we looked at in Section \ref{sec:intro}, where $\ell(x,Z) \rightarrow \ell(x^T\Phi(W),Y)$. 
-The assumption here is that we know the loss function $\ell$ (indeed, we can choose it!) and the constraint set $\mathcal{X}$, but we do not know the distribution of $(W,Y)$. We only have access to $m$ i.i.d.\ samples $(W_1,Y_1),\ldots,(W_m,Y_m)$ from this unknown distribution. So we do not know the function $r$ that we want to minimize, and in particular we can not operate in the deterministic first order oracle model discussed in the previous weeks as for a given $x\in\mathcal{X}$ we do not have access to a subgradient in $\partial r(x)$. On the other hand, given $x\in\mathcal{X}$ we can have access to an unbiased estimator of a subgradient of $r$ evaluated at $x$. In fact, given the function $x \rightarrow R_i(x) := \ell(x^T\Phi(W_i),Y_i)$, which is known to us, we can compute a subgradient of $R_i$ at $x$. This is a random variable $G_i\in \partial R_i(x)$ that satisfies $\E G_i \in \partial r(x)$. The same is true if we want to get an estimate of the subgradient of $r$ at $X\in\X$ when $X$ is a random variable \emph{independent} of $(W_i,Y_i)$. In fact, in this case we can evaluate a subgradient of $R_i$ at $X$, and this random variable $G_i\in \partial R_i(X)$ satisfies $\E[G_i|X]\in r(X)$.\footnote{Note that if $X$ is random, then there are two sources of randomness in $G_i$: one source is $X$ itself, the other is the data point $(W_i,Y_i)$. The statement $\E[G_i|X]\in r(X)$ holds if $X$ and $(W_i,Y_i)$ are independent.} Hence, we satisfy the assumption of the first order stochastic oracle model. At the same time, as we have $m$ independent data points at out disposal, we can have access to at most $m$ independent unbiased estimators of subgradients evaluated at possibly different locations in $\mathcal{X}$. In other words, the requirement of independence restricts us to a \emph{single pass} over the data, which is not as general as in the stochastic block model.
+The assumption here is that we know the loss function $\ell$ (indeed, we can choose it!) and the constraint set $\mathcal{X}$, but we do not know the distribution of $(W,Y)$. We only have access to $m$ i.i.d.\ samples $(W_1,Y_1),\ldots,(W_m,Y_m)$ from this unknown distribution. So we do not know the function $r$ that we want to minimize, and in particular we can not operate in the deterministic first order oracle model discussed in the previous weeks as for a given $x\in\mathcal{X}$ we do not have access to a subgradient in $\partial r(x)$. On the other hand, given $x\in\mathcal{X}$ we can have access to an unbiased estimator of a subgradient of $r$ evaluated at $x$. In fact, given the function $x \rightarrow R_i(x) := \ell(x^T\Phi(W_i),Y_i)$, which is known to us, we can compute a subgradient of $R_i$ at $x$. This is a random variable $G_i\in \partial R_i(x)$ that satisfies $\E G_i \in \partial r(x)$. The same is true if we want to get an estimate of the subgradient of $r$ at $X\in\X$ when $X$ is a random variable \emph{independent} of $(W_i,Y_i)$. In fact, in this case we can evaluate a subgradient of $R_i$ at $X$, and this random variable $G_i\in \partial R_i(X)$ satisfies $\E[G_i|X]\in r(X)$.\footnote{Note that if $X$ is random, then there are two sources of randomness in $G_i$: one source is $X$ itself, the other is the data point $(W_i,Y_i)$. The statement $\E[G_i|X]\in r(X)$ holds if $X$ and $(W_i,Y_i)$ are independent.} Hence, we satisfy the assumption of the first order stochastic oracle model. At the same time, as we have $m$ independent data points at out disposal, we can have access to at most $m$ independent unbiased estimators of subgradients evaluated at possibly different locations in $\mathcal{X}$. In other words, the requirement of independence restricts us to a \emph{single pass} over the data, which is not as general as in the stochastic block model defined above where we can have how many queries to the oracle as we want.
 
-%The question is then: given independent data $(W_1,Y_1),\ldots,(W_m,Y_m)$, can we design an iterative algorithm $X_1,X_2,\ldots,X_m$ that at each step $s$ uses the unbiased estimator for the subgradients $\partial R_s(X_s)$ so to build a final estimate $\hat X_m$, function of $(X_1,\ldots,X_m)$, to minimize the error $r(\hat X_m) - r(x^*)$?
-%The answer is yes, and that a straightforward application of the stochastic projected subgradient descent algorithm. 
 It is easy to check that under the assumptions of Proposition \ref{prop:Lip-stats}, Theorem \ref{thm:projectedgradLstoch} yields the following convergence guarantees for the stochastic projected descent method:
 $$
 	\E r(\hat X_m) - r(x^*) \leq \frac{GL_\textrm{loss}B}{\sqrt{m}},
 $$
-with $\hat X_m = \frac{1}{m}\sum_{i=1}^m X_i$. In other word, we can apply the stochastic gradient descent algorithm to \emph{directly} minimize the expected risk $r$, without invoking the empirical risk minimization paradigm, i.e., without breaking the problem into statistics and optimization as outlined in Section \ref{sec:intro}. The computational savings are clear. If computing a subgradient for each functions $R_i$ costs $O(1)$, then the computational complexity of stochastic gradient descent to achieve precision $\varepsilon$ is of order $O(1/\varepsilon^2)$. On the other hand, if we apply the deterministic gradient descent method to minimize the empirical risk $R$ up to precision $1/\sqrt{m}$, as discussed in Section \ref{sec:intro} and in Remark \ref{rem:optimization}, then we see that the computational complexity is $O(m/\varepsilon^2)$, as we need $O(1/\varepsilon^2)$ calls to the deterministic oracle but each call costs $O(m)$ base iterations, as $R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x)$.
-
-
-
+with $\hat X_m = \frac{1}{m}\sum_{i=1}^m X_i$. In other word, we can apply the stochastic gradient descent algorithm to \emph{directly} minimize the expected risk $r$, without invoking the empirical risk minimization paradigm, i.e., without breaking the problem into statistics and optimization as outlined in Section \ref{sec:intro}. The computational savings are clear. If computing a subgradient for each functions $R_i$ costs $O(1)$, then the computational complexity of stochastic gradient descent to achieve precision $\varepsilon$ (in expectation) is of order $O(1/\varepsilon^2)$. On the other hand, if we apply the deterministic gradient descent method to minimize the empirical risk $R$ up to precision $1/\sqrt{m}$, as discussed in Section \ref{sec:intro} and in Remark \ref{rem:optimization}, then we see that the computational complexity is $O(m/\varepsilon^2)$, as we need $O(1/\varepsilon^2)$ calls to the deterministic oracle but each call costs $O(m)$ base iterations, as $R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x)$.
