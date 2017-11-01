@@ -1,20 +1,21 @@
-%! TEX root = optimization17.tex
+%!TEX root = optimization17.tex
 
 \section{Introduction}\label{sec:intro}
 \emph{Speaker: Patrick Rebeschini, 12/10/2017.}\\
 
 \label{sec:introduction}
 
-Many problems in statistics and machine learning can be formulated as the problem of computing
-\begin{equation}
-	x^\star \in \argmin_{x\in\mathcal{X}} r(x),
+Many problems in statistics and machine learning can be formulated as the problem of computing a solution to:
+\begin{align}
+	\begin{aligned}
+		\text{minimize }\quad   & r(x) := \mathbf{E}\ell(x^T\Phi(W),Y)\\
+		\text{subject to }\quad & x\in \X,
+	\end{aligned}
 	\label{def:mainproblem}
-\end{equation}
-where $r(x):=\mathbf{E}\ell(x^T\Phi(W),Y)$, given only data in the form of $m$ i.i.d.\ labeled samples $(W_1,Y_1),\ldots,(W_m,Y_m) \sim (W,Y) \in \mathcal{W}\times\mathcal{Y}$, i.e., without knowledge of the distribution of $(W,Y)$ (in particular, without knowledge of the function $r$ that we want to minimize!). Here, the function $\Phi:\mathcal{W}\rightarrow\mathbb{R}^n$ (known) is a feature map, the function $x \in \mathcal{X}\subseteq\mathbb{R}^n \rightarrow x^T\Phi(W)$ is the linear predictor for the label $Y$ ($\mathcal{X}$ is known),
-%where the parameter space $\mathcal{X}\subseteq\mathbb{R}^n$ possibly also includes regularization constraints, 
-the function $\ell:\mathbb{R}\times \mathbb{R} \rightarrow \mathbb{R}$ (known) is a loss function characterizing the penalty in committing a wrong prediction, and $r(x)$ is the \emph{test cost}  or \emph{expected risk} associated to the parameter $x$. In this setting, one wants to find $x^\star$ that yields the best linear predictor over unseen data using the data in the training set, relying on the assumption that the unseen data share the same (unknown) distribution of observed samples.
+\end{align}
+given only data in the form of $m$ i.i.d.\ samples $(W_1,Y_1),\ldots,(W_m,Y_m) \sim (W,Y) \in \mathcal{W}\times\mathcal{Y}$, i.e., without knowledge of the distribution of $(W,Y)$ (in particular, without knowledge of the function $r$ that we want to minimize!). Here, the function $\Phi:\mathcal{W}\rightarrow\mathbb{R}^n$ (known) is a feature map, the function $x \in \mathcal{X}\subseteq\mathbb{R}^n \rightarrow x^T\Phi(W)$ is a linear predictor for the label $Y$ (the domain/constraint set $\mathcal{X}$ is known), the function $\ell:\mathbb{R}\times \mathbb{R} \rightarrow \mathbb{R}$ (known) is a loss function characterizing the penalty in committing a wrong prediction, and $r(x)$ is the \emph{test cost}  or \emph{expected risk} associated to the parameter $x$. In this setting, one wants to find $x^\star$ that yields the best linear predictor over unseen data using the data in the training set, under the assumption that the unseen data share the same (unknown) distribution of observed samples.
 
-In binary classification, one has $\mathcal{Y}=\{-1,1\}$ and loss functions are typically of the form $\ell(z,y) = \varphi(-zy)$. A few examples are:
+In binary classification, one has $\mathcal{Y}=\{-1,1\}$ and loss functions are typically of the form $\ell(z,y) = \varphi(-zy)$ for a given $\varphi:\R\rightarrow\R$. A few examples are:
 \begin{itemize}
 \item Zero-One loss (a.k.a.\ the true loss): $\varphi(u) = \mathbf{1}_{u\ge 0}$.
 \item Exponential loss: $\varphi(u) = \exp(u)$.
@@ -27,9 +28,13 @@ In regression, one has $\mathcal{Y}=\mathbb{R}$, and the typical loss is:
 \end{itemize}
 
 Perhaps the most intuitive paradigm for solving problem \eqref{def:mainproblem} is the \emph{empirical risk minimization}, that is, the idea to minimize the \emph{training cost} or \emph{empirical risk}:
-$$
-	R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x),
-$$
+\begin{align}
+	\begin{aligned}
+		\text{minimize }\quad   & R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x)\\
+		\text{subject to }\quad & x\in \X,
+	\end{aligned}
+	\label{def:mainproblem empirical risk}
+\end{align}
 where $R_i(x) := \ell(x^T\Phi(W_i),Y_i)$.
 This approach is motivated by the fact that for each $x\in\mathcal{X}$ the law of large number gives
 $
@@ -43,7 +48,7 @@ where
 $
 	X^\star \in \argmin_{x\in\mathcal{X}} R(x).
 $
-This intuition can be made precise, and Proposition \ref{prop:erm} below shows that the estimation error $r(X^\star) - r(x^\star) \ge 0$ can be controlled by suprema of random processes.
+This intuition can be made precise, and Proposition \ref{prop:erm} below shows that the estimation error $r(X^\star) - r(x^\star) \ge 0$ is controlled by suprema of random processes.
 
 \begin{proposition}
 \label{prop:erm}
@@ -89,9 +94,9 @@ As $X^\star$ is a minimizer of $R$, we have $R(X^\star) - R(x^\star) \le 0$. The
 \end{proof}
 
 The problem is now to estimate how close the expected risk of the approximate empirical risk minimizer $r(\hat X_t)$ is to the minimal expected risk $r(x^\star)$ in terms of the number of training samples $m$, the dimension of the feature map $n$, the number of iterates $t$ for the optimization routine, and the other parameters that define the model at hand (for example, the radius of the parameter set $\mathcal{X}$, properties of the loss function $\ell$, and of the feature map $\Phi$).
-To this end, as Proposition \ref{prop:erm2} shows, we need to control two terms: the \emph{STATISTICS} term $\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) )$ and the \emph{OPTIMIZATION} term $R(\hat X_t) - R(X^\star)$.
+To this end, as Proposition \ref{prop:erm2} shows, we need to control two random terms: the \emph{STATISTICS} term $\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) )$ and the \emph{OPTIMIZATION} term $R(\hat X_t) - R(X^\star)$.
 
-In the first part of the reading group we will focus on algorithms that can be used to approximately minimize the empirical risk and hence control the \emph{OPTIMIZATION} term in \eqref{bound:stats-opt}, making various assumptions for the loss function $\ell$ and the parameter space $\mathcal{X}$, starting from the fruitful assumption of convexity.\footnote{convexity is only needed to perform the analysis of the algorithms that we introduce, but it is not needed to run the algorithms themselves; in fact, in practice the algorithms that we define are run also on non-convex problems.} Along with convexity, we state some of the main properties that a generic function $f$ can have that are used to assess the quality of algorithms to minimize $f$. Here we assume that $f$ is differentiable, but analogous notions can be defined for non-differentiable functions using the notion of subgradients. We also mention in brackets equivalent (local) definitions, which apart from $L$-Lipschitz hold when $f$ is twice-differentiable.
+For the most part this reading group will focus on algorithms that can be used to approximately minimize the empirical risk and hence control the \emph{OPTIMIZATION} term in \eqref{bound:stats-opt}, making various assumptions for the loss function $\ell$ and the parameter space $\mathcal{X}$, starting from the fruitful assumption of convexity.\footnote{Convexity is only needed to perform the analysis of the algorithms that we introduce, but it is not needed to run the algorithms themselves; in fact, in practice the algorithms that we define are run also on non-convex problems.} Along with convexity, we state some of the main properties that a generic function $f$ can have that are used to assess the quality of algorithms to minimize $f$. Here we assume that $f$ is differentiable, but analogous notions can be defined for non-differentiable functions using the notion of subgradients. We also mention in brackets equivalent (local) definitions, which apart from $L$-Lipschitz hold when $f$ is twice-differentiable.
 
 \begin{itemize}
 	\item Convexity: $f(x) - f(y) \le \nabla f(x)^T(x - y)$ for any $x,y\in\mathbb{R}^n$ ($\nabla^2 f(x) \succcurlyeq 0$ for any $x\in\mathbb{R}^n$).
@@ -100,7 +105,7 @@ In the first part of the reading group we will focus on algorithms that can be u
 	\item $\alpha$-Strong convexity: $f(x) - f(y) \le \nabla f(x)^T(x - y) - \frac{\alpha}{2}\|x - y\|_2^2$ for any $x,y\in\mathbb{R}^n$ ($\nabla^2 f(x) \succcurlyeq \alpha I$ for any $x\in\mathbb{R}^n$).
 \end{itemize}
 
-Going back to the losses defined above, it is easy to check that the following holds:
+Going back to the losses defined above, it is easy to check that the convex losses below satisfy the following:
 \begin{itemize}
 \item Exponential loss: $\varphi(u) = \exp(u)$: Lipschitz NO, Smooth NO, strongly-convex NO.
 \item Hinge loss: $\varphi(u) = \max\{0,1+u\}$: Lipschitz YES, Smooth NO, strongly-convex NO.
@@ -108,59 +113,273 @@ Going back to the losses defined above, it is easy to check that the following h
 \item Least-squares loss: $\ell(u,y) = (u-y)^2$: Lipschitz NO, Smooth YES, strongly-convex YES.
 \end{itemize}
 
-Note that as far as the empirical risk minimization goes, what we care about are the (almost sure) properties of the function $x\in\mathcal{X}\rightarrow R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x) = \frac{1}{m} \sum_{i=1}^m \ell(x^T\Phi(W_i),Y_i)$. In particular, if $\mathcal{X}$ is bounded, we can restrict the definitions above to hold on a bounded set. For instance, we could define $L$-Lipschitz as the property: $| f(x) - f(y) | \le L \| x - y \|_2$ for any $x,y\in\mathbb{R}^n$ such that $\|x\|_2,\|y\|_2\le c$ ($\|\nabla f(x)\|_2 \le L$ for any $x\in\mathbb{R}^n$ such that $\|x\|_2\le c$). Assuming boundedness provides extra flexibility, allowing one to directly use these properties in setting where otherwise they would not apply (take the exponential loss, for instance).
-%Otherwise, approximation techniques need to be used to deal with non-boundedness.
+Note that as far as the empirical risk minimization goes, what we care about are the (almost sure) properties of the function $x\in\mathcal{X}\rightarrow R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x) = \frac{1}{m} \sum_{i=1}^m \ell(x^T\Phi(W_i),Y_i)$. In particular, if $\mathcal{X}$ and $\Phi$ are bounded, then $x^T\Phi(W_i)$ is bounded and we can restrict the definitions above to hold on a bounded set. Henceforth, we say that a function $x\in \text{Dom}(f)\subseteq\R^n\rightarrow f(x)$ is $L$-Lipschitz if $| f(x) - f(y) | \le L \| x - y \|_2$ for any $x,y\in \text{Dom}(f)$ ($\|\nabla f(x)\|_2 \le L$ for any $x\in\text{Dom}(f)$). Assuming boundedness provides extra flexibility, allowing one to directly use these properties in setting where otherwise they would not apply (take the exponential loss, for instance, which is only Lipschitz on a bounded interval).
 
-Even if we assume boundedness of $\mathcal{X}$, assuming that the empirical risk $R$ is strongly convex is typically a strong assumption. In fact, note that \emph{for any} $x\in\mathcal{X}$ (that is, regardless of the properties of $\mathcal{X}$) the Hessian
+Even if we assume boundedness, assuming that the empirical risk $R$ is strongly convex is typically a strong assumption. In fact, note that \emph{for any} $x\in\mathcal{X}$ (that is, regardless of the properties of $\mathcal{X}$) the Hessian
 \begin{align*}
 	\nabla^2R(x) = \frac{1}{m} \sum_{i=1}^m \frac{\partial^2}{\partial z^2} \ell(x^T\Phi(W_i),Y_i) 
 	\, \Phi(W_i)\Phi(W_i)^T\in\mathbb{R}^{n\times n}
 \end{align*}
 is not invertible if $m < n$, being a sum of $m<n$ rank-1 matrices. So in this case $x\rightarrow\nabla^2R(x)$ can not be strongly convex. In applications where $m\ge n$, the empirical covariance can be invertible, but it is typically the case that the strong convexity parameter $\alpha$ is very small, of order $1/m$, effectively $\alpha \approx 0$ (or close to machine precision) for applications involving large datasets. For this reason, in this reading group we will only focus on results about Lipschitz and smooth functions, which are more natural assumptions for the empirical risk $R$, as we now show.
 
-First, note that if we assume that $\ell$ is $L_{\textrm{loss}}$-Lipschitz in the first coordinate, namely, $z\rightarrow \ell(z,y)$ is $L_\textrm{loss}$-Lipschitz for any $y\in\mathcal{Y}$, and that the feature map $\Phi$ is bounded in $\ell_2$, namely, $\|\Phi\|_2\le G$, then $R$ is $GL_\textrm{loss}$-Lipschitz:
+First, note that if we assume that $\ell$ is $L_{\textrm{loss}}$-Lipschitz in the first coordinate, namely, $z\rightarrow \ell(z,y)$ is $L_\ell$-Lipschitz for any $y\in\mathcal{Y}$, and that the feature map $\Phi$ is bounded in $\ell_2$, namely, $\|\Phi\|_2\le G$, then $R$ is $GL_\ell$-Lipschitz:
 $$
 	| R(x) - R(y) | 
 	\le \frac{1}{m} \sum_{i=1}^m | \ell(x^T\Phi(W_i),Y_i)-\ell(y^T\Phi(W_i),Y_i) |
-	\le \frac{L_\textrm{loss}}{m} \sum_{i=1}^m \| (x-y)^T\Phi(W_i)) \|_2
-	\le GL_\textrm{loss} \|x-y\|_2,
+	\le \frac{L_\ell}{m} \sum_{i=1}^m \| (x-y)^T\Phi(W_i)) \|_2
+	\le GL_\ell \|x-y\|_2,
 $$
-where for the last inequality we used Cauchy-Schwarz. Second, note that if we assume that $\ell$ is $\beta_{\textrm{loss}}$-Lipschitz in the first coordinate, namely, $z\rightarrow \ell(z,y)$ is $\beta_\textrm{loss}$-Lipschitz for any $y\in\mathcal{Y}$, and that $\|\Phi\|_2\le G$, then $R$ is $G^2\beta_\textrm{loss} $-smooth:
+where for the last inequality we used Cauchy-Schwarz. Second, note that if we assume that $\ell$ is $\beta_\ell $-Lipschitz in the first coordinate, namely, $z\rightarrow \ell(z,y)$ is $\beta_\textrm{loss}$-Lipschitz for any $y\in\mathcal{Y}$, and that $\|\Phi\|_2\le G$, then $R$ is $G^2\beta_\textrm{loss} $-smooth:
 \begin{align*}
 	\| \nabla R(x) - \nabla R(y) \|_2 
 	&\le \frac{1}{m} \sum_{i=1}^m \bigg\| \bigg(\frac{\partial}{\partial z} \ell(x^T\Phi(W_i),Y_i)-\frac{\partial}{\partial z}\ell(y^T\Phi(W_i),Y_i)\bigg) \Phi(W_i) \bigg\|_2\\
-	&\le \frac{1}{m} \sum_{i=1}^m \beta_{\textrm{loss}} 
+	&\le \frac{1}{m} \sum_{i=1}^m \beta_\ell  
 	| (x-y)^T\Phi(W_i) |
 	\| \Phi(W_i) \|_2
-	\le \beta_{\textrm{loss}} G^2 \|x-y\|_2.
+	\le G^2\beta_\ell \|x-y\|_2.
 \end{align*}
 
-While this is a reading group on optimization, before we embark on the adventure of minimizing the empirical risk and bound the \emph{OPTIMIZATION} term in \eqref{bound:stats-opt}, we should try to develop some basic understanding of what to expect from the behavior of the \emph{STATISTICS} term as well. This understanding will give us insights on the type of precision that we should strive for to control the \emph{OPTIMIZATION} term. To this end, we now give a brief detour on statistical learning theory and derive an explicit bound in the case when the loss function $\ell$ is Lipschitz (no assumption on convexity is made for this result), the feature map is bounded, and also the parameter space $\mathcal{X}$ is bounded. While in this reading group we do not plan to prove other results such as the one that we present in the next section, nevertheless the proof is instructive and relies on classical machinery of concentration inequalities and Rademacher complexity.
+Before we embark on the adventure of minimizing the empirical risk and bound the \emph{OPTIMIZATION} term in \eqref{bound:stats-opt}, we should try to develop some basic understanding of what to expect from the behavior of the \emph{STATISTICS} term as well. This understanding will give us insights on the type of precision that we should strive for to control the \emph{OPTIMIZATION} term. To this end, we now give a brief detour on statistical learning theory and derive an explicit bound in the case when the loss function $\ell$ is Lipschitz (no assumption on convexity is made for this result), the feature map is bounded, and also the parameter space $\mathcal{X}$ is bounded. The proof is instructive and relies on classical machinery of concentration inequalities and Rademacher complexity.
 
-\subsection{Statistical learning theory}
+\subsection{Statistics term}
 \label{sec:Statistical learning theory}
-Statistical learning theory focuses on understanding how the estimation error $r(X^\star) - r(x^\star)$ converges to zero as a function of the sample size $m$, the loss function $\ell$, the parameter space $\mathcal{X}$, and possibly some properties of the distribution of $\Phi(W)$ and $Y$ (recall that the distribution themselves are not known). We will prove the following result, following the arguments as presented in \cite{bach}.
+Statistical learning theory focuses on understanding how the estimation error $r(X^\star) - r(x^\star)$ converges to zero as a function of the sample size $m$, the loss function $\ell$, the parameter space $\mathcal{X}$, and possibly some properties of the distribution of $\Phi(W)$ and $Y$ (recall that the distribution of the data is not known). We will prove the following results, inspired by the presentation in \cite{bach}.
 
-\begin{proposition}
+\begin{proposition}[Mean]
+\label{prop:Lip-stats mean}
+Let $z\rightarrow \ell(z,y)$ be $L_\ell$-Lipschitz for any $y\in\mathcal{Y}$, $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$ and $\|\Phi(W)\|_2\le G$ a.s.. Then,
+$$
+	\E[\textrm{STATISTICS}] = \E \sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \E \sup_{x\in\mathcal{X}} ( R(x) - r(x) )
+	\le 4\frac{BGL_\ell}{\sqrt{m}}.
+$$
+\end{proposition}
+
+\begin{proposition}[High probability]
 \label{prop:Lip-stats}
-If $z\rightarrow \ell(z,y)$ is $L_\textrm{loss}$-Lipschitz for any $y\in\mathcal{Y}$, $\|\Phi(W)\|_2\le G$ a.s., and $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$, then with probability at least $1-\delta$ we have
+Let $z\rightarrow \ell(z,y)$ be $L_\ell$-Lipschitz for any $y\in\mathcal{Y}$, $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$ and $\|\Phi(W)\|_2\le G$ a.s.. Then, with probability at least $1-\delta$ we have
 $$
 	\textrm{STATISTICS} = \sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) )
-	\le 2\frac{\ell_0+GL_\textrm{loss}B}{\sqrt{m}}\left(4 + \sqrt{2\log \frac{1}{\delta}} \right),
+	\le 2\frac{\ell_0+BGL_\ell}{\sqrt{m}}\left(2 + \sqrt{2\log \frac{1}{\delta}} \right),
 $$
 where $\ell_0:=\sup_{y\in\mathcal{Y}} | \ell(0,y) |$.
 \end{proposition}
 
-The quality of the bound in Proposition \ref{prop:Lip-stats} is typical in statistical learning theory. In particular, it is typically the case that the \emph{slow} rate $O(1/\sqrt{m})$ can not be improved, unless other assumptions are taken into consideration that allow to prove a \emph{fast} rate $O(1/m)$. These upper bounds suggest\footnote{Caveats are in order: after all the result in \eqref{bound:stats-opt} is only an upper-bound, and it is often the case that in practice one does not know the constants sitting in front of the error bounds that one can prove for both the \emph{OPTIMIZATION} term and the \emph{STATISTICS} term, i.e., the constants $G,L,R$ in our case.} that we only need to approximate the \emph{OPTIMIZATION} term up to precision $O(1/\sqrt{m})$ (resp. $O(1/m)$).
-%In particular, the general message is that it is only useful to optimize to precision which is of the same order of the estimation error (assuming that we know $G,L,R$).\\
+The quality of the bound in Proposition \ref{prop:Lip-stats} is typical in statistical learning theory. In particular, it is typically the case that the \emph{slow} rate $O(1/\sqrt{m})$ can not be improved unless other assumptions are taken into consideration that allow to prove the \emph{fast} rate $O(1/m)$. These upper bounds suggest\footnote{Caveats are in order: after all the result in \eqref{bound:stats-opt} is only an upper-bound, and it is often the case that in practice one does not know the constants sitting in front of the error bounds that one can prove for both the \emph{OPTIMIZATION} term and the \emph{STATISTICS} term, i.e., the constants $G,L,R$ in our case.} that we only need to approximate the \emph{OPTIMIZATION} term up to precision $O(1/\sqrt{m})$ (resp. $O(1/m)$).
 
-The next part of this section is devoted to proving Proposition \ref{prop:Lip-stats}. To this end, we need to bound suprema of a random processes. Henceforth, let us consider the following quantity (analogously, we can look at the symmetric quantity):
+\subsubsection{Bound on the mean}
+\label{sec:Bound on the mean}
+We prove Proposition \ref{prop:Lip-stats mean}. An important tool to bound the mean of a supremum of a random process is the Rademacher complexity.
+The Rademacher complexity of a set is defined as follows.
+\begin{definition}
+\label{def:Rademacher}
+The Rademacher complexity of a set $T\subseteq\R^m$ is
+$$
+	\mathcal{R}(T) := \E \sup_{t\in T} \frac{1}{m} \sum_{i=1}^m \varepsilon_i t_i,
+$$
+where $\varepsilon_1,\ldots,\varepsilon_m$ are i.i.d.\ random variables uniform in $\{-1,1\}$.
+\end{definition}
+
+The quantity $\mathcal{R}(T)$ is a measure of how complex the set $T$ is, as $\sup_{t\in T} \sum_{i=1}^m \varepsilon_i t_i$ describes how well elements in $T$ can replicate the sign pattern of a random signal $\varepsilon=(\varepsilon_1,\ldots,\varepsilon_m)$. One way of seeing this is to restrict to the case $T\subseteq [-1,1]^n$. If $T= [-1,1]^n$ then $\mathcal{R}(T)=1$, as for any realization of the signal $\varepsilon$ we can find $t\in T$ that has its same sign pattern. More generally, if $T\subseteq[-1,1]^n$ with $k$-sparse components, then $\mathcal{R}(T)=k/m$. 
+
+One reason why the Rademacher complexity is a useful notion is given by the following lemma, that shows how this quantity behaves with respect to composition with Lipschitz functions.
+
+\begin{lemma}[Contraction property]
+\label{lem:contraction}
+For each $i\in\{1,\ldots,m\}$, let $\varphi_i:\R\rightarrow\R$ be a $L$-Lipschitz function. Let $(\varphi_1,\ldots,\varphi_m) \circ T=\{ (\varphi_1(t_1),\ldots,\varphi_m(t_m))^T : t\in T \}$. Then,
+$$
+	\mathcal{R}((\varphi_1,\ldots,\varphi_m) \circ T)
+	\le 
+	L 
+	\mathcal{R}(T),
+$$
+or, explicitly,
+$$
+	\E\sup_{t\in T}\sum_{i=1}^m \varepsilon_i \varphi_i(t_i)
+	\le
+	L \E\sup_{t\in T}\sum_{i=1}^m \varepsilon_i t_i. 
+$$
+\end{lemma}
+
+\begin{proof}
+First, note that for $S\subseteq\R^2$ and $\varphi:\R\rightarrow\R$ $1$-Lipschitz we have
+\begin{align*}
+	\sup_{s\in S} (s_1+\varphi(s_2)) + \sup_{s\in S} (s_1-\varphi(s_2))
+	&= \sup_{s,s'\in S} (s_1+s_1'+\varphi(s_2)-\varphi(s_2'))
+	= \sup_{s,s'\in S} (s_1+s_1'+|\varphi(s_2)-\varphi(s_2')|)\\
+	&\le \sup_{s,s'\in S} (s_1+s_1'+|s_2-s_2'|)
+	= \sup_{s,s'\in S} (s_1+s_1'+s_2-s_2')\\
+	&= \sup_{s\in S} (s_1+s_2) + \sup_{s\in S} (s_1-s_2).
+\end{align*}
+Then, if the functions $\varphi_i$'s are $1$-Lipschitz we have, for any $k\in\{1,\ldots,m\}$,
+\begin{align*}
+	\E\sup_{t\in T}\sum_{i=1}^m \varepsilon_i \varphi_i(t_i)
+	&=
+	\E\E\bigg[\sup_{t\in T}\sum_{i=1}^m \varepsilon_i \varphi_i(t_i)\bigg| \varepsilon_1,\ldots,\varepsilon_{i-1},\varepsilon_{i+1},\ldots,\varepsilon_{m}\bigg]\\
+	&=
+	\frac{1}{2}
+	\E 
+	\bigg[
+	\sup_{t\in T}
+	\bigg(
+	\sum_{i\neq k} \varepsilon_i \varphi_i(t_i)
+	+ \varphi_k(t_k) 
+	\bigg)
+	+ 
+	\sup_{t\in T}
+	\bigg(\sum_{i\neq k} \varepsilon_i \varphi_i(t_i)
+	- \varphi_k(t_k)
+	\bigg)
+	\bigg]\\
+	&\le
+	\frac{1}{2}
+	\E 
+	\bigg[
+	\sup_{t\in T}
+	\bigg(
+	\sum_{i\neq k} \varepsilon_i \varphi_i(t_i)
+	+ t_k
+	\bigg)
+	+ 
+	\sup_{t\in T}
+	\bigg(\sum_{i\neq k} \varepsilon_i \varphi_i(t_i)
+	- t_k
+	\bigg)
+	\bigg]\\
+	&=
+	\E 
+	\sup_{t\in T}
+	\bigg(
+	\sum_{i\neq k} \varepsilon_i \varphi_i(t_i)
+	+ \varepsilon_k t_k
+	\bigg),
+\end{align*}
+and by iterating one finds
+$$
+	\E\sup_{t\in T}\sum_{i=1}^m \varepsilon_i \varphi_i(t_i)
+	\le
+	\E\sup_{t\in T}\sum_{i=1}^m \varepsilon_i t_i. 
+$$
+If the functions $\varphi_i$'s are $L$-Lipschitz, then clearly,
+$$
+	\E\sup_{t\in T}\sum_{i=1}^m \varepsilon_i \varphi_i(t_i)
+	=
+	L
+	\E\sup_{t\in T}\sum_{i=1}^m \varepsilon_i \frac{\varphi_i(t_i)}{L}
+	\le
+	L \E\sup_{t\in T}\sum_{i=1}^m \varepsilon_i t_i. 
+$$
+\end{proof}
+
+Given the contraction property for the Rademacher complexity of a set, we can derive the following result.
+\begin{proposition}
+\label{prop:radamacher}
+Let $z\rightarrow \ell(z,y)$ be $L_\ell$-Lipschitz for any $y\in\mathcal{Y}$. Then,
+$$
+	\mathbf{E}\sup_{x\in\mathcal{X}} ( r(x) - R(x) )
+	\le 2\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \varepsilon_i R_i(x)
+	\le
+	2L_\ell\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i),
+$$
+where $\varepsilon_1,\ldots,\varepsilon_n$ are i.i.d.\ random variables uniform in $\{-1,1\}$, independent of $(W_1,Y_1),\ldots,(W_m,Y_m)$. 
+\end{proposition}
+
+\begin{proof}
+The proof uses the standard machinery of symmetrization. Let $Z_i=(W_i,Y_i)$ for any $i\in\{1,\ldots,m\}$. Let $Z_1',\ldots,Z_m'$ be an independent copy of the data $Z_1,\ldots,Z_m$, and let $R_i'(x) := \ell(x^T\Phi(W_i'),Y_i')$ for each $i\in\{1,\ldots,m\}$. Using that $r(x)=\mathbf{E}R_i'(x)=\mathbf{E}[R_i'(x)|Z_1,\ldots,Z_m]$, we have
+\begin{align*}
+	\mathbf{E}\sup_{x\in\mathcal{X}} \bigg( r(x) - \frac{1}{m}\sum_{i=1}^m R_i(x) \bigg)
+	&=
+	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \mathbf{E} [ R_i'(x) - R_i(x) ) | Z_1,\ldots,Z_m]\\
+	&\le
+	\mathbf{E}\mathbf{E}\bigg[\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m ( R_i'(x) - R_i(x)) \bigg| Z_1,\ldots,Z_m\bigg]\\
+	&=
+	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m ( R_i'(x) - R_i(x) )\\
+	&=
+	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \varepsilon_i (R_i'(x) - R_i(x)) \quad \text{by symmetrization}\\
+	&\le
+	2\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \varepsilon_i R_i(x)
+	= 2\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i \ell(x^T\Phi(W_i),Y_i).
+\end{align*}
+Conditioning on $Z_1,\ldots,Z_m$ we can apply the contraction property for the Rademacher complexity of a set,
+applying Lemma \ref{lem:contraction} with the choice $\varphi_i(z)=\ell(z,Y_i)$ and $T=\{(x^T\Phi(W_1),\ldots,x^T\Phi(W_m))^T : x\in\mathcal{X}\}$:
 \begin{align}
-	h(Z_1,\ldots,Z_n) := \sup_{x\in\mathcal{X}} ( r(x) - R(x) )
-	= \sup_{x\in\mathcal{X}} \bigg( r(x)- \frac{1}{m} \sum_{i=1}^m R_i(x) \bigg),
+	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i \ell(x^T\Phi(W_i),Y_i) \bigg| Z_1,\ldots,Z_m \bigg]
+	\le
+	L_\ell\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i) \bigg| Z_1,\ldots,Z_m \bigg],
+	\label{boundEmpiricalRad}
+\end{align}
+and the result follows by taking the expectation.
+\end{proof}
+
+\begin{remark}[Emipirical Rademacher complexity]
+\label{rem:empiricalRad}
+The quantity
+$$
+	\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)
+$$
+on the right hand side of the bound in Proposition \ref{prop:radamacher} can be interpreted as the expected value of the Rademacher complexity of a random set. In fact, by conditioning on the data $W_1,\ldots,W_m$ we get
+$$
+	\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)
+	=
+	\mathbf{E}
+	\mathbf{E} \bigg[\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i) \bigg| W_1,\ldots,W_m\bigg]
+	=
+	\mathbf{E}
+	\mathbf{E} \bigg[\sup_{t\in T_{W_1,\ldots,W_m}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i t_i \bigg| W_1,\ldots,W_m\bigg],
+$$
+where
+$
+	T_{W_1,\ldots,W_m}
+	:= \{ (x^T\Phi(W_1),\ldots,x^T\Phi(W_m))^T : x\in\mathcal{X} \}.
+$
+The Rademacher complexity that we get when we condition on the data, as at the end of the proof of Proposition \ref{prop:radamacher}, is typically referred to as the \emph{empirical} Rademacher complexity.
+\end{remark}
+
+We now present a result to control the Rademacher complexity when we have boundedness assumptions with respect to the Euclidean norm.
+
+\begin{proposition}
+\label{bound:rad}
+Let $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$ and $\|\Phi(W)\|_2\le G$ a.s.. Then,
+$$
+	\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)
+	\le 
+	\frac{BG}{\sqrt{m}}.
+$$
+\end{proposition}
+
+\begin{proof}
+We have
+\begin{align*}
+	\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)
+	&\le \sup_{x\in\mathcal{X}} \| x \|_2
+	\mathbf{E} \bigg\|\frac{1}{m}\sum_{i=1}^m\varepsilon_i \Phi(W_i)\bigg\|_2 \quad \text{by Cauchy-Schwarz}\\
+	&\le B\mathbf{E} \sqrt{\bigg\|\frac{1}{m}\sum_{i=1}^m\varepsilon_i \Phi(W_i)\bigg\|_2^2}
+	\le B \sqrt{ \mathbf{E} \bigg\|\frac{1}{m}\sum_{i=1}^m\varepsilon_i \Phi(W_i)\bigg\|_2^2} \quad \text{by Jensen's inequality}\\
+	&= \frac{B}{m} \sqrt{ \mathbf{E} \sum_{j=1}^n \bigg(\sum_{i=1}^m \varepsilon_i \Phi(W_i)_j\bigg)^2 } 
+	= \frac{B}{m} \sqrt{ \mathbf{E} \sum_{j=1}^n \sum_{i=1}^m (\varepsilon_i \Phi(W_i)_j)^2 } \quad \text{by the independence of the $\varepsilon$'s}\\
+	&= \frac{B}{m} \sqrt{ \mathbf{E}  \sum_{i=1}^m \| \Phi(W_i)\|^2_2 }
+	\le \frac{G B}{\sqrt{m}} \quad \text{as $\|\Phi(W)\|_2\le G$ a.s.}
+\end{align*}
+\end{proof}
+
+Proposition \ref{prop:radamacher} and Proposition \ref{bound:rad} immediately yields the following result, from which Proposition \ref{prop:Lip-stats mean} follows immediately.
+\begin{proposition}
+\label{prop:expectationsupremum}
+Let $z\rightarrow \ell(z,y)$ be $L_\ell$-Lipschitz for any $y\in\mathcal{Y}$, $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$ and $\|\Phi(W)\|_2\le G$ a.s.. Then,
+$$
+	\mathbf{E}\sup_{x\in\mathcal{X}} ( r(x) - R(x) )
+	\le
+	2\frac{BGL_\ell}{\sqrt{m}}.
+$$
+\end{proposition}
+
+\subsubsection{Bound with high probability}
+\label{sec:high probability}
+We prove Proposition \ref{prop:Lip-stats}. Let us consider the following quantity:
+\begin{align}
+	h(Z_1,\ldots,Z_m) := \sup_{x\in\mathcal{X}} ( r(x) - R(x) ),
 	\label{def:h}
 \end{align}
-where we use the notation $Z_i := (W_i,Y_i)$. A classical way to bound this quantity is by using concentration inequalities, which are tools in probability theory to bound the deviation of a function of many i.i.d.\ random variables to its mean. One of the classical concentration inequalities is the Bounded Difference, of which we now state a simple version.
+where we use the notation $Z_i := (W_i,Y_i)$. Proposition \ref{prop:expectationsupremum} yields a bound on $\E h(Z_1,\ldots,Z_m)$. A classical way to derive bounds in high probability is to use concentration inequalities, which are tools in probability theory to bound the deviation of a function of many i.i.d.\ random variables from its mean. One of the classical concentration inequalities is the Bounded Difference, of which we now state a simple version.
 
 \begin{proposition}[Bounded Difference Inequality]
 \label{prop:BDI}
@@ -177,13 +396,14 @@ $$
 	h(Z_1,\ldots,Z_m) \le \mathbf{E}h(Z_1,\ldots,Z_m) + c\sqrt{\frac{m}{2}\log\frac{1}{\delta}}.
 $$
 \end{proposition}
-To apply the Bounded Difference inequality to the function $h$ defined in \eqref{def:h}, we need to find $c$ that satisfy the assumption of Proposition \ref{prop:BDI}. The next proposition shows how to do this under the assumption of Proposition \ref{prop:Lip-stats}.
+To apply the Bounded Difference inequality to the function $h$ defined in \eqref{def:h}, we need to find $c$ that satisfy the assumption of Proposition \ref{prop:BDI} to control the magnitude of the difference in the function $h$ upon changing only one coordinate. The next proposition shows how to do this we have boundedness assumptions with respect to the Euclidean norm.
 \begin{proposition}
 \label{prop:c}
-Let $h$ be the function defined in \eqref{def:h} and consider the same assumption of Proposition \ref{prop:Lip-stats}. Then, $c\in\mathbb{R}$ satisfying the requirement of the Bounded Difference inequality is given by
+Let $h$ be the function defined in \eqref{def:h}. Let $z\rightarrow \ell(z,y)$ be $L_\ell$-Lipschitz for any $y\in\mathcal{Y}$, $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$ and $\|\Phi(W)\|_2\le G$ a.s.. Then, $c\in\mathbb{R}$ satisfying the requirement of the Bounded Difference inequality is given by
 $$
-	c = \frac{2}{m} \bigg(\sup_{y\in\mathcal{Y}} | \ell(0,y) | + GL_\textrm{loss}B \bigg).
+	c = \frac{2}{m} \bigg(\ell_0 + BGL_\ell \bigg),
 $$
+where $\ell_0:=\sup_{y\in\mathcal{Y}} | \ell(0,y) |$.
 \end{proposition}
 
 \begin{proof}
@@ -206,125 +426,45 @@ $$
 	| h(z) - h(z') | \le \frac{2}{m} \sup_{x\in\mathcal{X},z\in\mathcal{Z}} | R^z_k(x) |
 	= \frac{2}{m} \sup_{x\in\mathcal{X},w\in\mathcal{W},y\in\mathcal{Y}} | \ell(x^T\Phi(w),y) |.
 $$
-Using, that $z\rightarrow \ell(z,y)$ is $L_\textrm{loss}$-Lipschitz for any $y\in\mathcal{Y}$ and Cauchy-Schwarz we get
+Using, that $z\rightarrow \ell(z,y)$ is $L_\ell$-Lipschitz for any $y\in\mathcal{Y}$ and Cauchy-Schwarz we get
 $$
 	|\ell(x^T\Phi(w),y)| \le | \ell(0,y) | + |\ell(x^T\Phi(w),y) - \ell(0,y)|
-	\le | \ell(0,y) | + L_\textrm{loss}\|x^T\Phi(w)\|_2
-	\le | \ell(0,y) | + L_\textrm{loss}\|x\|_2\|\Phi(w)\|_2,
+	\le | \ell(0,y) | + L_\ell\|x^T\Phi(w)\|_2
+	\le | \ell(0,y) | + L_\ell\|x\|_2\|\Phi(w)\|_2.
 $$
-which, upon using $\|\Phi(W)\|_2\le G$ a.s. and $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$ yields
-$$
+As $\|\Phi(W)\|_2\le G$ a.s.\ and $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$ we have
+$
 	|\ell(x^T\Phi(w),y)|
-	\le | \ell(0,y) | + GL_\textrm{loss}B,
-$$
+	\le | \ell(0,y) | + BGL_\ell,
+$
 so that
 $$
-	| h(z) - h(z') | \le \frac{2}{m} \bigg(\sup_{y\in\mathcal{Y}} | \ell(0,y) | + GL_\textrm{loss}B \bigg).
+	| h(z) - h(z') | \le \frac{2}{m} \bigg(\sup_{y\in\mathcal{Y}} | \ell(0,y) | + BGL_\ell \bigg).
 $$
 \end{proof}
 
-The bounded-difference inequality tells us that in order to control $h(Z_1,\ldots,Z_m)$ we need to control the expectation $\mathbf{E}[h(Z_1,\ldots,Z_m)]$. The following is a classical way of doing so, based on the Rademacher complexity.
-
-\begin{proposition}
-\label{prop:radamacher}
-We have
-$$
-	\mathbf{E}\sup_{x\in\mathcal{X}} \bigg( r(x) - \frac{1}{m}\sum_{i=1}^m R_i(x) \bigg)
-	\le 
-	2 \mathcal{R},
-$$
-where $\mathcal{R}$ is the Rademacher complexity defined as
-$$
-	\mathcal{R}:=\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i R_i(x) ,
-$$
-with $\epsilon_1,\ldots,\epsilon_n$ i.i.d.\ Rademacher random variables uniform in $\{-1,1\}$, independent of $Z_1,\ldots,Z_n$. 
-\end{proposition}
-
-\begin{proof}
-The proof uses the standard machinery of symmetrization. Let $\mathcal{D}':=\{Z_1',\ldots,Z_m'\}$ be an independent copy of the data $\mathcal{D}:=\{Z_1,\ldots,Z_m\}$. Using that $r(x)=\mathbf{E}R_i'(x)=\mathbf{E}[R_i'(x)|\mathcal{D}]$, we have
-\begin{align*}
-	\mathbf{E}\sup_{x\in\mathcal{X}} \bigg( r(x) - \frac{1}{m}\sum_{i=1}^m R_i(x) \bigg)
-	&=
-	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \mathbf{E} [ R_i'(x) - R_i(x) ) | \mathcal{D}]\\
-	&\le
-	\mathbf{E}\mathbf{E}\bigg[\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m ( R_i'(x) - R_i(x)) \bigg| \mathcal{D}\bigg]\\
-	&=
-	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m ( R_i'(x) - R_i(x) )\\
-	&=
-	\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \epsilon_i (R_i'(x) - R_i(x)) \quad \text{by symmetrization}\\
-	&=
-	2\mathbf{E}\sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m \epsilon_i R_i(x).
-\end{align*}
-\end{proof}
-
-We are left with bounding the Rademacher complexity.
-\begin{proposition}
-\label{prop:boundonradamacher}
-Under the assumption of Proposition \ref{prop:Lip-stats}, we have
-$$
-	\mathcal{R}
-	\le
-	\frac{2GL_\textrm{loss}B}{\sqrt{m}}.
-$$
-\end{proposition}
-
-\begin{proof}
-Note that there are two independent sources of randomness in the definition of $\mathcal{R}$. One comes from the Rademacher random variables $\epsilon_1,\ldots,\epsilon_m$, the other comes from the data $\mathcal{D}:=(Z_1,\dots,Z_m)$ itself. By the tower property we can isolate the effect of the Rademacher random variables and work conditionally on $\mathcal{D}$. That is,
-\begin{align*}
-	\mathcal{R} 
-	&= \mathbf{E} \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i R_i(x) \bigg| \mathcal{D}\bigg].
-\end{align*}
-If for each $i\in\{1,\ldots,m\}$ we define the functions $\varphi_i(u) := \ell(u,Y_i) - \ell(0,Y_i)$, we have
-\begin{align*}
-	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i R_i(x) \bigg| \mathcal{D} \bigg]
-	&= \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i [R_i(0) + R_i(x)-R_i(0)] \bigg| \mathcal{D} \bigg]\\
-	&\le \mathbf{E} \bigg[ \frac{1}{m}\sum_{i=1}^m\epsilon_i R_i(0) \bigg| \mathcal{D} \bigg]
-	+ \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i [\ell(x^T\Phi(W_i),Y_i)-\ell(0,Y_i)] \bigg| \mathcal{D} \bigg]\\
-	&= \frac{1}{m}\sum_{i=1}^m \mathbf{E} [\epsilon_i | \mathcal{D}] R_i(0) + 
-	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg]\\
-	&= \mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg],
-\end{align*}
-where for the last equality we used that by the independence between $\epsilon_1,\ldots,\epsilon_m$ and $\mathcal{D}$ we have $\mathbf{E} [\epsilon_i | \mathcal{D}]=\mathbf{E} \epsilon_i = 0$. As the function $z\rightarrow \ell(z,y)$ is $L_\textrm{loss}$-Lipschitz for any $y\in\mathcal{Y}$, also each function $\varphi_i$ is $L_\textrm{loss}$-Lipschitz. By the contraction property of Rademacher complexities (indeed, one of the reason why this notion of complexity is convenient to use), we have
-$$
-	\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i \varphi_i(x^T\Phi(W_i)) \bigg| \mathcal{D} \bigg]
-	\le
-	2L_\textrm{loss}\mathbf{E} \bigg[ \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i x^T\Phi(W_i) \bigg| \mathcal{D} \bigg].
-$$
-Hence, using that $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$
-\begin{align*}
-	\mathcal{R} 
-	&\le 2L_\textrm{loss}\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\epsilon_i x^T\Phi(W_i)\\
-	&\le 2L_\textrm{loss}\mathbf{E} \sup_{x\in\mathcal{X}} \| x \|_2\bigg\|\frac{1}{m}\sum_{i=1}^m\epsilon_i \Phi(W_i)\bigg\|_2 \quad \text{by Cauchy-Schwarz}\\
-	&\le 2L_\textrm{loss}B\mathbf{E} \sqrt{\bigg\|\frac{1}{m}\sum_{i=1}^m\epsilon_i \Phi(W_i)\bigg\|_2^2}
-	\le 2L_\textrm{loss}B \sqrt{ \mathbf{E} \bigg\|\frac{1}{m}\sum_{i=1}^m\epsilon_i \Phi(W_i)\bigg\|_2^2} \quad \text{by Jensen's inequality}\\
-	&= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E} \sum_{j=1}^n \bigg(\sum_{i=1}^m \epsilon_i \Phi(W_i)_j\bigg)^2 } 
-	= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E} \sum_{j=1}^n \sum_{i=1}^m (\epsilon_i \Phi(W_i)_j)^2 } \quad \text{by the independence of the $\epsilon$'s}\\
-	&= \frac{2L_\textrm{loss}B}{m} \sqrt{ \mathbf{E}  \sum_{i=1}^m \epsilon_i^2 \| \Phi(W_i)\|^2_2 }
-	\le \frac{2GL_\textrm{loss}B}{\sqrt{m}} \quad \text{as $\|\Phi(W)\|_2\le G$ a.s.}\\
-\end{align*}
-\end{proof}
-
-The proof of Proposition \ref{prop:Lip-stats} follows by putting everything together, namely, Proposition \ref{prop:BDI}, Proposition \ref{prop:c}, Proposition \ref{prop:radamacher}, and Proposition \ref{prop:boundonradamacher}, noting that the bounds in high probability that we have obtained hold for \emph{both} $\sup_{x\in\mathcal{X}} ( r(x) - R(x) )$ and $\sup_{x\in\mathcal{X}} ( R(x) - r(x) )$. Here are the details.
+The proof of Proposition \ref{prop:Lip-stats} follows by putting everything together, namely, Proposition \ref{prop:BDI}, Proposition \ref{prop:c}, and Proposition \ref{prop:expectationsupremum}, noting that the bounds in high probability that we have obtained hold \emph{simultaneously} for $\sup_{x\in\mathcal{X}} ( r(x) - R(x) )$ and $\sup_{x\in\mathcal{X}} ( R(x) - r(x) )$. Here are the details.
 
 \begin{proof}[Proof of Proposition \ref{prop:Lip-stats}]
-Using, respectively, Proposition \ref{prop:BDI} and Proposition \ref{prop:radamacher}, we have that with probability at least $1-\delta$ the following holds:
+Using, respectively, Proposition \ref{prop:BDI} and Proposition \ref{prop:expectationsupremum}, we have that with probability at least $1-\delta$ the following holds:
 $$
 	\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) \le 
 	\mathbf{E}\bigg[\sup_{x\in\mathcal{X}} ( r(x) - R(x) )\bigg] + c\sqrt{\frac{m}{2}\log\frac{1}{\delta}}
-	\le 2 \mathcal{R} + c\sqrt{\frac{m}{2}\log\frac{1}{\delta}},
+	\le \frac{2BGL_\ell}{\sqrt{m}} + c\sqrt{\frac{m}{2}\log\frac{1}{\delta}},
 $$
-where $c = \frac{2}{m} (\ell_0 + GL_\textrm{loss}B )$ by Proposition \ref{prop:c}. Plugging in the bound for $\mathcal{R}$ in Proposition \ref{prop:boundonradamacher}, we get
+with $c = \frac{2}{m} (\ell_0 + BGL_\ell )$ by Proposition \ref{prop:c}, which yields
 $$
-	\mathbb{P}\bigg(\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) \le c\bigg) \ge 1-\delta,
+	\mathbf{P}\bigg(\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) \le c'\bigg) \ge 1-\delta,
 $$
-where $c:=2(\ell_0+GL_\textrm{loss}B)(4 + \sqrt{2\log(1/\delta)})/\sqrt{m}$. As the bounds we have derived holds also for $\sup_{x\in\mathcal{X}} ( R(x) - r(x) )$, we have
+where $c':=(\ell_0+BGL_\ell)(2 + \sqrt{2\log(1/\delta)})/\sqrt{m}$. As the bounds we have derived holds also for $\sup_{x\in\mathcal{X}} ( R(x) - r(x) )$, we have
 $$
-	\mathbb{P}\bigg(\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) ) \le 2c \bigg)
-	\ge \mathbb{P}\bigg(\bigg\{\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) \le c \bigg\} \bigcap \bigg\{\sup_{x\in\mathcal{X}} ( R(x) - r(x) ) \le c \bigg\} \bigg) \ge 1-\delta.
+	\mathbf{P}\bigg(\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) ) \le 2c' \bigg)
+	\ge \mathbf{P}\bigg(\bigg\{\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) \le c' \bigg\} \bigcap \bigg\{\sup_{x\in\mathcal{X}} ( R(x) - r(x) ) \le c' \bigg\} \bigg) \ge 1-\delta.
 $$
 \end{proof}
 
-\subsection{Plan for the rest of the term}
+
+\subsection{Overview of the reading group}
 
 Given the analysis of the previous section, we can now describe the plan for the reading group this term.
 While we motivated our interest in optimization techniques by looking at the classical setting of supervised machine learning and empirical risk minimization, only in Week 8 (hopefully!) we will see how to develop specialized algorithms to minimize $R$ (that is, algorithms that can take advantage of the specific structure of $R$). In fact, most of our time will be devoted to reviewing classical algorithms to optimize a \emph{general} convex function $f$ over a convex set $\mathcal{X}$, namely, to solve:
@@ -375,32 +515,32 @@ As we discuss earlier, for applications in machine learning the assumption of $\
 
 These results are sometimes called \emph{dimension-free}, since as presented the rates do not depend explicitly on the ambient dimension $n$. However, the dependence on the dimension enters implicit in the constants: note that $B$ is the radius of the constraint set $\mathcal{X}\subseteq \mathbb{R}^n$, and that the parameters $L$, $\alpha$, and $\beta$, are defined in terms of the Euclidean norm in $\mathbb{R}^n$. The terminology dimension-free is used in \cite{bubeck} to differentiate the rates achieved by subgradient descent methods from the rates obtained by ellipsoid methods (Chapter 2 in \cite{bubeck}), which we will not cover in this reading group.
 	
-We can also phrase these results in terms of \emph{oracle complexity}, namely, the number of queries to the oracle that are \emph{sufficient} to find an $\epsilon$-approximate minima of a convex function:
+We can also phrase these results in terms of \emph{oracle complexity}, namely, the number of queries to the oracle that are \emph{sufficient} to find an $\varepsilon$-approximate minima of a convex function:
 \begin{center}
  \begin{tabular}{|c | c | c|}
  \hline
  & $L$-Lipschitz & $\beta$-smooth\\
  \hline
- Convex & $O(B^2L^2/\epsilon^2)$ & $O(B^2\beta/\epsilon)$\\
+ Convex & $O(B^2L^2/\varepsilon^2)$ & $O(B^2\beta/\varepsilon)$\\
  \hline
- $\alpha$-strongly convex & $O(L^2/(\alpha \epsilon))$ & $O((\beta/\alpha)\log{(B^2/\epsilon)})$\\
+ $\alpha$-strongly convex & $O(L^2/(\alpha \varepsilon))$ & $O((\beta/\alpha)\log{(B^2/\varepsilon)})$\\
  \hline
 \end{tabular}
 \end{center}
 
 	
 \begin{remark}\label{rem:optimization}
-To conclude, let us go back to our motivating example of minimizing the empirical risk function $R(x) = \frac{1}{m}\sum_{i=1}^m \ell(x^T\Phi(W_i),Y_i)$. Under the assumptions of Proposition \ref{prop:Lip-stats}, $R$ is $GL_\textrm{loss}$-Lipschitz (see Section \ref{sec:introduction}). Assuming that the loss function $\ell$ is convex, the subgradient descent method then yields:
+To conclude, let us go back to our motivating example of minimizing the empirical risk function $R(x) = \frac{1}{m}\sum_{i=1}^m \ell(x^T\Phi(W_i),Y_i)$. Under the assumptions of Proposition \ref{prop:Lip-stats mean}, $R$ is $GL_\ell$-Lipschitz (see Section \ref{sec:introduction}). Assuming that the loss function $\ell$ is convex, the subgradient descent method then yields:
 $$
-	\textrm{OPTIMIZATION} := R(\hat X_t) - R(X^\star) \le \frac{GL_\textrm{loss}B}{\sqrt{t}}.
+	\textrm{OPTIMIZATION} := R(\hat X_t) - R(X^\star) \le \frac{BGL_\ell}{\sqrt{t}}.
 $$
-Here the constants are explicit, and they match the ones in Proposition \ref{prop:Lip-stats} for the \textrm{STATISTICS} term. In particular, following the rationale of optimizing the \emph{OPTIMIZATION} term in \eqref{bound:stats-opt} up to the accuracy given by the \emph{STATISTICS} term in \eqref{bound:stats-opt}, one finds that it suffices to run the algorithm for $t\sim m$ number of steps.
+Here the constants are explicit, and they match the ones in Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} for the \textrm{STATISTICS} term. In particular, following the rationale of optimizing the \emph{OPTIMIZATION} term in \eqref{bound:stats-opt} up to the accuracy given by the \emph{STATISTICS} term in \eqref{bound:stats-opt}, one finds that it suffices to run the algorithm for $t\sim m$ number of steps.
 \end{remark}
 
 \subsubsection*{Week 3: Lower bounds for oracle complexity.}
 Readings: Parts of Chapter 3 in \cite{bubeck}. Details are below.\\
 
-We see that within the first order oracle model one can prove lower-bounds for the amount of calls to the oracle that are \emph{needed} to achieve a certain accuracy $\epsilon$.
+We see that within the first order oracle model one can prove lower-bounds for the amount of calls to the oracle that are \emph{needed} to achieve a certain accuracy $\varepsilon$.
 In the non-smooth case we show that the rates achieved by subgradient descent methods, i.e., $O(BL/\sqrt{t})$ for convex functions and $O(L^2/(\alpha t))$ for $\alpha$-strongly convex functions, can not be improved (\textbf{Theorem 3.13 in \cite{bubeck}; we will only cover the proof of the first statement for convex $L$-Lipschitz functions}).
 On the other hand, in the smooth case we prove oracle-complexity lower bounds that are better than the ones achieved by subgradient methods, namely, $O(D^2\beta/t^2)$ for smooth functions (\textbf{Theorem 3.14 in \cite{bubeck}}) and $O(D^2\exp(-t\sqrt{\alpha/\beta}))$ for smooth and strongly convex functions (Theorem 3.15 in \cite{bubeck}), where $D$ is the diameter of $\mathcal{X}$, i.e., $D:=\max_{x,y\in\mathcal{X}}\|x-y\|_2$. To recap, the optimal rates are:
 \begin{center}
@@ -416,38 +556,47 @@ On the other hand, in the smooth case we prove oracle-complexity lower bounds th
 \end{center}
 
 \subsubsection*{Week 4: Application: Boosting.}
-Reading: Parts of Part II, Section 1.4 and Part II, Section 2.2 in \cite{rigollet}. Details are below.\\
+Reading: Parts of Part II, Section 1.4 and Part II, Section 2.2 in \cite{rigollet}.\\
 
-We apply the projected subgradient descent algorithm to solve an important example in machine learning: Boosting. For a given loss function $\varphi$ (recall, $\ell(z,y) = \varphi(-zy)$ in classification), $\ell_1$-boosting can be written as the problem:
+We apply the projected subgradient descent algorithm to solve an important example in machine learning: Boosting. For a given loss function $\varphi$ (recall, $\ell(z,y) = \varphi(-zy)$ in classification), Boosting can be written as the problem:
 \begin{align*}
 	\begin{aligned}
 		\text{minimize }\quad   & r(x) = \mathbf{E} \varphi(-Yx^T\Phi(W))\\
-		\text{subject to }\quad & x\in \Delta_m,
+		\text{subject to }\quad & x\in \Delta_n,
 	\end{aligned}
 \end{align*}
-where $\Delta_m := \{x\in [0,1]^m : \sum_{k=1}^m x_k = 1\}$ is the $m$-dimensional probability simplex. Here the feature map $\Phi : \mathcal{W} \rightarrow \{-1,1\}^n$ encodes the prediction of the $n$ base classifiers on the given data point it is applied to, and $x^T\Phi$ is a linear combination of these classifiers. 
-Following the error decomposition in Proposition \ref{prop:erm2}, we show (\textbf{Part II, Section 1.4 in \cite{rigollet}}) that in this case the \emph{STATISTICS} term is $O(\log(n)/\sqrt{m})$, which only grows logarithmically with the number of base classifiers $n$. This is a nice feature in applications where $n$ is very large. Hence, one would hope to be able to design an algorithmic procedure that only uses $\log(n)$ calls to the oracle in order to match the accuracy of the \emph{STATISTICAL} term when finding a solution to the empirical risk minimization problem:
+where $\Delta_n := \{x\in [0,1]^n : \sum_{k=1}^n x_k = 1\}$ is the $n$-dimensional probability simplex. Here the feature map $\Phi : \mathcal{W} \rightarrow \{-1,1\}^n$ encodes the prediction of the $n$ base classifiers on the given data point it is applied to, and $x^T\Phi$ is a convex combination of these classifiers. 
+Following the error decomposition given in Proposition \ref{prop:erm2}, we show that in the case of Boosting the \emph{STATISTICS} term is $O(\log n/\sqrt{m})$, which only grows logarithmically with the number of base classifiers $n$. This is a nice feature in applications where the number $n$ of base classifiers is very large.
+Hence, one would hope to be able to design an algorithmic procedure that only uses $\log n$ calls to the first order oracle in order to match the accuracy of the \emph{STATISTICAL} term to find an approximate solution to the empirical risk minimization problem:
 \begin{align*}
 	\begin{aligned}
 		\text{minimize }\quad   & R(x) = \frac{1}{m} \sum_{i=1}^m \varphi(-Y_ix^T\Phi(W_i))\\
 		\text{subject to }\quad & x\in \Delta_m.
 	\end{aligned}
 \end{align*}
-We show that if $\phi$ is $L$-Lipschitz, then the empirical risk minimizer $R$ is $L\sqrt{n}$-Lipschitz, so that projected subgradient descent yields a rate $O(L\sqrt{n/t})$ (\textbf{Part II, Section 2.3.3 in \cite{rigollet}}). Imposing the condition $L\sqrt{n/t} \lesssim \log(n)/\sqrt{m}$, we find that $t\gtrsim L^2 nm/\log(n)^2$, which does \emph{not} scale logarithmically with $n$ as we hoped for. Boosting is one example where one would like to apply subgradient descent methods on a non-Euclidean space, in particular a $\ell_1$ space, but these methods are not suited for this type of problems as they are really designed for Euclidean geometry. Note, in fact, that all the definitions we gave for $L$-Lipschitz, $\beta$-smoothness, $\alpha$-strong convexity are expressed in terms of the Euclidean norm $\|\,\cdot\,\|_2$. This motivates the design of a new class of algorithms that can adapt to the geometry of the problem at hand, as we will see next.
+Note that if $\varphi$ is $L_\varphi$-Lipschitz on $[-1,1]$, then the empirical risk $R$ is $L_\varphi\sqrt{n}$-Lipschitz on $[-1,1]$:
+\begin{align*}
+	|R(x)-R(y)| 
+	&\le \frac{1}{m} \sum_{i=1}^m | \varphi(-Y_ix^T\Phi(W_i)) - \varphi(-Y_iy^T\Phi(W_i)) |
+	\le 
+	\frac{1}{m} \sum_{i=1}^m L_\varphi \| Y_i(x-y)^T\Phi(W_i) \|_2\\
+	&\le L_\varphi \| \Phi(W_i) \|_2 \| x-y \|_2
+	\le \sqrt{n}L_\varphi \| x-y \|_2.
+\end{align*}
+Hence, projected subgradient descent yields a rate $O(L_\varphi\sqrt{n/t})$. Imposing the condition $L_\varphi\sqrt{n/t} \lesssim \log n/\sqrt{m}$, we find that $t\gtrsim L^2_\varphi nm/\log n^2$, which does \emph{not} scale logarithmically with $n$ as we hoped for!
+
+Boosting is one example where one would like to apply subgradient descent methods on a non-Euclidean space, i.e., on the probability simplex $\Delta_n$, but these methods are not suited for this type of problems as they are really designed for the Euclidean geometry. Note, in fact, that all the definitions we gave for $L$-Lipschitz, $\beta$-smoothness, and $\alpha$-strong convexity are expressed in terms of the Euclidean norm $\|\,\cdot\,\|_2$. This motivates the design of a new class of algorithms that can adapt to the geometry of the problem at hand, as we will see next.
 %Since, as we saw in Section \ref{sec:Statistical learning theory}, the statistical term is often $O(1/\sqrt{m})$ or $O(1/m)$ in some favourable scenarios, to be generous we would like the optimization term to be bounded by $O(1/m)$, which would yield $t \gtrsim L^2 n m^2$.
 
 \subsubsection*{Week 5: Non-Euclidean setting: mirror descent.}
 Readings: Section 4.1, 4.2, and 4.3 in \cite{bubeck}. Details are below.\\
 
-%As we saw last time, Frank-Wolfe is an algorithm that can adapt to smoothness in any norm, not just the Euclidean $\ell_2$ norm. What about an algorithm that can adapt to other properties, such as $L$-Lipschitz or the radius $R$ of $\mathcal{X}$, in any norm? 
 We introduce the mirror descent algorithm and show that this algorithm adapts also to non-Euclidean geometries. We say that $f$ is $L$-Lipschitz in some norm $\|\,\cdot\,\|$ if $|f(x) - f(y)| \le L \| x - y \|$ for any $x,y\in\mathbb{R}^n$. We show that for such convex functions mirror descent yields rates that scale like $O(LB/\sqrt{t})$ (\textbf{Theorem 4.2 in \cite{bubeck}}). This allows mirror descent to achieve a rate $O(\sqrt{\log n/t})$ in the example of boosting, where one wants to minimize a function with subgradient bounded in the $\ell_\infty$-norm over the probability simplex (\textbf{Section 4.3 in \cite{bubeck}}), in contrast to the rate $O(\sqrt{n/t})$ achieved by subgradient descent, as shown last time. We also show that in the case of the Euclidean norm, the algorithm is equivalent to projected subgradient descent.
 
 \subsubsection*{Week 6: Acceleration by coupling gradient descent and mirror descent.}
 Readings: \cite{linearcoupling}.\\
 
 We show that mirror descent can be coupled with gradient descent to yield an \emph{accelerated} algorithm that can achieve the lower bound for smooth functions that we proved in Week 3. The acceleration technique is linear coupling, from the paper \cite{linearcoupling}.
-
-%that a modification of the original subgradient descent technique yields optimal convergence rates in terms of oracle complexity. In particular, we show that this method achieves the rate $O(D^2\beta/t^2)$ for the smooth case (\textbf{Theorem 3.19 in \cite{bubeck}}). The method achieves the rate $O((\alpha+\beta)D^2\exp(-t\sqrt{\alpha/\beta}))$ for the smooth and strongly convex case (Theorem 3.18 in \cite{bubeck}).
 
 \subsubsection*{Week 7: Non-Euclidean setting: Frank-Wolfe.}
 Readings: Section 3.3 in \cite{bubeck}. Details are below.\\
@@ -464,7 +613,6 @@ Within the setting of empirical risk minimization, one notices that we know the 
 
 \underline{Single pass over the data.}
 The empirical risk minimization approach described in Section \ref{sec:introduction} has allowed us to break the original problem we care about, namely, problem \eqref{def:mainproblem}, into a \emph{STATISTICAL} component and an \emph{OPTIMIZATION} component, see Proposition \ref{prop:erm2}. We show that within the stochastic oracle model there is a way to directly address problem \eqref{def:mainproblem} and yield a bound for $r(\hat X_t) - r(x^\star)$, \emph{combining} both statistics and optimization.
-%This can be done allowing access to unbiased estimates of the gradient of $g$, not $R$. 
 Recall that we do not know the function $r$ as we assume that we do not know the distribution of the random variables $W$ and $Y$; as a consequence, we also do not know the gradient of $r$, so we can not minimize $r$ within the classical first order oracle model. On the other hand, we can treat the $\nabla R_i(x)$'s as unbiased estimators of $\nabla r$.
 
 \clearpage
