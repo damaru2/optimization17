@@ -32,7 +32,7 @@ where $\mathcal{H}$ is a given class of soft classifiers. In the setting of Boos
 This problem is a particular instance of the general formulation given in \eqref{def:mainproblem}, with the choice $\ell(z,y) = \varphi(-zy)$ for the loss function and $\X=\Delta_n$ for the constraint set. We can then work within the framework of empirical risk minimization as introduced in Section \ref{sec:intro}, and use the error decomposition given in Proposition \ref{prop:erm2} to bound the \emph{STATISTICS} term $\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) )$ and the \emph{OPTIMIZATION} term $R(\hat X_t) - R(X^\star)$, respectively.
 
 \subsection{Statistics term}
-In particular, note that in the case of Boosting, as $x\in\Delta_n$ and $\Phi\in[-1,1]^n$ and $\mathcal{Y}=\{-1,1\}$, the loss function $\varphi$ is only evaluated in the interval $[-1,1]$, as $-1 \le yx^T\Phi(w) \le 1$ for any $x\in\Delta_n,w\in\mathcal{W}$, and $y\in\mathcal{Y}$. So, we can restrict to this interval as far as the Lipschitz property of $\varphi$ goes. On $[-1,1]$ we have the following Lipschitz constants:
+Note that in the case of Boosting, as $x\in\Delta_n$ and $\Phi\in[-1,1]^n$ and $\mathcal{Y}=\{-1,1\}$, the loss function $\varphi$ is only evaluated in the interval $[-1,1]$, as $-1 \le yx^T\Phi(w) \le 1$ for any $x\in\Delta_n,w\in\mathcal{W}$, and $y\in\mathcal{Y}$. So, we can restrict to this interval as far as the Lipschitz property of $\varphi$ goes. On $[-1,1]$ we have the following Lipschitz constants:
 \begin{itemize}
 \item Exponential loss: $\varphi(u) = \exp(u)$, $L_\varphi = e$.
 \item Hinge loss: $\varphi(u) = \max\{0,1+u\}$, $L_\varphi = 1$.
@@ -55,7 +55,7 @@ The proof follows from Proposition \ref{prop:Lip-stats mean} noticing that in th
 %and noticing that for any $x\in\Delta_n$ we have $-1 \le x^T\Phi \le 1$, so that for any $y\in\{-1,1\}$ the loss function $z\in[-1,1]\rightarrow \ell(z,y)=\varphi(-yz)$ is $L_\varphi$-Lipschitz.
 \end{proof}
 
-We could also directly apply Proposition \ref{prop:Lip-stats} to obtain a bound in high probability, and we would similarly get a bound that depends \emph{linearly} on $n$. Upon a closer look, we note that the assumptions of Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} are with respect to the Euclidean norm $\|\,\cdot\,\|_2$. However, while $\|\Phi(W)\|_2\le \sqrt{n}$ and $\sup_{x\in\Delta_n}\|x\|_2 \le \sqrt{n}$, one has $-1 \le x^T\Phi(W) \le 1$ for each $x\in\Delta_n$, so perhaps one can avoid the linear dependence on $n$ by developing a new version of Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} that can avoid the use of Cauchy-Swartz $x^T\Phi(W)\le \|x\|_2\|\Phi(W)\|_2$ and directly use that $-1 \le x^T\Phi(W) \le 1$. This is our goal. We prove the following results.
+We could also directly apply Proposition \ref{prop:Lip-stats} to obtain a bound in high probability, and we would similarly get a bound that depends \emph{linearly} on $n$. Upon a closer look, we note that the assumptions of Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} are with respect to the Euclidean norm $\|\,\cdot\,\|_2$. However, while $\|\Phi(W)\|_2\le \sqrt{n}$ and $\sup_{x\in\Delta_n}\|x\|_2 \le \sqrt{n}$, one has $-1 \le x^T\Phi(W) \le 1$ for each $x\in\Delta_n$, so perhaps one can avoid the linear dependence on $n$ by developing a new version of Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} that can avoid the use of Cauchy Schwarz $x^T\Phi(W)\le \|x\|_2\|\Phi(W)\|_2$ and directly use that $-1 \le x^T\Phi(W) \le 1$. This is our goal. We prove the following results.
 
 \begin{proposition}[Mean]
 \label{prop:Lip-stats mean boosting}
@@ -76,7 +76,7 @@ $$
 \end{proposition}
 
 \subsubsection{Bound on the mean}
-We prove Proposition \ref{prop:Lip-stats mean boosting}. To bound the mean of the $STATISTICS$ term in the case of Boosting, we follow the same plan described in Section \ref{sec:Bound on the mean} and use the notion of Rademacher complexity. This time, however, we avoid the use of Cauchy-Swartz to bound the Rademacher complexity. First, following the proof of Proposition \ref{prop:radamacher} it is immediate to derive a new version of this result for a loss function of the type $\ell(z,y)=\varphi(-yz)$.
+We prove Proposition \ref{prop:Lip-stats mean boosting}. To bound the mean of the $STATISTICS$ term in the case of Boosting, we follow the same plan described in Section \ref{sec:Bound on the mean} and use the notion of Rademacher complexity. This time, however, we avoid the use of Cauchy Schwarz to bound the Rademacher complexity. First, following the proof of Proposition \ref{prop:radamacher} it is immediate to derive a new version of this result for a loss function of the type $\ell(z,y)=\varphi(-yz)$.
 \begin{proposition}
 \label{prop:radamacherBoosting}
 Let $yx^T\Phi(w) \in [d_-,d_+]$ for each $x\in\X,w\in\mathcal{W}$, and $y\in \mathcal{Y}$. Let $\varphi$ be $L_\varphi$-Lipschitz on $[d_-,d_+]$. Then,
@@ -97,7 +97,7 @@ The proof is exactly the same as the proof of Proposition \ref{prop:radamacher} 
 \end{align*}
 \end{proof}
 
-We now derive a new version of Proposition \ref{bound:rad} to bound $\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)Y_i$, where instead of using the Cauchy-Swartz inequality and get a bound that depends on the Euclidean norms of $x$ and $\Phi$, we use that in the case of Boosting where $\mathcal{X}=\Delta_n$ the supremum inside the expectation is achieved in a vertex of the simplex, and hence, conditioning on the data, we are left with the (empirical) Rademacher complexity of a \emph{finite} set, which only grows \emph{logarithmically} with the size of the set. We first state the result about the behaviour of the Rademacher complexity $\mathcal{R}(T)$ when the set $T$ has finite cardinality.
+We now derive a new version of Proposition \ref{bound:rad} to bound $\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)Y_i$, where instead of using the Cauchy Schwarz inequality and get a bound that depends on the Euclidean norms of $x$ and $\Phi$, we use that in the case of Boosting where $\mathcal{X}=\Delta_n$ the supremum inside the expectation is achieved in a vertex of the simplex, and hence, conditioning on the data, we are left with the (empirical) Rademacher complexity of a \emph{finite} set, which only grows \emph{logarithmically} with the size of the set. We first state the result about the behaviour of the Rademacher complexity $\mathcal{R}(T)$ when the set $T$ has finite cardinality.
 
 \begin{lemma}
 \label{lem:RadFiniteSet}
@@ -112,7 +112,7 @@ Recall from Definition \ref{def:Rademacher} that
 $
 	\mathcal{R}(T) := \E \sup_{t\in T} \frac{1}{m} \sum_{i=1}^m \varepsilon_i t_i.
 $
-If we use Cauchy-Swartz, we would get
+If we use Cauchy Schwarz, we would get
 $$
 	\mathcal{R}(T)
 	\le
@@ -222,7 +222,7 @@ $$
 \end{proposition}
 
 \subsubsection{Bound with high probability}
-We prove Proposition \ref{prop:Lip-stats boosting}. To derive a bound in high probability for the $STATISTICS$ term in the case of Boosting, we follow the same plan described in Section \ref{sec:high-probability} and use the Bounded Difference concentration inequality. This time, however, we avoid the use of Cauchy-Swartz to find the constant $c$ that bounds the variation of a single component in the Bounded Difference inequality. Below is a new version of Proposition \ref{prop:c}, where instead of using Cauchy-Swartz to get the generic bound $x^T\Phi(W) \le \|x\|_2\|\Phi(W)\|_2$, we use the assumption that $x^T\Phi(W) \le [d_-,d_+]$. This assumption is satisfied in the case of Boosting with $d_-=-1$ and $d_+=1$. This allows to save a factor $n$ as opposed to what one would have by directly using Proposition \ref{prop:c} (Proposition \ref{prop:c} yields $c = \frac{2}{m} (|\varphi(0)| + nL_\ell ))$.
+We prove Proposition \ref{prop:Lip-stats boosting}. To derive a bound in high probability for the $STATISTICS$ term in the case of Boosting, we follow the same plan described in Section \ref{sec:high-probability} and use the Bounded Difference concentration inequality. This time, however, we avoid the use of Cauchy Schwarz to find the constant $c$ that bounds the variation of a single component in the Bounded Difference inequality. Below is a new version of Proposition \ref{prop:c}, where instead of using Cauchy Schwarz to get the generic bound $x^T\Phi(W) \le \|x\|_2\|\Phi(W)\|_2$, we use the assumption that $x^T\Phi(W) \le [d_-,d_+]$. This assumption is satisfied in the case of Boosting with $d_-=-1$ and $d_+=1$. This allows to save a factor $n$ as opposed to what one would have by directly using Proposition \ref{prop:c} (Proposition \ref{prop:c} yields $c = \frac{2}{m} (|\varphi(0)| + nL_\ell ))$.
 
 \begin{proposition}
 \label{prop:cBoosting}
@@ -274,7 +274,7 @@ $$
 $$
 \end{proof}
 
-\subsection{Optimization term}
+\subsection{Optimization term?}
 Following the error decomposition given in Proposition \ref{prop:erm2}, Proposition \ref{prop:Lip-stats mean boosting} and Proposition \ref{prop:Lip-stats boosting} show that in the case of Boosting the \emph{STATISTICS} term is $O(\log n/\sqrt{m})$, which only grows logarithmically with the number of base classifiers $n$. This is a nice feature in applications where the number $n$ of base classifiers is very large, possibly exponential.
 Hence, one would hope to be able to design an algorithmic procedure that only uses $\log n$ calls to the first order oracle in order to match the accuracy of the \emph{STATISTICAL} term to find an approximate solution to the empirical risk minimization problem:
 \begin{align*}
