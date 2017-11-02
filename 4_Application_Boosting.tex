@@ -19,7 +19,7 @@ Second, instead of \emph{hard} classifiers $h_\text{hard}:\mathcal{W} \rightarro
 		\text{subject to }\quad & h\in\mathcal{H},
 	\end{aligned}
 \end{align*}
-where $\mathcal{H}$ is a given class of soft classifiers. In the setting of Boosting, one assumes to have access to a set of $n$ \emph{base} (soft or hard, it does not matter here) classifiers encoded in a vector map $\Phi:\mathcal{W} \rightarrow [-1,1]^n$, where $\Phi(W)_k\equiv \Phi_k(W)$ represents the outcome of the $k$-th base classifier on the data point $W$, and one wants to find the best convex combinations of these base classifiers. If we let $\Delta_n := \{x\in [0,1]^n : \sum_{k=1}^n x_k = 1\}$ be the $n$-dimensional probability simplex, we want to find $x\in\Delta_n$ so that $x^T\Phi=\sum_{k=1}^nx_k\Phi_k$ minimizes the expected risk. In other words, we consider the family $\mathcal{H}=\{h : h=x^T\Phi \text{ for some }x\in\Delta_n\}$, and the problem we want to solve reads:
+where $\mathcal{H}$ is a given class of soft classifiers. In the setting of Boosting, one assumes to have access to a set of $n$ \emph{base} (soft or hard, it does not matter here; what matters for what we develop today is that each $\Phi_k$ is bounded) classifiers encoded in a vector map $\Phi:\mathcal{W} \rightarrow [-1,1]^n$, where $\Phi(W)_k\equiv \Phi_k(W)$ represents the outcome of the $k$-th base classifier on the data point $W$, and one wants to find the best convex combinations of these base classifiers. If we let $\Delta_n := \{x\in [0,1]^n : \sum_{k=1}^n x_k = 1\}$ be the $n$-dimensional probability simplex, we want to find $x\in\Delta_n$ so that $x^T\Phi=\sum_{k=1}^nx_k\Phi_k$ minimizes the expected risk. In other words, we consider the family $\mathcal{H}=\{h : h=x^T\Phi \text{ for some }x\in\Delta_n\}$, and the problem we want to solve reads:
 \begin{align*}
 	\begin{aligned}
 		\text{minimize }\quad   & r(x) = \mathbf{E} \varphi(-Yx^T\Phi(W))\\
@@ -32,7 +32,7 @@ where $\mathcal{H}$ is a given class of soft classifiers. In the setting of Boos
 This problem is a particular instance of the general formulation given in \eqref{def:mainproblem}, with the choice $\ell(z,y) = \varphi(-zy)$ for the loss function and $\X=\Delta_n$ for the constraint set. We can then work within the framework of empirical risk minimization as introduced in Section \ref{sec:intro}, and use the error decomposition given in Proposition \ref{prop:erm2} to bound the \emph{STATISTICS} term $\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) )$ and the \emph{OPTIMIZATION} term $R(\hat X_t) - R(X^\star)$, respectively.
 
 \subsection{Statistics term}
-In particular, note that in the case of Boosting, as $x\in\Delta_n$ and $\Phi\in[-1,1]^n$ and $\mathcal{Y}=\{-1,1\}$, the loss function $\varphi$ is only evaluated in the interval $[-1,1]$, as $-1 \le yx^T\Phi(w) \le 1$ for any $x\in\Delta_n,w\in\mathcal{W}$, and $y\in\mathcal{Y}$. So, we can restrict to this interval as far as the Lipschitz property of $\varphi$ goes. On $[-1,1]$ we have the following Lipschitz constants:
+Note that in the case of Boosting, as $x\in\Delta_n$ and $\Phi\in[-1,1]^n$ and $\mathcal{Y}=\{-1,1\}$, the loss function $\varphi$ is only evaluated in the interval $[-1,1]$, as $-1 \le yx^T\Phi(w) \le 1$ for any $x\in\Delta_n,w\in\mathcal{W}$, and $y\in\mathcal{Y}$. So, we can restrict to this interval as far as the Lipschitz property of $\varphi$ goes. On $[-1,1]$ we have the following Lipschitz constants:
 \begin{itemize}
 \item Exponential loss: $\varphi(u) = \exp(u)$, $L_\varphi = e$.
 \item Hinge loss: $\varphi(u) = \max\{0,1+u\}$, $L_\varphi = 1$.
@@ -46,16 +46,16 @@ A direct application of Proposition \ref{prop:Lip-stats mean} immediately yields
 Let $\varphi$ be $L_\ell$-Lipschitz on $[-1,1]$. In the case of Boosting, we have
 $$
 	\E[\textrm{STATISTICS}] 
-	\le 4L_\varphi\frac{n}{\sqrt{m}}.
+	\le 4\frac{L_\varphi}{\sqrt{m}}\sqrt{n}.
 $$
 \end{corollary}
 
 \begin{proof}
-The proof follows from Proposition \ref{prop:Lip-stats mean} noticing that in the setting of Boosting we have $\|\Phi(W)\|_2\le \sqrt{n}$ and $\sup_{x\in\Delta_n}\|x\|_2 \le \sqrt{n}$.
+The proof follows from Proposition \ref{prop:Lip-stats mean} noticing that in the setting of Boosting we have $\|\Phi(W)\|_2\le \sqrt{n}$ and $\sup_{x\in\Delta_n}\|x\|_2 \le 1$.
 %and noticing that for any $x\in\Delta_n$ we have $-1 \le x^T\Phi \le 1$, so that for any $y\in\{-1,1\}$ the loss function $z\in[-1,1]\rightarrow \ell(z,y)=\varphi(-yz)$ is $L_\varphi$-Lipschitz.
 \end{proof}
 
-We could also directly apply Proposition \ref{prop:Lip-stats} to obtain a bound in high probability, and we would similarly get a bound that depends \emph{linearly} on $n$. Upon a closer look, we note that the assumptions of Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} are with respect to the Euclidean norm $\|\,\cdot\,\|_2$. However, while $\|\Phi(W)\|_2\le \sqrt{n}$ and $\sup_{x\in\Delta_n}\|x\|_2 \le \sqrt{n}$, one has $-1 \le x^T\Phi(W) \le 1$ for each $x\in\Delta_n$, so perhaps one can avoid the linear dependence on $n$ by developing a new version of Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} that can avoid the use of Cauchy-Swartz $x^T\Phi(W)\le \|x\|_2\|\Phi(W)\|_2$ and directly use that $-1 \le x^T\Phi(W) \le 1$. This is our goal. We prove the following results.
+We could also directly apply Proposition \ref{prop:Lip-stats} to obtain a bound in high probability, and we would similarly get a bound that depends \emph{polynomially} on $n$. Upon a closer look, we note that the assumptions of Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} are with respect to the Euclidean norm $\|\,\cdot\,\|_2$. However, while $\|\Phi(W)\|_2\le \sqrt{n}$ and $\sup_{x\in\Delta_n}\|x\|_2 \le 1$, one has $-1 \le x^T\Phi(W) \le 1$ for each $x\in\Delta_n$, so perhaps one can avoid the linear dependence on $\sqrt{n}$ by developing a new version of Proposition \ref{prop:Lip-stats mean} and Proposition \ref{prop:Lip-stats} that can avoid the use of Cauchy Schwarz $x^T\Phi(W)\le \|x\|_2\|\Phi(W)\|_2$ and directly use that $-1 \le x^T\Phi(W) \le 1$. This is our goal. We prove the following results.
 
 \begin{proposition}[Mean]
 \label{prop:Lip-stats mean boosting}
@@ -76,7 +76,7 @@ $$
 \end{proposition}
 
 \subsubsection{Bound on the mean}
-We prove Proposition \ref{prop:Lip-stats mean boosting}. To bound the mean of the $STATISTICS$ term in the case of Boosting, we follow the same plan described in Section \ref{sec:Bound on the mean} and use the notion of Rademacher complexity. This time, however, we avoid the use of Cauchy-Swartz to bound the Rademacher complexity. First, following the proof of Proposition \ref{prop:radamacher} it is immediate to derive a new version of this result for a loss function of the type $\ell(z,y)=\varphi(-yz)$.
+We prove Proposition \ref{prop:Lip-stats mean boosting}. To bound the mean of the $STATISTICS$ term in the case of Boosting, we follow the same plan described in Section \ref{sec:Bound on the mean} and use the notion of Rademacher complexity. This time, however, we avoid the use of Cauchy Schwarz to bound the Rademacher complexity. First, following the proof of Proposition \ref{prop:radamacher} it is immediate to derive a new version of this result for a loss function of the type $\ell(z,y)=\varphi(-yz)$.
 \begin{proposition}
 \label{prop:radamacherBoosting}
 Let $yx^T\Phi(w) \in [d_-,d_+]$ for each $x\in\X,w\in\mathcal{W}$, and $y\in \mathcal{Y}$. Let $\varphi$ be $L_\varphi$-Lipschitz on $[d_-,d_+]$. Then,
@@ -97,7 +97,7 @@ The proof is exactly the same as the proof of Proposition \ref{prop:radamacher} 
 \end{align*}
 \end{proof}
 
-We now derive a new version of Proposition \ref{bound:rad} to bound $\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)Y_i$, where instead of using the Cauchy-Swartz inequality and get a bound that depends on the Euclidean norms of $x$ and $\Phi$, we use that in the case of Boosting where $\mathcal{X}=\Delta_n$ the supremum inside the expectation is achieved in a vertex of the simplex, and hence, conditioning on the data, we are left with the (empirical) Rademacher complexity of a \emph{finite} set, which only grows \emph{logarithmically} with the size of the set. We first state the result about the behaviour of the Rademacher complexity $\mathcal{R}(T)$ when the set $T$ has finite cardinality.
+We now derive a new version of Proposition \ref{bound:rad} to bound $\mathbf{E} \sup_{x\in\mathcal{X}} \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)Y_i$, where instead of using the Cauchy Schwarz inequality and get a bound that depends on the Euclidean norms of $x$ and $\Phi$, we use that in the case of Boosting where $\mathcal{X}=\Delta_n$ the supremum inside the expectation is achieved in a vertex of the simplex, and hence, conditioning on the data, we are left with the (empirical) Rademacher complexity of a \emph{finite} set, which only grows \emph{logarithmically} with the size of the set. We first state the result about the behaviour of the Rademacher complexity $\mathcal{R}(T)$ when the set $T$ has finite cardinality.
 
 \begin{lemma}
 \label{lem:RadFiniteSet}
@@ -112,7 +112,7 @@ Recall from Definition \ref{def:Rademacher} that
 $
 	\mathcal{R}(T) := \E \sup_{t\in T} \frac{1}{m} \sum_{i=1}^m \varepsilon_i t_i.
 $
-If we use Cauchy-Swartz, we would get
+If we use Cauchy Schwarz, we would get
 $$
 	\mathcal{R}(T)
 	\le
@@ -167,18 +167,18 @@ In the case of Boosting, we have
 \begin{proof}
 Let us define the (random) function
 $$
-	x\in\Delta_n\rightarrow g(x) := \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)Y_i
+	x\in\Delta_n\rightarrow G(x) := \frac{1}{m}\sum_{i=1}^m\varepsilon_i x^T\Phi(W_i)Y_i
 	= \sum_{j=1}^n x_j A_j,
 $$
-where $A_j:=\frac{1}{m}\sum_{i=1}^m \varepsilon_i \Phi(W_i)_j Y_i$. As $g$ is a linear function, its supremum over the simplex $\Delta_n$ is achieved in at least one of the $n$ vertices of the simplex. Note that
+where $A_j:=\frac{1}{m}\sum_{i=1}^m \varepsilon_i \Phi(W_i)_j Y_i$. As $G$ is a linear function, its supremum over the simplex $\Delta_n$ is achieved in at least one of the $n$ vertices of the simplex. Note that
 $$
-	\sup_{x\in\Delta_n} g(x) = \sup_{x\in\Delta_n} \sum_{j=1}^n x_j A_j
+	\sup_{x\in\Delta_n} G(x) = \sup_{x\in\Delta_n} \sum_{j=1}^n x_j A_j
 	\le \max\{A_1,\ldots,A_n\}.
 $$
 If we let $e_1,\ldots,e_n\in\R^n$ be the base vectors, then it is immediate to see that, for instance, the bound above is achieved with equality at the vertex $e_{j^\star}$, where $j^\star:=\min\{k\in\{1,\ldots,n\}:A_k=\max\{A_1,\ldots,A_n\}\}$.
 Hence,
 $$
-	\sup_{x\in\Delta_n} g(x) = \max_{x\in \{e_1,\ldots,e_n\}} g(x),
+	\sup_{x\in\Delta_n} G(x) = \max_{x\in \{e_1,\ldots,e_n\}} G(x),
 $$
 which yields
 $$
@@ -207,7 +207,7 @@ $
 	T_{Z_1,\ldots,Z_m}
 	:= \{ (x^T\Phi(W_1)Y_1,\ldots,x^T\Phi(W_m)Y_m)^T : x\in \{e_1,\ldots,e_n\} \}
 $
-contains $n$ vectors, i.e., $|T_{Z_1,\ldots,Z_m}|=n$, and clearly $\max_{t\in T_{Z_1,\ldots,Z_m}} \| t \|_2 \le \sqrt{m}$.
+contains $n$ vectors, i.e., $|T_{Z_1,\ldots,Z_m}|=n$, and clearly $\max_{t\in T_{Z_1,\ldots,Z_m}} \| t \|_2 \le \sqrt{m}$ (here we use $x^T\Phi\in[-1,1]$ instead of Cauchy Schwarz).
 \end{proof}
 
 Proposition \ref{prop:radamacherBoosting} (with $d_-=-1$, $d_+=1$) and Proposition \ref{bound:radBoosting} immediately yields the following result, from which Proposition \ref{prop:Lip-stats mean boosting} follows immediately.
@@ -222,7 +222,7 @@ $$
 \end{proposition}
 
 \subsubsection{Bound with high probability}
-We prove Proposition \ref{prop:Lip-stats boosting}. To derive a bound in high probability for the $STATISTICS$ term in the case of Boosting, we follow the same plan described in Section \ref{sec:high-probability} and use the Bounded Difference concentration inequality. This time, however, we avoid the use of Cauchy-Swartz to find the constant $c$ that bounds the variation of a single component in the Bounded Difference inequality. Below is a new version of Proposition \ref{prop:c}, where instead of using Cauchy-Swartz to get the generic bound $x^T\Phi(W) \le \|x\|_2\|\Phi(W)\|_2$, we use the assumption that $x^T\Phi(W) \le [d_-,d_+]$. This assumption is satisfied in the case of Boosting with $d_-=-1$ and $d_+=1$. This allows to save a factor $n$ as opposed to what one would have by directly using Proposition \ref{prop:c} (Proposition \ref{prop:c} yields $c = \frac{2}{m} (|\varphi(0)| + nL_\ell ))$.
+We prove Proposition \ref{prop:Lip-stats boosting}. To derive a bound in high probability for the $STATISTICS$ term in the case of Boosting, we follow the same plan described in Section \ref{sec:high probability} and use the Bounded Difference concentration inequality. This time, however, we avoid the use of Cauchy Schwarz to find the constant $c$ that bounds the variation of a single component in the Bounded Difference inequality. Below is a new version of Proposition \ref{prop:c}, where instead of using Cauchy Schwarz to get the generic bound $x^T\Phi(W) \le \|x\|_2\|\Phi(W)\|_2$, we use the assumption that $x^T\Phi(W) \le [d_-,d_+]$. This assumption is satisfied in the case of Boosting with $d_-=-1$ and $d_+=1$. This allows to save a factor $n$ as opposed to what one would have by directly using Proposition \ref{prop:c} (Proposition \ref{prop:c} yields $c = \frac{2}{m} (|\varphi(0)| + \sqrt{n}L_\ell ))$.
 
 \begin{proposition}
 \label{prop:cBoosting}
@@ -254,7 +254,7 @@ where the last but one inequality comes as $d_- \le yx^T\Phi(w) \le d_+$ for eac
 Proceeding analogously in the case $h(z) - h(z') \le 0$, we obtain the result.
 \end{proof}
 
-The proof of Proposition \ref{prop:Lip-stats boosting} follows the same lines as the proof of Proposition \ref{prop:Lip-stats} in Section \ref{sec:high-probability}.
+The proof of Proposition \ref{prop:Lip-stats boosting} follows the same lines as the proof of Proposition \ref{prop:Lip-stats} in Section \ref{sec:high probability}.
 
 \begin{proof}[Proof of Proposition \ref{prop:Lip-stats boosting}]
 Using, respectively, Proposition \ref{prop:BDI} and Proposition \ref{prop:expectationsupremumBoosting}, we have that with probability at least $1-\delta$ the following holds:
@@ -274,9 +274,9 @@ $$
 $$
 \end{proof}
 
-\subsection{Optimization term}
-Following the error decomposition given in Proposition \ref{prop:erm2}, Proposition \ref{prop:Lip-stats mean boosting} and Proposition \ref{prop:Lip-stats boosting} show that in the case of Boosting the \emph{STATISTICS} term is $O(\log n/\sqrt{m})$, which only grows logarithmically with the number of base classifiers $n$. This is a nice feature in applications where the number $n$ of base classifiers is very large, possibly exponential.
-Hence, one would hope to be able to design an algorithmic procedure that only uses $\log n$ calls to the first order oracle in order to match the accuracy of the \emph{STATISTICAL} term to find an approximate solution to the empirical risk minimization problem:
+\subsection{Optimization term?}
+Following the error decomposition given in Proposition \ref{prop:erm2}, Proposition \ref{prop:Lip-stats mean boosting} and Proposition \ref{prop:Lip-stats boosting} show that in the case of Boosting the \emph{STATISTICS} term is $O(\sqrt{\log n/m})$, which only grows logarithmically with the number of base classifiers $n$. This is a nice feature in applications where the number $n$ of base classifiers is very large, possibly exponential.
+Hence, one would hope to be able to design an algorithmic procedure that only uses $\sim\log n$ calls to the first order oracle in order to match the accuracy of the \emph{STATISTICAL} term to find an approximate solution to the empirical risk minimization problem:
 \begin{align*}
 	\begin{aligned}
 		\text{minimize }\quad   & R(x) = \frac{1}{m} \sum_{i=1}^m \varphi(-Y_ix^T\Phi(W_i))\\
@@ -293,6 +293,6 @@ Given Theorem \ref{thm:projectedgradL}, we can assess the guarantees given by th
 	&\le L_\varphi \| \Phi(W_i) \|_2 \| x-y \|_2
 	\le \sqrt{n}L_\varphi \| x-y \|_2.
 \end{align*}
-As $B=\sup_{x\in\Delta_n}\|x\|_2=1$, projected subgradient descent yields a rate $O(L_\varphi\sqrt{n/t})$. Imposing the condition $L_\varphi\sqrt{n/t} \lesssim \log n/\sqrt{m}$, we find that $t\gtrsim L^2_\varphi nm/\log n^2$, which does \emph{not} scale logarithmically with $n$ as we hoped for!
+As $B=\sup_{x\in\Delta_n}\|x\|_2=1$, projected subgradient descent yields a rate $O(L_\varphi\sqrt{n/t})$. Imposing the condition $\sqrt{n/t} \lesssim \sqrt{\log n/m}$, we find that $t\gtrsim nm/\log n$, which does \emph{not} scale logarithmically with $n$ as we hoped for!
 
-Boosting is one example where one would like to apply subgradient descent methods on a non-Euclidean space, i.e., on the probability simplex $\Delta_n$, but these methods are not suited for this type of problems as they are really designed for the Euclidean geometry. Note, in fact, that all the definitions we gave for $L$-Lipschitz, $\beta$-smoothness, and $\alpha$-strong convexity are expressed in terms of the Euclidean norm $\|\,\cdot\,\|_2$. This motivates the design of a new class of algorithms that can adapt to the geometry of the problem at hand, as we will see next.
+Boosting is one example where one would like to apply subgradient descent methods on a non-Euclidean space: the probability simplex $\Delta_n$. However, subgradient descent methods are only designed for the Euclidean geometry. Note, in fact, that all the definitions we gave for $L$-Lipschitz, $\beta$-smoothness, and $\alpha$-strong convexity, as well as the bounds for the constraint set $\mathcal{X}$, are expressed in terms of the Euclidean norm $\|\,\cdot\,\|_2$. This motivates the design of a new class of algorithms (in fact, a generalization of subgradient descent) that can adapt to the geometry of the problem at hand, as we will see next.

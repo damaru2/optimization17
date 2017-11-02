@@ -566,8 +566,8 @@ We apply the projected subgradient descent algorithm to solve an important examp
 	\end{aligned}
 \end{align*}
 where $\Delta_n := \{x\in [0,1]^n : \sum_{k=1}^n x_k = 1\}$ is the $n$-dimensional probability simplex. Here the feature map $\Phi : \mathcal{W} \rightarrow \{-1,1\}^n$ encodes the prediction of the $n$ base classifiers on the given data point it is applied to, and $x^T\Phi$ is a convex combination of these classifiers. 
-Following the error decomposition given in Proposition \ref{prop:erm2}, we show that in the case of Boosting the \emph{STATISTICS} term is $O(\log n/\sqrt{m})$, which only grows logarithmically with the number of base classifiers $n$. This is a nice feature in applications where the number $n$ of base classifiers is very large.
-Hence, one would hope to be able to design an algorithmic procedure that only uses $\log n$ calls to the first order oracle in order to match the accuracy of the \emph{STATISTICAL} term to find an approximate solution to the empirical risk minimization problem:
+Following the error decomposition given in Proposition \ref{prop:erm2}, we show that in the case of Boosting the \emph{STATISTICS} term is $O(\sqrt{\log n/m})$, which only grows logarithmically with the number of base classifiers $n$. This is a nice feature in applications where the number $n$ of base classifiers is very large, possibly exponential.
+Hence, one would hope to be able to design an algorithmic procedure that only uses $\log n$ calls to the first order oracle in order to match the accuracy of the \emph{STATISTICS} term to find an approximate solution to the empirical risk minimization problem:
 \begin{align*}
 	\begin{aligned}
 		\text{minimize }\quad   & R(x) = \frac{1}{m} \sum_{i=1}^m \varphi(-Y_ix^T\Phi(W_i))\\
@@ -583,9 +583,9 @@ Note that if $\varphi$ is $L_\varphi$-Lipschitz on $[-1,1]$, then the empirical 
 	&\le L_\varphi \| \Phi(W_i) \|_2 \| x-y \|_2
 	\le \sqrt{n}L_\varphi \| x-y \|_2.
 \end{align*}
-Hence, projected subgradient descent yields a rate $O(L_\varphi\sqrt{n/t})$. Imposing the condition $L_\varphi\sqrt{n/t} \lesssim \log n/\sqrt{m}$, we find that $t\gtrsim L^2_\varphi nm/\log n^2$, which does \emph{not} scale logarithmically with $n$ as we hoped for!
+Hence, projected subgradient descent yields a rate $O(L_\varphi\sqrt{n/t})$. Imposing the condition $\sqrt{n/t} \lesssim \sqrt{\log n/m}$, we find that $t\gtrsim nm/\log n$, which does \emph{not} scale logarithmically with $n$ as we hoped for!
 
-Boosting is one example where one would like to apply subgradient descent methods on a non-Euclidean space, i.e., on the probability simplex $\Delta_n$, but these methods are not suited for this type of problems as they are really designed for the Euclidean geometry. Note, in fact, that all the definitions we gave for $L$-Lipschitz, $\beta$-smoothness, and $\alpha$-strong convexity are expressed in terms of the Euclidean norm $\|\,\cdot\,\|_2$. This motivates the design of a new class of algorithms that can adapt to the geometry of the problem at hand, as we will see next.
+Boosting is one example where one would like to apply subgradient descent methods on a non-Euclidean space: the probability simplex $\Delta_n$. However, subgradient descent methods are only designed for the Euclidean geometry. Note, in fact, that all the definitions we gave for $L$-Lipschitz, $\beta$-smoothness, and $\alpha$-strong convexity, as well as the bounds for the constraint set $\mathcal{X}$, are expressed in terms of the Euclidean norm $\|\,\cdot\,\|_2$. This motivates the design of a new class of algorithms (in fact, a generalization of subgradient descent) that can adapt to the geometry of the problem at hand, as we will see next.
 %Since, as we saw in Section \ref{sec:Statistical learning theory}, the statistical term is often $O(1/\sqrt{m})$ or $O(1/m)$ in some favourable scenarios, to be generous we would like the optimization term to be bounded by $O(1/m)$, which would yield $t \gtrsim L^2 n m^2$.
 
 \subsubsection*{Week 5: Non-Euclidean setting: mirror descent.}
@@ -612,7 +612,7 @@ The first order oracle model that we have investigated so far had allowed us to 
 Within the setting of empirical risk minimization, one notices that we know the \emph{global} structure of the function we want to minimize, namely, $R=\frac{1}{m}\sum_{i=1}^m R_i$. Hence, for instance, given $x\in\mathcal{X}$ we can have access to $\nabla R_i(x)$ for a specific $i\in\{1,\ldots,m\}$, which is something that is not allowed in the oracle model previously discussed where only access to $\nabla R(x)$ is granted. Note that computing $\nabla R(x)$ costs $O(m)$ operations as $R$ is the sum of $m$ terms, while computing $\nabla R_i(x)$ costs $O(1)$.
 
 \underline{Single pass over the data.}
-The empirical risk minimization approach described in Section \ref{sec:introduction} has allowed us to break the original problem we care about, namely, problem \eqref{def:mainproblem}, into a \emph{STATISTICAL} component and an \emph{OPTIMIZATION} component, see Proposition \ref{prop:erm2}. We show that within the stochastic oracle model there is a way to directly address problem \eqref{def:mainproblem} and yield a bound for $r(\hat X_t) - r(x^\star)$, \emph{combining} both statistics and optimization.
+The empirical risk minimization approach described in Section \ref{sec:introduction} has allowed us to break the original problem we care about, namely, problem \eqref{def:mainproblem}, into a \emph{STATISTICS} component and an \emph{OPTIMIZATION} component, see Proposition \ref{prop:erm2}. We show that within the stochastic oracle model there is a way to directly address problem \eqref{def:mainproblem} and yield a bound for $r(\hat X_t) - r(x^\star)$, \emph{combining} both statistics and optimization.
 Recall that we do not know the function $r$ as we assume that we do not know the distribution of the random variables $W$ and $Y$; as a consequence, we also do not know the gradient of $r$, so we can not minimize $r$ within the classical first order oracle model. On the other hand, we can treat the $\nabla R_i(x)$'s as unbiased estimators of $\nabla r$.
 
 \clearpage
