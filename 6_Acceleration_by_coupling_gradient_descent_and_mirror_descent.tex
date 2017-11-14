@@ -130,7 +130,10 @@ If we telescope \ref{lemma_simplified_coupling} for $k= 0, 1, \dots, T-1$ and se
     \eta T \left( f(\bar{x}) - f(x^\ast) \right)\leq \sum_{k=0}^{T-1} \eta \langle \nabla f(x_k), x_k - x^\ast \rangle \leq \eta^2 \beta \left( f(y_0) - f(y_T) \right) + V_{x_0} - V_{x_T}(x^\ast).
 \end{equation}
 
-Suppose our initial point is of error at most $d$, that is $f (y_0 ) − f (x^\ast ) \leq d$, and suppose $V_{x_0}(x^\ast) \leq \Theta$, then \ref{final_lemma_simplified_coupling} gives $f (\bar{x})-f (x^\ast ) \leq \frac{1}{T}\left( \eta \beta d + \Theta/\eta\right)$. Choosing $\eta = \sqrt{\Theta/(\beta d)}$ to be the value that balances the above two terms (it is essentially the same way of choosing $\eta$ in mirror descent), we obtain that $f (x) − f (x^\ast ) \leq \frac{\sqrt{\beta \Theta d}}{T}$. In other words, in $T = 4 \sqrt{\beta\Theta/d}$ steps, we can obtain some $\bar{x}$ satisfying $f (\bar{x}) − f (x^\ast ) \leq d/2$, halving the distance to the optimum. If we restart this entire entire procedure a few number of times, halving the distance for every run, then we obtain an $\epsilon$-approximate solution in
+Suppose our initial point is of error at most $d$, 
+that is $f(y_0)-f(x^\ast) \leq d$,
+and suppose $V_{x_0}(x^\ast) \leq \Theta$, then \ref{final_lemma_simplified_coupling} gives $f (\bar{x})-f (x^\ast ) \leq \frac{1}{T}\left( \eta \beta d + \Theta/\eta\right)$. 
+Choosing $\eta = \sqrt{\Theta/(\beta d)}$ to be the value that balances the above two terms (it is essentially the same way of choosing $\eta$ in mirror descent), we obtain that $f (x) - f (x^\ast ) \leq \frac{\sqrt{\beta \Theta d}}{T}$. In other words, in $T = 4 \sqrt{\beta\Theta/d}$ steps, we can obtain some $\bar{x}$ satisfying $f (\bar{x}) - f (x^\ast ) \leq d/2$, halving the distance to the optimum. If we restart this entire entire procedure a few number of times, halving the distance for every run, then we obtain an $\epsilon$-approximate solution in
 \[
     T = O \left(\sqrt{\beta \Theta / \epsilon} + \sqrt{\beta \Theta / 2\epsilon} + \sqrt{\beta \Theta / 4 \epsilon} + \dots \right) = O\left(\sqrt{L\Theta / \epsilon}  \right)
 \]

@@ -10,25 +10,26 @@
 
 
 
-
 % Load Math packages
 \usepackage{amsmath, mathtools, amssymb}
 \usepackage{amsthm}
 \usepackage{color}
-\usepackage{algorithm}
+\usepackage[section]{algorithm}
 \usepackage{algorithmic}
 \floatname{algorithm}{Procedure}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 
 % Define Problem environment
-\newtheorem{theorem}{Theorem}
-\newtheorem{definition}{Definition}
-\newtheorem{lemma}{Lemma}
-\newtheorem{remark}{Remark}
-\newtheorem{proposition}{Proposition}
-\newtheorem{corollary}{Corollary}
-\newtheorem{fact}{Fact}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{fact}[theorem]{Fact}
+\theoremstyle{remark}
+\newtheorem*{example}{Example}
 
 % Some macros for typesetting ease
 \newcommand{\X}{\mathcal{X}}
@@ -47,6 +48,7 @@
 \usepackage{hyperref}
 \def\propositionautorefname{Proposition}
 \def\lemmaautorefname{Lemma}
+\def\remarkautorefname{Remark}
 
 % Start section numbering at 1
 \addtocounter{section}{0}
