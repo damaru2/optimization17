@@ -2,3 +2,309 @@
 
 \section{Non-Euclidean setting: mirror descent}
 
+Let $f\colon \mathcal{X}\rightarrow \mathbb{R}$ denote a convex function and suppose we are interested in the following optimisation problem
+\begin{equation*}
+	\min_{x \in \mathcal{X}} f(x)
+\end{equation*}
+The projected subgradient descent algorithm proceeds as follows
+\begin{align*}
+	y_{t+1} &= x_t - \eta g_t, \qquad g_t \in \partial f(x_t) \\
+	x_{t+1} &= \Pi_\mathcal{X}(y_{t+1}),
+\end{align*}
+where $\Pi_\mathcal{X}(x) = \arg \min_{y \in \mathcal{X}}\left\|x - y\right\|_2$ is the projection to $\mathcal{X}$. In week 2 we saw that a projected subgradient descent algorithm with $\|x\|\leq B$ and step size $\eta = \frac{B}{L\sqrt{t}}$ has bounded approximation error
+\begin{equation*}
+	f\left(\frac{1}{t}\sum_{s=1}^t x_s\right) - f(x^*) \leq \frac{BL}{\sqrt{t}}.
+\end{equation*}
+\begin{example}
+Let $\mathcal{B}_n \subset X = \mathbb{R}^k$ denote the euclidean ball with unit radius and $f\colon \mathcal{B}_n\rightarrow \mathbb{R}$ a convex function with $\left\|\nabla f(x)\right\|_\infty \leq 1$. In the notation of \autoref{thm:projectedgradL} we have $L = \left\|\nabla f(x)\right\|_2 \leq \sqrt{n}$, $B = 1$ and therefore
+\begin{equation*}
+	f\left(\frac{1}{t} \sum_{s=1}^t x_s\right) - f(x^*) \leq \frac{LB}{\sqrt{t}} = \sqrt{\frac{n}{t}}.
+\end{equation*}
+\end{example}
+Previously, we established that in case of boosting the STATISTICS term is of order $O(\sqrt{\log(n)/m})$. 
+As discussed already in section 4.2, we would like to match this rate with an optimisation algorithm that scales with $\log(n)$ whereas projected subgradient descent scales with $n$. 
+Similar to above, the solution lies in replacing the euclidean norm with a problem specific notion of distance. This can be achieved, for example, by describing the geometry of the problem with a different norm (and hence also a different notion of distance). This is the idea of the \emph{mirror descent} algorithm.
+
+However, as a caveat, note that replacing the norm in gradient descent is not entirely straightforward. To see this we briefly review some basics about derivatives on normed vector spaces. Denote $X$ a normed vector space and $\|\cdot \|_X$ an associated norm. The \emph{dual space} $X^*$ of $X$ is defined as the vector space of all linear maps $A\colon X\rightarrow \mathbb{R}$, equipped with the \emph{operator} or \emph{dual norm}
+\begin{equation*}
+	\|A\|_* := \sup\left\{|Ax|; x\in X, \|x\|_X = 1 \right\},
+\end{equation*}
+which is the maximal stretch of the unit ball in $X$.
+\begin{remark}\label{rem5.1}
+If $X = \mathbb{R}^k$ and $\|\cdot\|$, then linear functionals can be written as a scalar product, i.e. for some $g\in \mathbb{R}^n$, we have $A(x) = g^\mathsf{T}x$ and the dual norm reads
+\begin{equation*}
+	\|g\|_* := \|A\|_* :=  \sup\left\{|g^\mathsf{T}x|; x\in \mathbb{R}^n, \|x\| = 1 \right\}.
+\end{equation*}
+\end{remark}
+\begin{definition}
+For general normed spaces $(X, \|\cdot\|_X)$ and $(Y,\|\cdot\|_Y)$, we say that an operator $T\colon U \rightarrow Y, U\subset X$ open is (Fréchet-)differentiable in some point $x \in U$ if there exists a bounded linear operator $D_T(x)\colon X \rightarrow Y$, such that
+\begin{equation*}
+	\frac{\left\|T(x + h) - T(x) - D_T(x)h\right\|_Y}{\|h\|_X} \rightarrow 0
+\end{equation*}
+as $\|h\|_X \rightarrow 0$. The operator $D_T(x)$ is called the (Fréchet-)derivative of $T$ in $x$.
+\end{definition}
+It is immediate that for $f\colon X \rightarrow \mathbb{R}$ the operator $D_f(x)$ is an element of the dual $X^*$.
+
+Going back to our gradient descent algorithm this means that in general the equation $x - \eta \nabla f(x)$ doesn't make sense, because $\nabla f(x)$ is an element of the dual and $x$ is an element of the primal. 
+Note that the exception in case of the euclidean norm arises because we can write linear functionals as an appropriate scalar product, see \autoref{rem5.1}. (More generally, the Riesz representation theorem implies that the dual of a Hilbert space is isometrically isomorph to its primal.)
+
+In mirror descent allows us to circumvent this problem by mapping the current point of our descent algorithm to its dual, perform the gradient descent step and map back to our primal space. In general there is no guarantee that our new point in the primal space is in our restriction set $\mathcal{X}$ and, hence, an additional projection may be required. Summarised we get the following algorithm.
+
+\begin{algorithm} \label{alg:mirror_descent}
+\caption{Mirror Descent}
+\label{alg:mirror_descent}
+\begin{algorithmic}
+\STATE Set $x_1 \in \arg \min_{x\in \mathcal{X}\cap\mathcal{C} }\Phi(x)$
+\STATE For $t \geq 1$ find $y_{t+1}$ such that
+\begin{align*}
+	\nabla\Phi(y_{t+1}) &= \nabla\Phi(x_t)-\eta g_t,\quad g_t \in \partial f(x_t) \\
+	x_{t+1} & \in \Pi_\mathcal{X}^\Phi(y_{t+1}),
+\end{align*}
+\end{algorithmic}
+\end{algorithm}
+where we used $\Phi$ to denote the \emph{mirror map} that helps map $x$ to the dual space and $\Pi_\mathcal{X}^\Phi$ denotes an appropriate projection. We will develop the steps in this algorithm more carefully in the following.
+
+
+\subsection{Mirror Maps}
+We need the following two concepts.
+
+
+\begin{definition}[Mirror Map]
+Let $\mathcal{D}\subset \mathbb{R}^n$ open and $\mathcal{X}\subset \overline{\mathcal{D}}$ with $\mathcal{X}\cap \mathcal{D}\neq \emptyset$. A \emph{mirror map} is a map $\Phi \colon \mathcal{D} \rightarrow \mathbb{R}$ if the following properties hold
+\begin{itemize}
+	\item[i)] $\Phi$ is strictly convex and differentiable.
+	\item[ii)] The gradient is a surjective map, i.e.
+	\begin{align*}
+	\nabla \Phi \colon \mathcal{D} &\rightarrow \mathbb{R}^n\\
+			x	&\mapsto \nabla\Phi(x).
+	\end{align*} 
+	is onto.
+	\item[iii)] The gradient diverges on the boundary
+	\begin{equation*}
+		\lim_{x \rightarrow \partial \mathcal{D}} \left\|\nabla \Phi(x) \right\| = \infty
+	\end{equation*}
+\end{itemize}
+\end{definition}
+\begin{definition}[Bregman Divergence]
+The Bregman divergence associated with a function $f$ is defined as 
+\begin{equation*}
+	D_f(x, y) = f(x) - f(y) - \nabla f(y)^\mathsf{T}(x - y).
+\end{equation*} 
+\end{definition}
+Hence, the Bregman divergence is measuring the "error" of the local linear approximation. We have the following identity
+\begin{equation}\label{eq:bergman_ident}
+	D_f(x,y) + D_f(z,x) - D_f(z, y) = \left(\nabla f(x) - \nabla f(y)\right)^\mathsf{T}\left(x - z\right),
+\end{equation}
+which follows directly collecting terms.
+
+A note on these conditions. We will use the Bregman divergence to project $y \in \mathcal{D}$ back to $\mathcal{X}$, i.e. we 
+\begin{equation*}
+	\Pi_\mathcal{X}^\Phi(y) = \argmin_{x\in \mathcal{X}\cap\mathcal{D}} D_\Phi(x, y).
+\end{equation*}
+Condition $iii)$ implies the existence of this projection. In addition, this implies that $x\mapsto D_\Phi(x, y)$ is locally increasing on the boundary of $\mathcal{D}$. Together the compactness of $\mathcal{X}$ and the fact that $x\mapsto D_\Phi(x, y)$ is strictly convex also implies the uniqueness. 
+Condition $ii)$ ensures that for every point in the dual $\mathcal{D}$ we need a preimage in $\mathcal{D}$.
+
+
+
+\subsection{Mirror Descent: Examples}
+
+We are now able to describe the algorithm in detail for two important examples. Our first example illustrates the generality of the algorithm and its connection to projected subgradient descent. With our second example we will go back to our boosting example and we will show in Section \ref{subsec:complexity} that by applying this mirror descent with an appropriate mirror map, we will recover the promised $\log(n)$ rate, thus matching the approximation quality of the STATISTICS term.
+
+\subsubsection{Ball setup and projected subgradient descent}
+We can recover the original projected subgradient descent by considering $\mathcal{D}$ to be the whole of $\mathbb{R}^n$ and the mirror map half of the squared Euclidian norm, i.e. 
+\begin{equation*}
+	\Phi(x) = \frac{1}{2}\left\|x\right\|_2^2
+\end{equation*}
+The associated Bregman divergence is 
+\begin{align*}
+	D_\Phi(x, y) &= \Phi(x) - \Phi(y) - \nabla \Phi(y)^\mathsf{T}(x - y) \\
+	& = \frac{1}{2}\left\|x\right\|_2^2 - \frac{1}{2}\left\|y\right\|_2^2 - y^\mathsf{T}x + y^\mathsf{T}y \\
+	& = \frac{1}{2}\left\|x - y\right\|_2^2
+\end{align*}
+which implies that he Bregman projection coincides with our standard projection $\Pi_\mathcal{X}$.
+
+\subsubsection{Entropy setup and boosting I}
+Consider  as the restriction set the simplex $\mathcal{X} = \Delta_n := \left\{x\in [0,1]^n: \sum_{i=1}^n x_i = 1\right\}$, i.e. discrete finite space probability measures or probability simplex. We choose the mirror map to be the negative entropy 
+\begin{equation*}
+	\Phi(x) = \sum_{i=1}^n x_i \log x_i,
+\end{equation*}
+where $\mathcal{D} = \mathbb{R}^n_{>0} := \{x \in \mathbb{R}^n \colon x_i > 0, i=1,\ldots,n \}$. Further, $\nabla \Phi(x) = \left(1 + \log(x_i)\right)_{i=1,\ldots,n}$ so our update step becomes
+\begin{equation*}
+	\log(y_{i, s+1}) = \log(x_{i, s}) - \eta g_s
+\end{equation*}
+or equivalently
+\begin{equation*}
+	y_{i, s+1} = x_{i, s}\exp\left(-\eta g_s \right)
+\end{equation*}
+hence mirror descent here amounts to an "`exponential gradient descent algorithm"'. The Bregman divergence is 
+\begin{align*}
+	D_\Phi(x, y) &= \Phi(x) - \Phi(y) - \nabla \Phi(y)^\mathsf{T}(x - y) \\
+	& = \sum_{i=1}^n x_i \log x_i - \sum_{i=1}^n y_i \log y_i - \sum_{i=1}^n \log(y_i) (x_i - y_i) - \sum_{i=1}^n (x_i - y_i)	\\
+	& = \sum_{i=1}^n x_i \log\left( \frac{x_i}{y_i} \right)
+\end{align*}
+since $\sum_{i=1}^n (x_i - y_i) = 0$ on $\Delta_n$. Hence, the Bregman divergence coincides with the relative entropy or Kullback-Leibler divergence. Moreover, the above calculations imply that $\Phi$ is $1$-strongly convex with respect to $\|\cdot\|_1$
+\begin{align*}
+	\Phi(x) - \Phi(y) - \nabla \Phi(y)^\mathsf{T}(x - y) & = \sum_{i=1}^n x_i \log\left( \frac{x_i}{y_i} \right) \\
+	& \geq \frac{1}{2}\left(\sum_{i=1}^n|x_i - y_i|\right)^2 \\
+	& = \frac{1}{2}\left\|x - y\right\|_1^2,
+\end{align*}
+where we used Pinsker's inequality 
+\begin{equation*}
+	\left\| x - y \right\|_\mathrm{tv} = \frac{1}{2}\sum_{i=1}^n|x_i - y_i| \leq \sqrt{\frac{1}{2} \sum_{i=1}^n x_i \log\left( \frac{x_i}{y_i} \right)},
+\end{equation*}
+where $\|\cdot\|_\mathrm{tv}$ denotes the total variation norm on the space of probability measures. Furthermore, we show that the Bregman projection in this case amounts to renormalising the vector $y \mapsto x = \frac{y}{\|y\|_1}$ (unsurprisingly). 
+Recall we want to minmimize 
+\begin{equation*}
+	\Pi_\mathcal{X}^\Phi(y) = \argmin_{x\in \mathcal{X}\cap\mathcal{D}} D_\Phi(y, x).
+\end{equation*}
+Note that Bregman divergence in not symmetrical so swapping the components might result in different behaviour. In this case we want to project by minimizing over the second coordinate and our input is $y$.
+Using Lagrange multipliers, minimizing the Kullback-Leibler divergence under the restriction $\Delta_n$ we have 
+\begin{equation*}
+	\mathcal{L}(x) = \sum_{i=1}^n y_i \log \frac{y_i}{x_i} + \lambda \sum_{i=1}\left(x_i - 1\right).
+\end{equation*}
+The first order condition yields
+\begin{align*}
+		\frac{y_i}{x_i} &= \lambda, \qquad i=1, \ldots,n \\
+	\sum_{i=1}^n x_i	&= 1.
+\end{align*}
+Hence, $y_i = \lambda x_i$, $\sum_{i=1}^n y_i = \lambda$ and $x_i = y/\|y\|_1$.
+
+\subsection{Oracle complexity}
+\label{subsec:complexity}
+We start with a useful Lemma.
+\begin{lemma}
+Let $x \in \mathcal{X}\cap \mathcal{D}$ and $y\in \mathcal{D}$, then we have the following two inequalities.
+\begin{equation}\label{eq:lem1}
+	\left(\nabla\Phi\left(\Pi_\mathcal{X}^\Phi(y) \right)- \nabla \Phi(y)\right)^\mathsf{T}\left(\Pi_\mathcal{X}^\Phi(y) - x \right) \leq 0
+\end{equation}
+and as a consequence
+\begin{equation}\label{eq:lem2}
+	D_\Phi(x, \Pi_\mathcal{X}^\Phi(y)) + D_\Phi(\Pi_\mathcal{X}^\Phi(y), y) \leq D_\Phi(x, y).
+\end{equation}
+\end{lemma}
+\begin{proof}
+Note that for $x, y$
+\begin{align*}
+	\nabla_x D_\Phi(x, y) &= \nabla_x \left(\Phi(x) - \Phi(y) - \nabla_y\Phi(y)^\mathsf{T}(x - y) \right)	\\
+	&=	\nabla_x \Phi(x) - \nabla_y \Phi(y).
+\end{align*}
+Hence, taking $x^* = \Pi_\mathcal{X}(y) \in \arg \min_{x\in \mathcal{X}\cap\mathcal{D}} D_\Phi(x, y) $, then by the first order optimality condition (\autoref{prop:fo_opt}) for any given $y$ and all $z \in \mathcal{X}$
+\begin{align*}
+	0 & \geq \nabla_x D_\Phi(x^*, y)^\mathsf{T}(x^* - z) \\
+	  & = \left(\nabla_x \Phi(x^*) - \nabla_y \Phi(y)\right)^\mathsf{T} (x^* - z),
+\end{align*}
+which shows \eqref{eq:lem1}. An application of the identity \eqref{eq:bergman_ident} yields 
+\begin{equation*}
+	\left(\nabla_x \Phi(x^*) - \nabla_y \Phi(y)\right)^\mathsf{T} (x^* - y) = D_\Phi(x^*, y) + D_\Phi(z, x^*) - D_\Phi(z, y),
+\end{equation*}
+which shows \eqref{eq:lem2}.
+\end{proof}
+
+We are now able to prove the main result of this section.
+\begin{theorem}\label{compl:mirror_descent}
+Fix a norm $\|\cdot \|$ on $\mathbb{R}^n$. Let $\Phi$ denote a $\rho$-strongly convex mirror map on $\mathcal{X}\cap\mathcal{D}$. Denote $f$ a Lipschitz function with Lipschitz constant $L$. Then mirror descent with $\eta =\frac{R}{L}\sqrt{\frac{2\rho}{t}}$satisfies the following approximation guarantee
+\begin{equation*}
+	f\left(\frac{1}{t}\sum_{s=1}^t x_s \right) - f(x^*) \leq RL\sqrt{\frac{2}{\rho t}},
+\end{equation*}
+where $R^2 = \sup_{x\in \mathcal{X}\cap\mathcal{D}}\Phi(x)-\Phi(x_1)$.
+\end{theorem}
+
+\begin{proof}
+Let $x\in \mathcal{X}\cap\mathcal{D}$. Using the definition of the gradient step of mirror descent
+\begin{equation*}
+	\nabla\Phi(y_{t+1}) = \nabla\Phi(x_t)-\eta g_t
+\end{equation*}
+we get
+\begin{equation}\label{first_part_mirror_descent_lemma}
+    \begin{align*}
+        f(x_s) - f(x) &\leq g_s^\mathsf{T}\left(x_s - x\right) \\
+        & = \frac{1}{\eta}\left(\nabla\Phi(x_s) - \nabla\Phi(y_{s+1}) \right)^\mathsf{T}\left(x_s - x\right) \\
+        & = \frac{1}{\eta}\left(D_\Phi(x_s, y_{s+1}) + D_\Phi(x, x_s) - D_\Phi(x, y_{s+1}) \right)	\\
+        & \leq  \frac{1}{\eta}\left(D_\Phi(x_s, y_{s+1}) + D_\Phi(x, x_s) - D_\Phi(x, x_{s+1}) - D_\Phi(x_{s+1}, y_{s+1})\right),
+    \end{align*}
+\end{equation}
+where we used identity \eqref{eq:bergman_ident} in line 3 and inequality \eqref{eq:lem2} applied to $D_\Phi(x, y_{s+1})$ in line 4. We bound the difference $D_\Phi(x_s, y_{s+1}) - D_\Phi(x_{s+1}, y_{s+1})$ as follows
+\begin{equation}\label{key_inequality_mirror_descent}
+    \begin{align*}
+	& D_\Phi(x_s, y_{s+1}) - D_\Phi(x_{s+1}, y_{s+1}) 	\\
+	& = \Phi(x_s) - \Phi(y_{s+1}) - \nabla \Phi(y_{s+1})^\mathsf{T}(x_s - y_{s+1}) - \Phi(x_{s+1}) + \Phi(y_{s+1}) + \nabla \Phi(y_{s+1})^\mathsf{T}(x_{s+1} - y_{s+1}) \\
+	& = \Phi(x_s) - \Phi(x_{s+1}) - \nabla\Phi(y_{s+1})^\mathsf{T}\left(x_s - x_{s+1}\right) \\
+	& = \Phi(x_s) - \Phi(x_{s+1}) - \nabla\Phi(x_s)^\mathsf{T}\left(x_s - x_{s+1}\right) + \left(\nabla\Phi(x_s)^\mathsf{T} - \nabla\Phi(y_{s+1})^\mathsf{T}\right)\left(x_s - x_{s+1}\right) \\
+	& \leq \left(\nabla\Phi(x_s)^\mathsf{T} - \nabla\Phi(y_{s+1})^\mathsf{T}\right)\left(x_s - x_{s+1}\right) - \frac{\alpha}{2}\left\|x_s - x_{s+1} \right\|^2 \\
+	& = \eta g_s^\mathsf{T}\left(x_s - x_{s+1}\right) - \frac{\alpha}{2}\left\|x_s - x_{s+1} \right\|^2 \\
+	& \leq \eta \|g_s\|_\ast\left\|x_s - x_{s+1}\right\| -\frac{\alpha}{2}\left\|x_s - x_{s+1}\right\|^2 \\
+	& \leq \frac{\left(\eta \|g_s\|_\ast\right)^2}{2\rho} \\
+    & \leq \frac{\left(\eta L\right)^2}{2\rho},
+    \end{align*}
+\end{equation}
+where we used the inequality $az - bz^2 \leq a^2/4b$ for all $z\in \mathbb{R}$ in the last line and $\alpha$-strong convexity in line 4. We compute
+\begin{align}
+	& \sum_{s=1}^t f(x_s) - f(x) \nonumber \\
+	& \leq  \frac{1}{\eta} \left(\sum_{s=1}^t D_\Phi(x, x_s) - D_\Phi(x, x_{s+1}) +  \frac{1}{\eta}\frac{\left(\eta L\right)^2}{2\rho}\right) \nonumber \\
+	& =  \frac{1}{\eta} \left(D_\Phi(x, x_1) - D_\Phi(x, x_{s+1})\right) +  \frac{t}{\eta}\frac{\left(\eta L\right)^2}{2\rho} \nonumber \\ \label{proof_mirror_final}
+	& \leq \frac{D_\Phi(x, x_1)}{\eta} + \frac{t\eta L^2}{2\rho},
+\end{align}
+where we used that 
+\begin{equation*}
+	D_\Phi(x, x_{s+1}) = \Phi(x) - \Phi(x_{s+1}) - \nabla \Phi(x_{s+1})^\mathsf{T}(x - x_{s+1}) \geq 0.
+\end{equation*}
+Note that by construction $D_\Phi(x,x_1) \leq R^2$. Thus, plugging in $\eta =\frac{R}{L}\sqrt{\frac{2\rho}{t}}$ we get
+\begin{align*}
+	\eqref{proof_mirror_final} &\leq \frac{R^2}{\frac{R}{L}\sqrt{\frac{2\rho}{t}}} + \frac{R}{L}\sqrt{\frac{2\rho}{t}}\frac{t L^2}{2\rho} \\
+	& = LR \sqrt{\frac{t}{2 \rho}} + LR\sqrt{\frac{t}{2 \rho}} \\
+	& = LR \sqrt{\frac{2t}{\rho}}.
+\end{align*}
+This implies the required result.
+\end{proof}
+\begin{remark}
+The inequality
+\begin{equation*}
+g_s^\mathsf{T}\left(x_s - x_{s+1}\right) \leq L\left\|x_s - x_{s+1}\right\|
+\end{equation*}
+that we used in the above proof is somewhat crucial in our case because $L$ bounds the dual or operator norm, i.e. $L \geq \|g\|_* = \sup\{g^\mathsf{T}x : \|x\|=1\}$. Using the fact that for $1 \leq p, q \leq \infty$ and $\frac{1}{p} + \frac{1}{q} = 1$ the norms $\ell^p$ and $\ell^q$ are dual, we see that we can get much finer control by adjusting the norm we are using to the problem hat hand. Seen from a different point, we can now use any appropriate form of Hölder's inequality and are not confined to using Cauchy-Schwarz.
+\end{remark}
+
+\begin{remark}\label{mirror_descent_lemma_for_linear_coupling}
+    If we do not use the previous inequality in the proof we get that for any $\eta > 0$
+    \[
+    \eta g_s^\top(x_s - x) \leq \frac{\eta^2}{2\rho} \|g_s\|_\ast^2 + D_\Phi(x, x_s) - D_\Phi(x, x_{s+1}).
+    \]
+    We will use this fact in the next section, when we explain linear coupling.
+\end{remark}
+
+\subsubsection{Entropy setup and boosting II}
+
+We are finally able to show how to achieve the $\log(n)$ rate in the case of boosting. Note, that for the negative entropy mirror map $\Phi(x) = \sum_{i=1}^n x_i \log x_i$ and $x\in \Delta_n$
+\begin{equation*}
+	 -\log(n) \leq \sum_{i=1}^n x_i \log x_i \leq 0
+\end{equation*}
+and hence $R^2 = \sup_{x\in \mathcal{X}\cap\mathcal{D}}\Phi(x)-\Phi(x_1) = \log(n)$. We already established that $\Phi$ is 1-strongly convex with respect to $\|\cdot\|_1$.
+
+\begin{corollary}
+Let $f$ be a convex function on $\Delta_n$ with 
+\begin{equation*}
+	\|g\|_\infty \leq L, \quad \forall g \in \partial f(x), \forall x\in \Delta_n.
+\end{equation*}
+Then, mirror descent with $\Phi(x) = \sum_{i=1}^n x_i \log x_i$ and $\eta =\frac{R}{L}\sqrt{\frac{2\rho}{t}}= \frac{1}{L}\sqrt{\frac{2\log(n)}{t}}$ yields
+\begin{equation*}
+	f\left(\frac{1}{t}\sum_{s=1}^t x_s \right) - f(x^*) \leq L\sqrt{\frac{2\log(n)}{t}}.
+\end{equation*}
+\end{corollary}
+
+\begin{proof}
+Apply \autoref{compl:mirror_descent}. 
+\end{proof}
+
+In order to achieve a predefined bound $\varepsilon > 0$ we thus neeed to take $t \geq \frac{2L^2\log(n)}{\varepsilon^2}$. 
+Recall the optimisation problem in boosting
+\begin{align*}
+	\begin{aligned}
+		\text{minimize }\quad   & R(x) = \frac{1}{m} \sum_{i=1}^m \varphi(-Y_ix^T\Phi(W_i))\\
+		\text{subject to }\quad & x\in \Delta_m.
+	\end{aligned}
+\end{align*}
+In this case our gradient is
+\begin{equation*}
+	g(x) = \nabla R(x) = \frac{1}{m}\sum_{i=1}^m \varphi'\left(Y_i x^\mathsf{T}\Phi(W_i)\right)\Phi(W_i)(-Y_i).
+\end{equation*}
+By construction we obtain $\|\Phi\|_\infty \leq 1$, $\|Y_i\|_\infty\leq 1$ and thus $\|g\|_\infty \leq L_\varphi$, the Lipschitz constant of $\varphi$.

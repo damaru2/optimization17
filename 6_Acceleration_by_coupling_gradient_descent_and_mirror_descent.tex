@@ -1,21 +1,19 @@
 %! TEX root = main.tex
 
 \section{Acceleration by coupling gradient descent and mirror descent}
-%TODO we will only work with $\beta$-smooth functions
-We have seen as a consequence of Theorem \ref{smooth_proj_gd} that if $f$ is $\beta$-smooth then projected gradient descent needs $T = O\left( \frac{\beta R^2}{\epsilon}\right)$ iterations to obtain an $\epsilon$-minimizer. However, we derived in Theorem \ref{lower_bound_smooth} a lower bound in which the dependence on $\beta$ and $\epsilon$ was $O\left(\sqrt{\frac{\beta}{\epsilon}}\right)$. Nesterov in \cite{nesterov1983method} designed a gradient descent method whose complexity matches this lower bound. This method only works for $\|{\cdot}\|_2$. Later, in \cite{nesterov2005smooth} he generalized his method to allow arbitrary norms. Algorithms whose complexity is optimal are said to be accelerated. Nesterov's accelerated gradient descent has always been regarded as an obscure and unintuitive method whose proof uses ``magical'' algebra tricks. Since he published his seminal work in 1983, several papers that have tried to understand acceleration by proposing other accelerated methods, trying to give more intuition and showing acceleration from other points of view. For example, in \cite{bubeck} we can find a geometric interpretation of acceleration. Linear Coupling \cite{linearcoupling} (2014) is one of these methods. We think that it is one of the best methods to understand acceleration. We start giving some intuition about how gradient and mirror descent can be combined to obtain these accelerated method. We present first a simplified version of linear coupling that also achieves acceleration but under more restrictive assumptions and finally, we present linear coupling. Linear coupling has the virtue that its analysis is the same for any norm.
+%TODO we will only work with $\beta$-smooth functions it
+We have seen as a consequence of Theorem \ref{smooth_proj_gd} that if $f$ is $\beta$-smooth then projected gradient descent needs $T = O\left( \frac{\beta R^2}{\epsilon}\right)$ iterations to obtain an $\epsilon$-minimizer. However, we derived in Theorem \ref{lower_bound_smooth} a lower bound in which the dependence on $\beta$ and $\epsilon$ was $O\left(\sqrt{\frac{\beta}{\epsilon}}\right)$. Nesterov in \cite{nesterov1983method} designed a gradient descent method whose complexity matches this lower bound. This method only works for $\|{\cdot}\|_2$. Later, in \cite{nesterov2005smooth} he generalized his method to allow arbitrary norms. Algorithms whose complexity is optimal are said to be accelerated. Nesterov's accelerated gradient descent has always been regarded as an obscure and unintuitive method whose proof uses ``magical'' algebra tricks. Since he published his seminal work in 1983, several authors have proposed other accelerated methods, in order to give more intuition about acceleration and to show this from other points of view. For example, in \cite{bubeck} we can find a geometric interpretation of acceleration. Linear Coupling \cite{linearcoupling} (2014) is one of these methods. We think that it is one of the best methods to understand acceleration. We start giving some intuition about how gradient and mirror descent can be combined to obtain these accelerated method. We present first a simplified version of linear coupling that also achieves acceleration but under more restrictive assumptions and finally, we present linear coupling. This method works for any norm and for each of them, the analysis of Linear Coupling is the same. We will only work with convex,, $\beta$-smooth functions $f$, we note that \cite{linearcoupling}, the paper in which this section is based, contains other analysis like the $\alpha$-strictly convex and $\beta$-smooth case.
 
 \subsection{Intuition}
 
-%TODO define x^\ast as a minimizer if it has not been defined before
-
-To understand why combining gradient and mirror descent makes sense and why doing so is a good idea we will note some properties about both methods. We have seen in \ref{smooth_proj_gd} that projected gradient descent is defined by
+To understand why combining gradient and mirror descent makes sense and why doing so is a good idea we will note some properties about both methods. As we have been doing in previous sections we use the notation $x^\ast$ for a minimizer of $f$ restricted to $\X$. We have seen in \ref{smooth_proj_gd} that projected gradient descent is defined by
 
 \begin{align*}
-    y_{t+1} &= x_t -\frac{1}{\beta} g_t, \text{ where } g_t \in \partial f(x_t) \\
-    x_{t+1} &= \Pi_{\X}(y_{t+1}). \\
+    y_{k+1} &= x_k -\frac{1}{\beta} g_k, \text{ where } g_k \in \partial f(x_k) \\
+    x_{k+1} &= \Pi_{\X}(y_{k+1}). \\
 \end{align*}
 
-One should not be surprised that in the case that $\X = \R^n$ regular gradient descent in unconstrained optimization is defined by the rule $ x_{t+1} = x_t -\frac{1}{\beta} g_t$. But, why is gradient descent, constrained or not, defined in that way? Of course, it works and provides a non trivial convergence rate, but proofs of this usually only define the method and prove convergence without explaining where the method comes from, specially regarding the choice of the learning rate. It can be useful to see gradient from the following point of view. Let's do it first for unconstrained gradient descent with $\|{\cdot}\|_2$ only. If we are at point $x_k \in \R^n$ and we compute the next point by moving against the gradient, the choice of $\frac{1}{\beta}$ is the best choice for the learning rate, in the sense that we can guarantee maximal local decrease for that choice of the learning rate. This is not difficult to see using the assumptions we have at hand. The smoothness assumption tells us that along the line defined by $x_k$ and $\nabla f(x_k)$, $f$ is lower bounded by a parabola with leading coefficient $\frac{\beta}{2}$ (blue graph in Figure \ref{parabolas}) whose derivative in $x_k$ coincides with the one of $f$ (restricted to the line, i.e. it is $\lVert \nabla f(x_k) \rVert$). The derivative of $x^2\beta/2 $ is $x\beta = \lVert \nabla f(x_k) \rVert$ so the distance to the minimum is ${\tt x} = \frac{1}{\beta}\lVert \nabla f(x_k) \rVert$ and it is clear now that maximal guaranteed progress is the evaluation of $x^2\beta/2 $ at $\tt{x}$, i.e. $\frac{1}{2\beta} = \lVert \nabla f(x_k) \rVert$. And we have just proved that the guaranteed decrease is maximal for that choice of the learning rate and we have computed how much. All these arguments can be written using inequalities, but hopefully this can be considered cleaner by some people. %rephrase
+One should not be surprised that in the case that $\X = \R^n$ regular gradient descent in unconstrained optimization is defined by the rule $ x_{k+1} = x_k -\frac{1}{\beta} g_k$. But, why is gradient descent, constrained or not, defined in that way? Of course, it works and it provides a non trivial convergence rate, but the proofs of this rate usually only define the method and prove convergence without explaining where the method comes from, specially regarding the choice of the learning rate. It can be useful to see gradient descent from the following point of view. Let's do it first for unconstrained gradient descent with $\|{\cdot}\|_2$ only. If we are at point $x_k \in \R^n$ and we compute the next point by moving against the gradient, the choice of $\frac{1}{\beta}$ is the best choice for the learning rate, in the sense that we can guarantee maximal local decrease for that choice of the learning rate. This is not difficult to see using the assumptions we have at hand. The smoothness assumption tells us that along the line defined by $x_k$ and $\nabla f(x_k)$, $f$ is lower bounded by a parabola with leading coefficient $\frac{\beta}{2}$ (blue graph in Figure \ref{parabolas}) whose derivative in $x_k$ coincides with the one of $f$ (restricted to the line, i.e. it is $\lVert \nabla f(x_k) \rVert$). Therefore, the derivative of $x^2\beta/2 $ is $x\beta = \lVert \nabla f(x_k) \rVert$ so the distance to the minimum in the parabola is ${\tt x} = \frac{1}{\beta}\lVert \nabla f(x_k) \rVert$ and it is clear now that maximal guaranteed progress is the evaluation of $x^2\beta/2 $ at $\tt{x}$, i.e. $\frac{1}{2\beta} \lVert \nabla f(x_k) \rVert^2$. And we have just proved that the guaranteed decrease is maximal for that choice of the learning rate and we have computed how much. All these arguments can be written using inequalities, but hopefully this can be considered cleaner by some people. %rephrase
 Proving the rate of convergence of gradient descent given the guaranteed progress at each step is straightforward. With this picture in mind, it is also very easy to derive the rate of convergence of gradient descent in the case that $f$ is also $\mu$-strongly convex. Since this assumption lower bounds $f$ by another parabola with leading coefficient $\mu/2$, we can see that the guaranteed progress is proportional to $1/2\beta$ and $f(x_k) - f(x^\ast)$ is upper bounded by something proportional to $1/2\mu$ so after one step the value $f(x_k)-f(x^\ast)$ decreases to at least $(f(x_k)-f(x^\ast))\left(1 - \frac{\lVert \nabla f(x_k) \rVert/2\beta}{\lVert \nabla f(x_k) \rVert/2\mu}\right) = (f(x_k)-f(x^\ast))\left(1- \frac{\mu}{\beta}\right)$. And therefore $f(x_T)-f(x^\ast) \leq (f(x_0) - f(x^\ast))\left(1- \frac{\mu}{\beta}\right)^T$, so an $\epsilon$-minimizer is found in $O\left((f(x_0) - f(x^\ast))\log \frac{1}{\epsilon}\right)$ iterations.
 
 
@@ -27,7 +25,7 @@ Proving the rate of convergence of gradient descent given the guaranteed progres
 
 We make two important remarks about the previous analysis. Firstly, gradient descent uses the assumption of $\beta$-smoothness to guarantee maximal local decrease and secondly, the guaranteed decrease is better if the norm of the gradient is large. We will note later that the regret of mirror descent is lower when the norm of the gradient is low, and this, along with the second remark, is what we can leverage to combine gradient and mirror descent. But let's focus first on the first remark. The maximal decrease on the objective we can guarantee from $x_k$ occurs when we minimize, as we did before in our toy example, the bound that is given by the $\beta$-smoothness assumption, which is
 \[
-    f(y) \leq f(x_k) + \langle \nabla f(x_k), y-x_k \rangle + \frac{\beta}{2} \|{y-x}\|^2,
+    f(y) \leq f(x_k) + \langle \nabla f(x_k), y-x_k \rangle + \frac{\beta}{2} \|{y-x_k}\|^2,
 \]
 for every $y \in \X$. Note that for enough regular functions, the smoothness condition can be derived by upper bounding a second order multivariate Taylor expansion using that the Hessian's eigenvalues are upper bounded by $\beta$. It is a simple way to remember the inequality. So we can define the next point as
  \begin{align}\label{general_grad_descent}
@@ -45,7 +43,7 @@ which matches our previous analysis. Maybe the following, for a general convex s
     \argmin_{y \in \X} \left\{ \left\|{\left(x_k - \frac{1}{\beta}\nabla f(x_k)\right) - y}\right\|^2 \right\} \stackrel{?}{=} \argmin_{y \in \X} \left\{ \langle \nabla f(x_k), y-x_k \rangle  +\frac{\beta}{2}\|{y-x_k\|}^2\right\} \\
     \Leftrightarrow \argmin_{y \in \X} \left\{ \langle y, y\rangle - 2\left\langle y, \left(x_k - \frac{1}{\beta} \nabla f(x_k)\right)\right\rangle\right\} \stackrel{?}{=} \argmin_{y \in \X} \left\{ \langle \nabla f(x_k), y\rangle + \frac{\beta}{2}(\langle y, y\rangle - 2\langle x_k, y\rangle)\right\}. \\
 \end{align*}
-It is clear that the two $\argmin$'s of the last expression are the same, since we can obtain the left hand side by dividing by $\frac{\beta}{2}$ in the $\argmin$ of the right hand side. This means that our rule for projected gradient descent computes the point in $\X$ whose decrease guarantee given by the $\beta$-smoothness of $f$ is maximal among all the points in $\X$. Gradient descent for general norms is defined by rule (\ref{general_grad_descent}). We denote 
+It is clear that the two $\argmin$'s of the last expression are the same, since we can obtain the left hand side by dividing by $\frac{\beta}{2}$ in the $\argmin$ of the right hand side. This means that our rule for projected gradient descent (left hand side) computes the point in $\X$ whose decrease guarantee given by the $\beta$-smoothness of $f$ is maximal among all the points in $\X$ (right hand side). It is natural now to define gradient descent for general norms by rule (\ref{general_grad_descent}). We denote 
 
 \[
     \Prog(x) := - \min_{y\in\X} \left\{ \langle \nabla f(x), y-x \rangle + \frac{\beta}{2} \|{y-x}\|^2\right\} \geq 0.
@@ -58,29 +56,21 @@ In short, we can say that \textbf{gradient descent at each iteration maximizes t
 
 Our second remark was that with $\X = \R^n$ and $\|\cdot \|_2$ the decrease is better if $\|\nabla f(x)\|$ is larger. An intuition that we will formalize later is that mirror descent for $\X = \R^n$ and $\|\cdot \|_2$ suffers from a small loss if $\|\nabla f(x)\|$ is small. In general we will prove that a bound for the mirror descent loss is going to have a term that will be easy to control and something proportional to $\Prog(x)$. So when mirror descent suffers from a large loss, gradient descent decreases the objective a lot, and when gradient descent does not have a large guaranteed decrease, mirror descent's loss will be small. This is the key idea of linear coupling.
 
-We saw last week that mirror descent tackles the dual optimization problem by constructing lower bounds to the optimum. Recall that each queried gradient $\nabla f(x)$ can be viewed as a hyperplane lower bounding the objective $f$, that is, $f (y) \geq f (x)+ \langle \nabla f (x), y-x \rangle$ for all $y$. Mirror-descent methods attempt to carefully construct a convex combination of these hyperplanes in order to yield even a stronger lower bound. From this point of view our claimed intuition about mirror descent having a small loss when $\|\nabla f(x)\|_2$ is small should be clear. We will denote
+We saw last week that mirror descent tackles the dual optimization problem by constructing lower bounds to the optimum. Recall that each queried gradient $\nabla f(x)$ can be viewed as a hyperplane lower bounding the objective $f$, that is, $f (y) \geq f (x)+ \langle \nabla f (x), y-x \rangle$ for all $y$. Mirror-descent methods attempt to carefully construct a convex combination of these hyperplanes in order to yield even a stronger lower bound. From this point of view our claimed intuition about mirror descent having a small loss when $\|\nabla f(x)\|_2$ is small should be clear, because the planes are closer to being horizontal. We will denote
 \[
-    \Mirr(\xi) := \argmin_{y \in \X} \left\{ D(y, x) + \langle \xi, y-x \rangle \right\}.
+    \Mirr_{x_k}(\xi):= \argmin_{x \in \X} \left\{ D(x, x_k) + \langle \xi, x-x_k \rangle \right\}. 
 \]
-Note that a mirror descent step is $x' = \Mirr(\eta \partial f(x))$. 
-
-
+Note that a mirror descent step is $x' = \Mirr_{x_k}(\eta \partial f(x_k))$. Here, $D$ is the Bregman divergence of a mirror map $\Phi$ which for simplicity we will assume that is $1$-strongly convex.  \footnote{Note that this is equivalent to the mirror descent step in Algorithm \ref{alg:mirror_descent}. We defined $x_{k+1}$ to be in $ \Pi_\mathcal{X}^\Phi(y_{k+1}) = \argmin_{x\in\X}D(x, y_{k+1}) = \argmin_{x\in\X}\left\{ \Phi(x) - \Phi(y_{k+1}) - \langle \nabla \Phi(y_{k+1}), x\rangle \right\} = \argmin_{x\in\X}\left\{ \Phi(x) - \langle \nabla \Phi(x_k) - \eta \nabla f(x_k), x\rangle \right\}$ where in the last step we have removed constant terms from the $\argmin$ and used the definition of $\nabla \Phi(y_{k+1})$. On the other hand $\argmin_{x\in\X}\{D_(x, x_k) + \langle \eta \nabla f(x_k), x-x_k \rangle\} = \argmin_{x\in\X}\{\Phi(x)  - \Phi(x_k) - \langle \nabla \Phi(x_k), x-x_k\rangle + \langle \eta \nabla f(x_k), x- x_k \}  = \argmin_{x\in\X}\left\{ \Phi(x) - \langle \nabla \Phi(x_k) - \eta \nabla f(x_k), x\rangle \right\}$ where in the last step we have also removed constant terms. We observe that thus the two expressions lead to the same result. However, the second one (or the simplified version of both for that matter) does not need to obtain $y_{k+1}$ from $\nabla \Phi(y_{k+1})$.}
 
 \begin{figure}[h!] \label{mirror_descent_dual_loss}
 \centering
         \includegraphics[width=0.5\textwidth]{img/mirror_descent_dual_loss} 
-        \caption{TODO Mirror descent dual loss}
+        \caption{Mirror combines several linear lower bounds obtained by convexity to give a lower bound on the optimum.}
 \end{figure}
 
-It is clear that if we have several hyperplanes lower bounding the epigraph of our function we could pick a point $x$ with a small loss, that is, the difference $f(x)-f(x^\ast)$ is small. That is because the difference between the optimum and the maximum of the lower bound is small. Figure \ref{mirror_descent_dual_loss} there is a visualization of this process. In general, instead of picking the best point of the lower bound, which could need the solution of an expensive convex problem, we just take the mean of the points that we used to defined the hyperplanes and that point is good enough for the analysis. Of course this happens because mirror descent does not pick the hyperplanes naively.
+\textbf{Thought experiment.} For the sake of demonstrating the idea, suppose $\| \nabla f(x) \|_2$, the norm of the observed gradient, is \textbf{either} always $\geq K$, or always $\leq K$, where $K$ will be determined later. Under such ``wishful assumption'', we can propose the following algorithm: if the norm of the gradient is always $\geq K$ perform $T$ gradient descent steps. Otherwise perform $T$ mirror descent steps. To analyze such an algorithm, suppose without loss of generality we start with some point $x_0$ whose objective distance $f(x_0 )-f(x^\ast )$ is at most $2\epsilon$, and we want to find some $x$ so that $f(x) - f(x^\ast) \leq \epsilon$.
 
-%TODO mention complexity of mirror descent.
-%TODO adapt mirror's descent key lemma (and proof if it wasn't proved in week 5)
-
-\textbf{Thought experiment.} For the sake of demonstrating the idea, suppose $\| \nabla f(x) \|_2$, the norm of the observed gradient, is \textbf{either} always $\geq K$, or always $\geq K$, where $K$ will be determined later. Under such ``wishful assumption'', we can propose the following algorithm: if the norm of the gradient is always $\geq K$ perform $T$ gradient descent steps. Otherwise perform $T$ mirror descent steps. To analyze such an algorithm, suppose without loss of generality we start with some point $x_0$ whose objective distance $f(x_0 )-f(x^\ast )$ is at most $2\epsilon$, and we want to find some $x$ so that $f(x) - f(x^\ast) \leq \epsilon$.
-
-If $T$ gradient descent steps are performed, the objective decreases by at least $\frac{\|\nabla f(\cdot)\|_2^2}{2L} \geq \frac{K^2}{2L}$ per step and we only need $T \geq \Omega\left(\frac{\epsilon L}{K^2}\right)$ steps to achieve an $\epsilon$ accuracy. If $T$ mirror descent steps are performed, we need $T \geq \Omega\left(\frac{K^2}{\epsilon^2}\right)$ steps according to the mirror descent convergence. In sum, we need $T \geq \Omega\left( \max \left\{ \frac{\epsilon L}{K^2}, \frac{K^2}{\epsilon^2}\right\}\right)$ steps to converge to an $\epsilon$-minimizer. Setting K to be the magic number to balance the two terms, we only need $T \geq \Omega\left( \sqrt{\frac{L}{\epsilon}}\right)$ iterations. This means that in the general case in which $f(x_0) - f(x^\ast) \leq d $ we only need $T \geq \Omega \left(\sqrt{\frac{L}{\epsilon}}\left(\frac{\epsilon}{d} + \frac{2\epsilon}{d} + \dots + \frac{1}{2} + 1 \right)\right) = \Omega \left( \sqrt{\frac{L}{\epsilon}}\right)$.
-%TODO fix \epsilon/d
+If $T$ gradient descent steps are performed, the objective decreases by at least $\frac{\|\nabla f(\cdot)\|_2^2}{2\beta} \geq \frac{K^2}{2\beta}$ per step and we only need $T \geq \Omega\left(\frac{\epsilon \beta}{K^2}\right)$ steps to achieve an $\epsilon$ accuracy. If $T$ mirror descent steps are performed, we need $T \geq \Omega\left(\frac{K^2}{\epsilon^2}\right)$ steps according to the mirror descent convergence (Remark \ref{mirror_descent_lemma_for_linear_coupling}). In sum, we need $T \geq \Omega\left( \max \left\{ \frac{\epsilon \beta}{K^2}, \frac{K^2}{\epsilon^2}\right\}\right)$ steps to converge to an $\epsilon$-minimizer. Setting K to be the magic number to balance the two terms, we only need $T \geq \Omega\left( \sqrt{\frac{\beta}{\epsilon}}\right)$ iterations. This means that in the general case in which $f(x_0) - f(x^\ast) \leq d $ we can repeat this procedure to obtain points such that the distances of their images to $f(x^\ast)$ halve after each iteration. So we only need $T \geq \Omega \left(\sqrt{\frac{\beta}{\epsilon}}\left(\sqrt{\frac{2\epsilon}{d}} + \sqrt{\frac{4\epsilon}{d}} + \dots + \sqrt{\frac{1}{2} }+ 1 \right)\right) = \Omega \left( \sqrt{\frac{\beta}{\epsilon}}\right)$.
 
 \subsection{Warm-Up Method with Fixed Step Length}
 The key ideas of this method will be the same as the ones for the final method. As we mentioned previously, at each iteration linear coupling performs a gradient descent step and a mirror descent step and the point for the next iteration is a convex combination of the points obtained by gradient and mirror descent. The key of the proof is to see that the loss in which mirror descent incurs is something proportional to the gradient descent guaranteed decrease (plus a couple of Bregman divergences that will telescope) and using this fact to see that a particular convex combination of mirror and gradient descent incurs in a similar loss.
@@ -88,7 +78,7 @@ The key ideas of this method will be the same as the ones for the final method. 
 Formally, we start with $x_0 = y_0 = z_0$. In each iteration $k= 0, 1, \dots, T-1$ we define $x_{k+1} \gets \tau z_k + (1-\tau) y_k$ and then we perform:
 \begin{itemize}
     \item A gradient step $y_{k+1} \gets \Grad(x_{k+1})$.
-    \item A mirror step $z_{k+1} \gets \Mirr\left(\eta \nabla f(x_{k+1})\right)$.
+    \item A mirror step $z_{k+1} \gets \Mirr_{z_k}\left(\eta \nabla f(x_{k+1})\right)$.
 \end{itemize}
 The choices of $\eta$ and $\tau$ will become clear at the end of this section, but from a high level $\eta$ is determined by the mirror descent analysis, similarly to what we saw last week, and $\tau$ will be determined as the best parameter to balance gradient and mirror descent, similar to $K$ in the previous thought experiment.
 
@@ -104,14 +94,14 @@ The two key ideas mentioned before materialize in the following two lemmas:
 \end{lemma}
 
 \begin{proof}
-    The first inequality is Lemma \ref{todo}, in which the mirror descent analysis is based. The second inequality is from the gradient step guarantee $f(x_{k+1}) - f(y_{k+1}) \geq \frac{1}{2L}\| \nabla f(x_{k+1})\|^2_\ast$.
+    The first inequality is Remark \ref{mirror_descent_lemma_for_linear_coupling}, which is the key lemma of the mirror descent analysis. The second inequality is from the gradient step guarantee $f(x_{k+1}) - f(y_{k+1}) \geq \frac{1}{2\beta}\| \nabla f(x_{k+1})\|^2_\ast$.
 \end{proof}
 
 The second lemma bounds the actual regret at $x_{k+1}$ and picks $\tau$ so that we can telescope the sum of the regrets.
 
-\begin{lemma}\label{lemma_simplified_coupling}[Coupling] Letting $\tau \in (0, 1)$ satisfy that $\frac{1-\tau}{\tau}  \eta\beta$, we have that
+\begin{lemma}[Coupling]\label{lemma_simplified_coupling} Letting $\tau \in (0, 1)$ satisfy that $\frac{1-\tau}{\tau}  \eta\beta$, we have that
 \[
-    \forall u \in \X = \R^n, \quad \eta \langle \nabla f(x_{k+1}), x_{k+1} - u \rangle \leq \eta^2\beta\left( f(y_k) - f(y_{k+1})\right)a + \left( D(u, {z_k}) - D(u, {z_{k+1}})\right).
+    \forall u \in \X = \R^n, \quad \eta \langle \nabla f(x_{k+1}), x_{k+1} - u \rangle \leq \eta^2\beta\left( f(y_k) - f(y_{k+1})\right) + \left( D(u, {z_k}) - D(u, {z_{k+1}})\right).
 \]
 \end{lemma}
 
@@ -123,7 +113,7 @@ The second lemma bounds the actual regret at $x_{k+1}$ and picks $\tau$ so that 
             = \frac{(1-\tau)\eta}{\tau} \langle \nabla f(x_{k+1}), y_k - x_{k+1} \rangle \leq \frac{(1-\tau)\eta}{\tau} (f(y_k) - f(x_{k+1})).
         \end{aligned}
     \end{align}
-    Above, we used the fact that $\tau(x_{k+1} - z_k) = (1-\tau)(y_k -x_{k+1})$, as well as the convexity of $f$. It is immediate that by choosing $\frac{1-\tau}{\tau} = \eta \beta$ and combining \ref{mirror_bound_in_linear_coupling} and \ref{actual_regret_simplified_linear_coupling} we have the result.
+    Above, we used the fact that $\tau(x_{k+1} - z_k) = (1-\tau)(y_k -x_{k+1})$, as well as the convexity of $f$. It is immediate that by choosing $\frac{1-\tau}{\tau} = \eta \beta$ and combining \eqref{mirror_bound_in_linear_coupling} and \eqref{actual_regret_simplified_linear_coupling} we have the result.
 \end{proof}
 
 If we telescope \ref{lemma_simplified_coupling} for $k= 0, 1, \dots, T-1$ and setting $\bar{x} := \frac{1}{T} \sum_{k=0}^{T-1} x_k$  and $u = x^\ast$, we have
@@ -131,29 +121,29 @@ If we telescope \ref{lemma_simplified_coupling} for $k= 0, 1, \dots, T-1$ and se
     \eta T \left( f(\bar{x}) - f(x^\ast) \right)\leq \sum_{k=0}^{T-1} \eta \langle \nabla f(x_k), x_k - x^\ast \rangle \leq \eta^2 \beta \left( f(y_0) - f(y_T) \right) + D(x^\ast, x_0) - D(x^\ast, {x_T}).
 \end{equation}
 
-Suppose our initial point is of error at most $d$, that is $f (y_0 ) − f (x^\ast ) \leq d$, and suppose $D(x^\ast, {x_0}) \leq \Theta$, then \ref{final_lemma_simplified_coupling} gives $f (\bar{x})-f (x^\ast ) \leq \frac{1}{T}\left( \eta \beta d + \Theta/\eta\right)$. Choosing $\eta = \sqrt{\Theta/(\beta d)}$ to be the value that balances the above two terms (it is essentially the same way of choosing $\eta$ in mirror descent), we obtain that $f (x) − f (x^\ast ) \leq \frac{\sqrt{\beta \Theta d}}{T}$. In other words, in $T = 4 \sqrt{\beta\Theta/d}$ steps, we can obtain some $\bar{x}$ satisfying $f (\bar{x}) − f (x^\ast ) \leq d/2$, halving the distance to the optimum. If we restart this entire entire procedure a few number of times, halving the distance for every run, then we obtain an $\epsilon$-approximate solution in
+Suppose our initial point is of error at most $d$, that is $f (y_0 ) - f (x^\ast ) \leq d$, and suppose $D(x^\ast, {x_0}) \leq \Theta$, then \eqref{final_lemma_simplified_coupling} gives $f (\bar{x})-f (x^\ast ) \leq \frac{1}{T}\left( \eta \beta d + \Theta/\eta\right)$. Choosing $\eta = \sqrt{\Theta/(\beta d)}$ to be the value that balances the above two terms (it is essentially the same way of choosing $\eta$ in mirror descent), we obtain that $f (x) - f (x^\ast ) \leq \frac{\sqrt{\beta \Theta d}}{T}$. In other words, in $T = 4 \sqrt{\beta\Theta/d}$ steps, we can obtain some $\bar{x}$ satisfying $f (\bar{x}) - f (x^\ast ) \leq d/2$, halving the distance to the optimum. If we restart this entire entire procedure a few number of times, halving the distance for every run, then we obtain an $\epsilon$-approximate solution in
 \[
-    T = O \left(\sqrt{\beta \Theta / \epsilon} + \sqrt{\beta \Theta / 2\epsilon} + \sqrt{\beta \Theta / 4 \epsilon} + \dots \right) = O\left(\sqrt{L\Theta / \epsilon}  \right)
+    T = O \left(\sqrt{\beta \Theta / \epsilon} + \sqrt{\beta \Theta / 2\epsilon} + \sqrt{\beta \Theta / 4 \epsilon} + \dots \right) = O\left(\sqrt{\beta\Theta / \epsilon}  \right)
 \]
-iterations. The value of $\eta = \sqrt{\Theta/(\beta d)}$ increases as time goes and therefore $\tau = \frac{1}{\eta \beta +1}$ decreases as time goes. This tells us that gradient descent is given more weight the mirror step when we are close to the minimum.  This fact can be counter-intuitive because when it is closer to the optimum, the observed gradients will become smaller, and therefore mirror steps should perform well according to the thought experiment. This understanding is incorrect, when it is closer to the optimum, the threshold between large and small gradients also becomes smaller, so one cannot rely only on mirror steps.
+iterations. The value of $\eta = \sqrt{\Theta/(\beta d)}$ increases as time goes and therefore $\tau = \frac{1}{\eta \beta +1}$ decreases as time goes. This tells us that gradient descent is given more weight the mirror step when we are close to the minimum.  This fact can be counter-intuitive because when it is closer to the optimum, the observed gradients will become smaller, and therefore mirror steps should perform well according to the thought experiment. This understanding is incorrect, the reason is that when it is closer to the optimum, the threshold between large and small gradients also becomes smaller, so one cannot rely only on mirror steps.
 
 \subsection{Final Method with Variable Step Lengths}
 This final method will change $\eta$ and $\tau$ gradually to obtain an algorithm that does not need to know the bounds $\Theta$ and $d$. This approach will also work for any convex restriction set $\X$. The final algorithm is the following:
 
 \begin{algorithm}[H]\label{alg:AGM}
 \scriptsize
-\caption{AGM $(f, w, x_0, T)$}
+\caption{AGM $(f, \Phi, x_0, T)$}
    \label{alg:AGM}
    \begin{algorithmic}[1]
-   \REQUIRE $f$ a differentiable and convex function on $\X$ that is $\beta$-smooth with respect to $\|\cdot\|$, $w$ the $DGF$ function that is $1$-strongly convex with respect to the same $\|\cdot\|$ over $\X$. $x_0$ some initial point and $T$ the number of iterations.
+   \REQUIRE $f$ a differentiable and convex function on $\X$ that is $\beta$-smooth with respect to $\|\cdot\|$, $\Phi$ the $DGF$ function that is $1$-strongly convex with respect to the same $\|\cdot\|$ over $\X$. $x_0$ some initial point and $T$ the number of iterations.
    \ENSURE $y_T$ such that $f(y_T) -f(x^\ast) \leq \frac{4\Theta \beta}{T^2}$.
-   \STATE $D(y, x) := w(y) - \langle \nabla w(x), y-x\rangle - w(x).$
+   \STATE $D(y, x) := \Phi(y) - \langle \nabla \Phi(x), y-x\rangle - \Phi(x).$
    \STATE $y_0 \gets x_0, \quad z_0 \gets x_0$.
    \FOR{$ k \gets 0 $ to $T-1$}
        \STATE $\eta_{k+1} \gets \frac{k+2}{2\beta}$, and $\tau_k \gets \frac{1}{\eta_{k+1}\beta} = \frac{2}{k+2}$
        \STATE $x_{k+1} \gets \tau_k z_k + (1-\tau_k)y_k$.
        \STATE {$y_{k+1} \gets \Grad(x_{k+1})$ \hfill\hfill $\left( := \argmin_{y\in\X} \left\{ \frac{\beta}{2} \| y-x_{k+1}\|^2 + \langle \nabla f(x_{k+1}), y-x_{k+1} \rangle \right\}\right) $}
-       \STATE{ $z_{k+1} \gets \Mirr_{z_k}\left(\eta_{k+1} \nabla f (x_{k+1})\right)$ \hfill\hfill $\left( := \argmin_{y\in\X} \left\{ D(z, {z_k}) + \langle \eta_{k+1} \nabla f(x_{k+1}), z-z_k \rangle \right\}\right) $}
+       \STATE{ $z_{k+1} \gets \Mirr_{z_k}\left(\eta_{k+1} \nabla f (x_{k+1})\right)$ \hfill\hfill $\left( := \argmin_{z\in\X} \left\{ D(z, {z_k}) + \langle \eta_{k+1} \nabla f(x_{k+1}), z-z_k \rangle \right\}\right) $}
 
    \ENDFOR
    \STATE {\bfseries return} $y_T$
@@ -163,7 +153,7 @@ This final method will change $\eta$ and $\tau$ gradually to obtain an algorithm
 We will prove that this method is accelerated. In particular, we have the following theorem.
 
 \begin{theorem}\label{thm:linear_coupling}
-    If $f(x)$ is $\beta$-smooth w.r.t. $\|\cdot\|$ on $\X$, and $w(x)$ is $1$-strongly convex w.r.t. $\|\cdot\|$ on $\X$, then Algorithm \ref{alg:AGM} outputs $y_t$ satisfying $f(y_T) - f(x^\ast) \leq 4 \Theta \beta /T^2$, where $\Theta$ is any upper bound on $v_{x_0}(x^\ast)$.
+    If $f(x)$ is $\beta$-smooth w.r.t. $\|\cdot\|$ on $\X$, and $\Phi(x)$ is $1$-strongly convex w.r.t. $\|\cdot\|$ on $\X$, then Algorithm \ref{alg:AGM} outputs $y_T$ satisfying $f(y_T) - f(x^\ast) \leq 4 \Theta \beta /T^2$, where $\Theta$ is any upper bound on $D(x^\ast, x_0)$.
 \end{theorem}
 
 We will use two lemmas, that are the analogous to Lemma \ref{lemma:mirror_bound} and Lemma \ref{lemma_simplified_coupling}, that we will prove after the proof of the theorem.
@@ -172,48 +162,48 @@ We will use two lemmas, that are the analogous to Lemma \ref{lemma:mirror_bound}
     If $\tau_k = \frac{1}{\eta_{k+1}\beta}$, then linear coupling satisfies that for every $u \in \X$,
     \begin{align*}\label{actual_regret_linear_coupling}
         \begin{aligned}
-            \eta \langle \nabla f(x_{k+1}), x_{k+1} - u \rangle &\leq \eta^2\beta \Prog(x_{k+1}) + \left( V_{z_k} - V_{z_{k+1}}(u)\right) \\
-                                                                &\leq \eta_{k+1}^2 \left( f(x_{k+1}) - f(y_{k+1})\right) + \left( V_{z_k} - V_{z_{k+1}}(u)\right).
+            \eta_{k+1} \langle \nabla f(x_{k+1}), z_{k} - u \rangle &\leq \eta^2_{k+1}\beta \Prog(x_{k+1}) + \left( D(u, z_k) - D(u, z_{k+1})\right) \\
+                                                                &\leq \eta_{k+1}^2\beta \left( f(x_{k+1}) - f(y_{k+1})\right) + \left( D(u, z_k) - D(u, z_{k+1})\right).
         \end{aligned}
     \end{align*}
 \end{lemma}
 
 \begin{lemma}[Coupling]\label{lemma:coupling} For any $u\in\X$,
     \[
-        \left(\eta_{k+1}^2 \beta \right) f(y_{k+1}) - \left( \eta^2_{k+1} \beta - \eta_{k+1}\right)f(y_k) + \left( V_{z_{k+1}} - V_{z_k}\right) \leq \eta_{k+1} f(u).
+        \left(\eta_{k+1}^2 \beta \right) f(y_{k+1}) - \left( \eta^2_{k+1} \beta - \eta_{k+1}\right)f(y_k) + \left( D(u, z_{k+1} ) - D(u, {z_k})\right) \leq \eta_{k+1} f(u).
     \]
 \end{lemma}
 
 \begin{proof}[Proof of Theorem \ref{thm:linear_coupling}]
-    In order to telescope Lemma \ref{lemma:coupling} we only need to set the sequence of $\eta_k$ so that $\eta_k^2 \beta \approx \eta_{k+1}^2 \beta - \eta_{k+1}$ as well as $\tau_k = 1/\eta_{k+1}\beta \in (0, 1]$. In Algorithm \ref{alg:AGM} $\eta_k =  \frac{k+1}{2\beta}$ so that $\eta_k^2 = \eta^2_{k+1} -\alpha_{k+1} + \frac{1}{4\beta}$. Summing up Lemma \ref{lemma:coupling} for $k = 0, 1, \dots, T-1$, we obtain
+    In order to telescope Lemma \ref{lemma:coupling} we only need to set the sequence of $\eta_k$ so that $\eta_k^2 \beta \approx \eta_{k+1}^2 \beta - \eta_{k+1}$ as well as $\tau_k = 1/\eta_{k+1}\beta \in (0, 1]$. In Algorithm \ref{alg:AGM} $\eta_k =  \frac{k+1}{2\beta}$ so that $\eta_k^2\beta = \eta^2_{k+1}\beta -\eta_{k+1} + \frac{1}{4\beta}$. Summing up Lemma \ref{lemma:coupling} for $k = 0, 1, \dots, T-1$, we obtain
 \[
-    \eta^2_T \beta f(y_T) + \sum_{k=1}^{T-1}\frac{1}{4\beta} + \left( V_{x_T}(u) - V_{z_0}(u)\right) \leq   \sum_{k=1}^T \eta_k f(u).
+    \eta^2_T \beta f(y_T) + \sum_{k=1}^{T-1}\frac{1}{4\beta}f(y_k) + \left( D(u, {z_T}) - D(u, {z_0})\right) \leq   \sum_{k=1}^T \eta_k f(u).
 \]
-By choosing $u= x^\ast$, we notice that $\sum_{k=1}^T \eta_k = \frac{T(T+3)}{4\beta}$, $f(y_t) \geq f(x^\ast)$, $V_{z_T} \geq 0$ and $V_{z_0} (x^\ast) \leq \Theta$. Therefore, we obtain
+By choosing $u= x^\ast$, we notice that $\sum_{k=1}^T \eta_k = \frac{T(T+3)}{4\beta}$, $f(y_k) \geq f(x^\ast)$, $D(u, {z_T}) \geq 0$ and $D(x^\ast, {z_0}) \leq \Theta$. Therefore, we obtain
 \[
-    \frac{(T+1)^2}{4\beta^2}\beta f(y_T) \leq \left(  \frac{T(T+3)}{4L} - \frac{T-1}{4L}\right)f(x^\ast) + \Theta,
+    \frac{(T+1)^2}{4\beta^2}\beta f(y_T) \leq \left(  \frac{T(T+3)}{4\beta} - \frac{T-1}{4\beta}\right)f(x^\ast) + \Theta,
 \]
 which after simplification implies $f(y_T)\leq f(x^\ast) + \frac{4\Theta \beta}{(T+1)^2}$.
 \end{proof}
 
 
 \begin{proof}[Proof of Lemma \ref{lemma:mirror_bound_general}]
-    The second inequality of the lemma is again by the gradient descent guarantee $f(x_{k+1}) - f(y_{k+1})) \geq \Prog(x_{k+1})$. To prove the first one, we first write down the key inequality of mirror-descent analysis. 
+    The second inequality of the lemma is again by the gradient descent guarantee $f(x_{k+1}) - f(y_{k+1})) \geq \Prog(x_{k+1})$. To prove the first one, we first write down the key inequality of mirror-descent analysis (whose proof is identical to the one given in the previous section). 
 \begin{align*}\label{actual_regret_linear_coupling}
     \begin{aligned}
         \eta_{k+1} \langle \nabla f(x_{k+1}), z_{k} - u \rangle &= \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle + \langle \eta_{k+1} \nabla f(x_{k+1}), z_{k+1} - u \rangle \\
-                                                                &\leq  \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle + \langle -\nabla V_{z_k}(u), z_{k+1} - u \rangle \\
-                                                                &=  \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle + V_{z_k}(u) - V_{z_{k+1}}(u) + V_{z_k}(z_{k+1}) \\
-                                                                &\leq  \left( \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle - \frac{1}{2}\|z_k - z_{k+1}\|^2 \right)  +  \left( V_{z_k}(u) - V_{z_{k+1}}(u) \right) \\
+                                                                &\leq  \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle + \langle -\nabla D(u, {z_k}), z_{k+1} - u \rangle \\
+                                                                &=  \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle + D(u, {z_k}) - D(u, z_{k+1}) + D((z_{k+1}, {z_k}) \\
+                                                                &\leq  \left( \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle - \frac{1}{2}\|z_k - z_{k+1}\|^2 \right)  +  \left( D(u, {z_k}) - D(u, z_{k+1}) \right) \\
     \end{aligned}
 \end{align*}
-The first inequality is due to the minimality of $z_{k+1} = \argmin_{z\in\X} \{V_{z_k} + \langle \eta_{k+1} \nabla f(x_{k+1}), z \rangle\}$, which implies that  $\langle \nabla V_{z_k} (z_{k+1}) + \eta_{k+1} \nabla f(x_{k+1}), u-z_{k+1} \rangle \geq 0 $ for all $u \in \X$. The second inequality is because $V_x(y) \geq \frac{1}{2} \|x-y\|^2$ by the strong convexity of the $w(\cdot)$. If we apply Cauchy-Shwartz to the first summand of the last expression above and the fact that $az-bz^2 \leq \frac{a^2}{4b}, \ \forall z \in \R$ we get
+The first inequality is due to the minimality of $z_{k+1} = \argmin_{z\in\X} \{D(u, {z_k}) + \langle \eta_{k+1} \nabla f(x_{k+1}), z \rangle\}$, which implies that  $\langle \nabla D(z_{k+1}, {z_k} ) + \eta_{k+1} \nabla f(x_{k+1}), u-z_{k+1} \rangle \geq 0 $ for all $u \in \X$. The second inequality is because $D(y, x) \geq \frac{1}{2} \|x-y\|^2$ by the strong convexity of the $\Phi(\cdot)$. If we apply Cauchy-Schwarz to the first summand of the last expression above and the fact that $az-bz^2 \leq \frac{a^2}{4b}, \ \forall z \in \R$ we get
 \[
     \left( \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle - \frac{1}{2}\|z_k - z_{k+1}\|^2 \right) \leq \left(\eta_{k+1}\|\nabla f(x_{k+1})\|_\ast \right) \|z_k - z_{k+1}\| - \frac{1}{2}\|z_k - z_{k+1}\|^2 \leq \frac{\eta_{k+1}^2}{2} \|\nabla f(x_{k+1})\|_\ast^2
 \]
-and thus we have the result for $\X = \R^n$. For the general constrained we need to use the special choice of $\tau_k = 1/\eta_{k+1} \beta$ as follows. Letting $v:= \tau_k z_{k+1} + (1-\tau_K) y_k \in \X$ so that $x_{k+1} - v = (\tau_k z_k + (1-\tau_k)y_k) -v = \tau_k(z_k-z_{k+1})$, we have
+and thus we have the result for $\X = \R^n$. For the general constrained we need to use the special choice of $\tau_k = 1/\eta_{k+1} \beta$ as follows. Letting $v:= \tau_k z_{k+1} + (1-\tau_k) y_k \in \X$ so that $x_{k+1} - v = (\tau_k z_k + (1-\tau_k)y_k) -v = \tau_k(z_k-z_{k+1})$, we have
 \begin{align*}\label{actual_regret_linear_coupling}
-    \begin{aligned}
+     \begin{aligned}
         &\langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle - \frac{1}{2}\|z_k - z_{k+1}\|^2  \\
         = & \left\langle \frac{\eta_{k+1}}{\tau_k} \nabla f(x_{k+1}), x_{k+1} - v \right\rangle - \frac{1}{2\tau_k^2} \|x_{k+1} - v \|^2 \\
         = & \eta_{k+1}^2 \beta \left( \langle \nabla f(x_{k+1}), x_{k+1} -v \rangle - \frac{\beta}{2} \|x_{k+1} - v\|^2\right) \leq \eta_{k+1}^2 \beta \Prog(x_{k+1})
@@ -231,11 +221,13 @@ We can derive the lemma from the following inequalities
         &\ \eta_{k+1}(f(x_{k+1}) -f(u)) \\
         \leq &\ \eta_{k+1} \langle \nabla f(x_{k+1}), x_{k+1} -u \rangle \\
         = &\ \eta_{k+1} \langle \nabla f(x_{k+1}), x_{k+1} -z_{k} \rangle + \eta_{k+1} \langle \nabla f(x_{k+1}), z_k -u \rangle \\
-        = &\ \frac{(1-\tau_k)\eta_{k+1}}{\tau_k} \langle \nabla f(x_{k+1}), y_k - x_{k+1} \rangle + \langle \nabla f(x_{k+1}), z_k - u \rangle \\
+        = &\ \frac{(1-\tau_k)\eta_{k+1}}{\tau_k} \langle \nabla f(x_{k+1}), y_k - x_{k+1} \rangle + \eta_{k+1} \langle \nabla f(x_{k+1}), z_k - u \rangle \\
         \leq &\ \frac{(1-\tau_k)\eta_{k+1}}{\tau_k}(f(y_k)-f(x_{k+1})) + \eta_{k+1} \langle \nabla f(x_{k+1}), z_k-u \rangle \\
-        \leq &\ \frac{(1-\tau_k)\eta_{k+1}}{\tau_k}(f(y_k)-f(x_{k+1})) + \eta_{k+1}^2 \beta (f(x_{k+1}) - f(y_{k+1}))  + V_{z_k}(u) - V_{z_{k+1}}(u)\\
-        = &\ (\eta_{k+1}^2\beta -\eta_{k+1})f(y_k) -(\eta_{k+1}^2 \beta)f(y_{k+1})  +\eta_{k+1}f(x_{k+1})   + \left( V_{z_k}(u) - V_{z_{k+1}}(u)\right)\\
+        \leq &\ \frac{(1-\tau_k)\eta_{k+1}}{\tau_k}(f(y_k)-f(x_{k+1})) + \eta_{k+1}^2 \beta (f(x_{k+1}) - f(y_{k+1}))  + D(u, {z_k}) - D(u, z_{k+1})\\
+            = &\ (\eta_{k+1}^2\beta -\eta_{k+1})f(y_k) -(\eta_{k+1}^2 \beta)f(y_{k+1})  +\eta_{k+1}f(x_{k+1})   + \left( D(u, {z_k}) - D(u, z_{k+1})\right)\\
     \end{aligned}
 \end{align*}
-where the lines $4,5,6$ and $7$ are obtained, respectively, by $(4)$ the choice of $x_{k+1}$ that satisfies $\tau_k(x_{k+1} - z_k) = (1-\tau_k) (y_k - x_{k+1})$; $(5)$ is by the convexity of $f$ and $1-\tau_k \geq 0$; $(6)$ uses Lemma \ref{lemma:mirror_bound_general} and $(7)$ uses the choice of $\tau_k = 1/\alpha_{k+1}\beta$.
+where the lines $4,5,6$ and $7$ are obtained, respectively, by $(4)$ the choice of $x_{k+1}$ that satisfies $\tau_k(x_{k+1} - z_k) = (1-\tau_k) (y_k - x_{k+1})$; $(5)$ is by the convexity of $f$ and $1-\tau_k \geq 0$; $(6)$ uses Lemma \ref{lemma:mirror_bound_general} and $(7)$ uses the choice of $\tau_k = 1/\eta_{k+1}\beta$.
 \end{proof}
+
+\textbf{Conclusion.} Linear coupling describes a family of methods whose oracle complexity matches the lower bound that we had proved for these kinds of algorithms. However, this is not the end of the story. Linear coupling provides intuition about acceleration as any other method before. The authors of the paper advocate thinking about any kind of first order optimization problem in terms of linear coupling. Provided one proves similar lemmas for the guaranteed progress of the primal approach (gradient descent) and for the loss of the dual approach (mirror descent) for your particular problem, one can try to use linear coupling to obtain a fast algorithm. Since Linear Coupling was published, there have been several proposals of algorithms to solve optimization problems whose complexity is lower that the one of the best previous known algorithm. Some of these are: the first accelerated stochastic gradient descent algorithm \cite{allen2016katyusha}, a faster algorithm for matrix scaling \cite{allen2017much}, a faster algorithm of accelerated coordinate descent using non-uniform sampling \cite{allen2016even}, nearly-linear time packing and covering LP solvers \cite{allen2014nearly}, an algorithm to solve positive LPs faster in parallel \cite{allen2014using}, an algorithm for non-convex optimization faster than stochastic gradient descent \cite{allen2017natasha}.
