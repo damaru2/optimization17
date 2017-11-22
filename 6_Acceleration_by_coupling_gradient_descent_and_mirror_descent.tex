@@ -160,7 +160,7 @@ We will use two lemmas, that are the analogous to Lemma \ref{lemma:mirror_bound}
 
 \begin{lemma}\label{lemma:mirror_bound_general}
     If $\tau_k = \frac{1}{\eta_{k+1}\beta}$, then linear coupling satisfies that for every $u \in \X$,
-    \begin{align*}\label{actual_regret_linear_coupling}
+    \begin{align*}
         \begin{aligned}
             \eta_{k+1} \langle \nabla f(x_{k+1}), z_{k} - u \rangle &\leq \eta^2_{k+1}\beta \Prog(x_{k+1}) + \left( D(u, z_k) - D(u, z_{k+1})\right) \\
                                                                 &\leq \eta_{k+1}^2\beta \left( f(x_{k+1}) - f(y_{k+1})\right) + \left( D(u, z_k) - D(u, z_{k+1})\right).
@@ -189,7 +189,7 @@ which after simplification implies $f(y_T)\leq f(x^\ast) + \frac{4\Theta \beta}{
 
 \begin{proof}[Proof of Lemma \ref{lemma:mirror_bound_general}]
     The second inequality of the lemma is again by the gradient descent guarantee $f(x_{k+1}) - f(y_{k+1})) \geq \Prog(x_{k+1})$. To prove the first one, we first write down the key inequality of mirror-descent analysis (whose proof is identical to the one given in the previous section). 
-\begin{align*}\label{actual_regret_linear_coupling}
+\begin{align*}
     \begin{aligned}
         \eta_{k+1} \langle \nabla f(x_{k+1}), z_{k} - u \rangle &= \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle + \langle \eta_{k+1} \nabla f(x_{k+1}), z_{k+1} - u \rangle \\
                                                                 &\leq  \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle + \langle -\nabla D(u, {z_k}), z_{k+1} - u \rangle \\
@@ -202,7 +202,7 @@ The first inequality is due to the minimality of $z_{k+1} = \argmin_{z\in\X} \{D
     \left( \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle - \frac{1}{2}\|z_k - z_{k+1}\|^2 \right) \leq \left(\eta_{k+1}\|\nabla f(x_{k+1})\|_\ast \right) \|z_k - z_{k+1}\| - \frac{1}{2}\|z_k - z_{k+1}\|^2 \leq \frac{\eta_{k+1}^2}{2} \|\nabla f(x_{k+1})\|_\ast^2
 \]
 and thus we have the result for $\X = \R^n$. For the general constrained we need to use the special choice of $\tau_k = 1/\eta_{k+1} \beta$ as follows. Letting $v:= \tau_k z_{k+1} + (1-\tau_k) y_k \in \X$ so that $x_{k+1} - v = (\tau_k z_k + (1-\tau_k)y_k) -v = \tau_k(z_k-z_{k+1})$, we have
-\begin{align*}\label{actual_regret_linear_coupling}
+\begin{align*}
      \begin{aligned}
         &\langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle - \frac{1}{2}\|z_k - z_{k+1}\|^2  \\
         = & \left\langle \frac{\eta_{k+1}}{\tau_k} \nabla f(x_{k+1}), x_{k+1} - v \right\rangle - \frac{1}{2\tau_k^2} \|x_{k+1} - v \|^2 \\
@@ -216,7 +216,7 @@ where the last inequality is from the definition of $\Prog(x_{k+1})$.
 
 \begin{proof}[Proof of Lemma \ref{lemma:coupling}]
 We can derive the lemma from the following inequalities
-\begin{align*}\label{actual_regret_linear_coupling}
+\begin{align}
     \begin{aligned}
         &\ \eta_{k+1}(f(x_{k+1}) -f(u)) \\
         \leq &\ \eta_{k+1} \langle \nabla f(x_{k+1}), x_{k+1} -u \rangle \\
@@ -226,7 +226,7 @@ We can derive the lemma from the following inequalities
         \leq &\ \frac{(1-\tau_k)\eta_{k+1}}{\tau_k}(f(y_k)-f(x_{k+1})) + \eta_{k+1}^2 \beta (f(x_{k+1}) - f(y_{k+1}))  + D(u, {z_k}) - D(u, z_{k+1})\\
             = &\ (\eta_{k+1}^2\beta -\eta_{k+1})f(y_k) -(\eta_{k+1}^2 \beta)f(y_{k+1})  +\eta_{k+1}f(x_{k+1})   + \left( D(u, {z_k}) - D(u, z_{k+1})\right)\\
     \end{aligned}
-\end{align*}
+\end{align}
 where the lines $4,5,6$ and $7$ are obtained, respectively, by $(4)$ the choice of $x_{k+1}$ that satisfies $\tau_k(x_{k+1} - z_k) = (1-\tau_k) (y_k - x_{k+1})$; $(5)$ is by the convexity of $f$ and $1-\tau_k \geq 0$; $(6)$ uses Lemma \ref{lemma:mirror_bound_general} and $(7)$ uses the choice of $\tau_k = 1/\eta_{k+1}\beta$.
 \end{proof}
 

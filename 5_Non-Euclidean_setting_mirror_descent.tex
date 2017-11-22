@@ -215,17 +215,17 @@ Let $x\in \mathcal{X}\cap\mathcal{D}$. Using the definition of the gradient step
 	\nabla\Phi(y_{t+1}) = \nabla\Phi(x_t)-\eta g_t
 \end{equation*}
 we get
-\begin{equation}\label{first_part_mirror_descent_lemma}
-    \begin{align*}
+\begin{align}\label{first_part_mirror_descent_lemma}
+    \begin{aligned}
         f(x_s) - f(x) &\leq g_s^\mathsf{T}\left(x_s - x\right) \\
         & = \frac{1}{\eta}\left(\nabla\Phi(x_s) - \nabla\Phi(y_{s+1}) \right)^\mathsf{T}\left(x_s - x\right) \\
         & = \frac{1}{\eta}\left(D_\Phi(x_s, y_{s+1}) + D_\Phi(x, x_s) - D_\Phi(x, y_{s+1}) \right)	\\
         & \leq  \frac{1}{\eta}\left(D_\Phi(x_s, y_{s+1}) + D_\Phi(x, x_s) - D_\Phi(x, x_{s+1}) - D_\Phi(x_{s+1}, y_{s+1})\right),
-    \end{align*}
-\end{equation}
+    \end{aligned}
+\end{align}
 where we used identity \eqref{eq:bergman_ident} in line 3 and inequality \eqref{eq:lem2} applied to $D_\Phi(x, y_{s+1})$ in line 4. We bound the difference $D_\Phi(x_s, y_{s+1}) - D_\Phi(x_{s+1}, y_{s+1})$ as follows
-\begin{equation}\label{key_inequality_mirror_descent}
-    \begin{align*}
+\begin{align}\label{key_inequality_mirror_descent}
+    \begin{aligned}
 	& D_\Phi(x_s, y_{s+1}) - D_\Phi(x_{s+1}, y_{s+1}) 	\\
 	& = \Phi(x_s) - \Phi(y_{s+1}) - \nabla \Phi(y_{s+1})^\mathsf{T}(x_s - y_{s+1}) - \Phi(x_{s+1}) + \Phi(y_{s+1}) + \nabla \Phi(y_{s+1})^\mathsf{T}(x_{s+1} - y_{s+1}) \\
 	& = \Phi(x_s) - \Phi(x_{s+1}) - \nabla\Phi(y_{s+1})^\mathsf{T}\left(x_s - x_{s+1}\right) \\
@@ -235,8 +235,8 @@ where we used identity \eqref{eq:bergman_ident} in line 3 and inequality \eqref{
 	& \leq \eta \|g_s\|_\ast\left\|x_s - x_{s+1}\right\| -\frac{\alpha}{2}\left\|x_s - x_{s+1}\right\|^2 \\
 	& \leq \frac{\left(\eta \|g_s\|_\ast\right)^2}{2\rho} \\
     & \leq \frac{\left(\eta L\right)^2}{2\rho},
-    \end{align*}
-\end{equation}
+    \end{aligned}
+\end{align}
 where we used the inequality $az - bz^2 \leq a^2/4b$ for all $z\in \mathbb{R}$ in the last line and $\alpha$-strong convexity in line 4. We compute
 \begin{align}
 	& \sum_{s=1}^t f(x_s) - f(x) \nonumber \\
