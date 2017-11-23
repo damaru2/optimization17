@@ -96,7 +96,7 @@ Instead of considering the penalized version of the problem one could look at th
 \text{subject to} \|\beta\|_1 \leq 1 \nonumber
 \end{align}
 
-We are interested in situations where $n<<p$, that is the number of variables $p$ in $X$ can be very large, potentially exponential in the dimension $n$. Nonetheless we want to restrict our attention to algorithms that run in reasonable time with respect to $n$, that is we want polynomial time algorithms in $n$. Of course in general this is impossible, and we need to assume that the dictionary has some structure that can be exploited. Here we make the assumption that one can solve in time $p(n)$ (where $p$ is polynomial) the following problem for any $y\in\mathbb{R}$:
+We are interested in situations where $n<<p$, that is the number of variables $p$ in $X$ can be very large, potentially exponential in the dimension $n$. Nonetheless we want to restrict our attention to algorithms that run in reasonable time with respect to $n$, that is we want polynomial time algorithms in $n$. Of course in general this is impossible, and we need to assume that the dictionary has some structure that can be exploited. Here we make the assumption that one can solve in time $p(n)$ (where $p$ is polynomial) the following problem for any $y\in\mathbb{R}^n$:
 \begin{equation}
 \min_{ 1\leq i \leq p } y^{\top} x_i\nonumber
 \end{equation}
@@ -110,7 +110,7 @@ conditional gradient descent. First, observe that:
 \nabla f (\beta)=X^\top (X\beta-Y) \nonumber
 \end{equation}
 
-Now assume that $s_t=X \beta_t - Y \in \mathbb{R}^n$ is already computed, then to compute the update \ref{eq:fw_update} one needs to find  the coordinate $i_t \in 1,\ldots,p$ that maximizes $| [\nabla f(\beta_t)](i) |$ which can be done by maximizing $x_i^\top s_t$ and $-x_i^\top s_t$. Thus \ref{eq:fw_update} takes time $O(p(n))$. Computing $\beta_{t+1}$ from $\beta_t$ and $i_t$ takes time $O(t)$ since $\|x_t \|_0 \leq t$, and computing $s_{t+1}$ from $s_t$ and $i_t$ takes time $O(n)$. Thus the overall time complexity of running t steps is (we assume $p(n) =\Omega(n)$)
+Now assume that $z_t=X \beta_t - Y \in \mathbb{R}^n$ is already computed, then to compute the update \ref{eq:fw_update} one needs to find  the coordinate $i_t \in 1,\ldots,p$ that maximizes $| [\nabla f(\beta_t)](i) |$ which can be done by maximizing $x_i^\top z_t$ and $-x_i^\top z_t$. Thus \ref{eq:fw_update} takes time $O(p(n))$. Computing $\beta_{t+1}$ from $\beta_t$ and $i_t$ takes time $O(t)$ since $\|\beta_t \|_0 \leq t$, and computing $s_{t+1}$ from $s_t$ and $i_t$ takes time $O(n)$. Thus the overall time complexity of running t steps is (we assume $p(n) =\Omega(n)$)
 \begin{equation} \label{eq:lasso_time_bound}
 O(tp(n) + t^2 )
 \end{equation}
@@ -142,8 +142,10 @@ Instead of using the pre-defined step-sizes $\gamma=\frac{2}{k+2}$ a modified al
 
 \subsubsection{Fully corrective.}
 
-This is a harder-working variant of the Frank-Wolfe method, which after the addition of a new \emph{atom} (or search direction) $s$ re-optimizes the objective $f$ over all previously used atoms. Here in step $t$, the current atom $s_t$ is still allowed to be an approximate linear minimizer.
-
+This is a harder-working variant of the Frank-Wolfe method, which after the addition of a new \emph{atom} (or search direction) $s$ re-optimizes the objective $f$ over all previously used atoms. The change consists on computing $x_{t+1}$ using a convex combination of all the previous atoms $s_t$. This is:
+\begin{equation}
+x_{t+1} = \argmin_{x \in \text{conv}(s_0,\ldots,s_{t}) } f(x)
+\end{equation}
 Comparing to the original Frank-Wolfe method, the idea is that the variant here will hopefully make more progress per iteration, and therefore result in iterates $x$ being combinations of even fewer atoms (i.e. better sparsity). This however comes at a price, namely that the internal problem in each iteration can now become as hard to solve as the original optimization problem, implying that no global run-time guarantees can be given for the algorithm in general.
 
 \subsubsection{Away steps.}
