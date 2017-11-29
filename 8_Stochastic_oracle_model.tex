@@ -1,6 +1,7 @@
 %! TEX root = main.tex
 
 \section{Stochastic oracle model}
+\emph{Speaker: Adam Foster, 30/11/2017.}\\
 
 Assume that we want to solve the following problem:
 \begin{align}
@@ -10,19 +11,20 @@ Assume that we want to solve the following problem:
 	\end{aligned}
 	\label{def:stochastic problem}
 \end{align}
-where $f$ is a convex function, possibly not known. The first order \emph{stochastic} oracle model defines the framework where given $x\in\mathcal{X}$ an oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $x$, namely, $\E[G] \in \partial f(x)$. If $X$ is a random variable, the oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $X$ conditionally on $X$, namely, $\E[G|X] \in \partial f(X)$.
+where $f$ is a convex function, possibly not known. In previous work, we assumed that we had a first order oracle which, given $x \in \mathcal{X}$, would yield a $g \in \partial f(x)$. When analysing our algorithms in terms of oracle complexity, it was the \textit{number of calls} to the oracle that was important. In many applications, an oracle may not exist, or a single call to the oracle may be very expensive. In such cases, we accept randomness in our oracle but require it to be unbiased.
 
-\subsubsection*{$L$-Lipschitz functions}
-We analyze the behavior of the projected gradient descent algorithm to solve problem \eqref{def:stochastic problem} when we replace exact knowledge of subgradients of $f$ with unbiased estimates of them. For a given initial point $X_1\in\X$, possibly random, and a given collection of step sizes $\eta_1,\eta_2,\ldots$, the stochastic projected gradient descent is defined by the sequence of random variables generated according to the following update:
+Formally, a first order \emph{stochastic} oracle model defines the framework where given $x\in\mathcal{X}$ an oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $x$, namely, $\E[G] \in \partial f(x)$. If $X$ is a random variable, the oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $X$ conditionally on $X$, namely, $\E[G|X] \in \partial f(X)$.
+
+
+\subsection*{Projected gradient descent with a stochastic oracle}
+We analyse the behaviour of the projected gradient descent algorithm to solve problem \eqref{def:stochastic problem} when we replace exact knowledge of subgradients of $f$ with unbiased estimates of them. For a given initial point $X_1\in\X$, possibly random, and a given collection of step sizes $\eta_1,\eta_2,\ldots$, the stochastic projected gradient descent is defined by the sequence of random variables generated according to the following update:
 \begin{align*}
 Y_{s+1} &= X_s - \eta_s G_s,\\
 X_{s+1} &= \Pi_{\X}(Y_{s+1}).
 \end{align*}
-Here, conditionally on $X_s$, the random variable $G_s$ is an unbiased estimator of the subgradient of the function $f$ at $X_s$, namely,
-$$
-	\E[G_s|X_s] \in\partial f(X_s).
-$$
-We state and prove the convergence of this method in the $L$-Lipschitz case.
+where $G_s$ is obtained from a stochastic oracle with $\E[G_s|X_s] \in \partial f(X_s)$.
+
+Remarkably, for $f$ a $L$-Lipschitz function we can recover the rate of convergence of the deterministic oracle (cf. Theorem \ref{thm:projectedgradL}). When $f$ is additionally $\alpha$-strongly convex we recover the unaccelerated rate of convergence of \cite{bubeck} Theorem 3.9.
 
 \begin{theorem}[$L$-Lipschitz Stochastic Projected Subgradient Descent]
 \label{thm:projectedgradLstoch}
@@ -30,8 +32,6 @@ Let $f$ be convex. Suppose $\X$ is contained in a Euclidean ball of radius $B$ c
 \begin{equation} \label{eqn:proj_subgrad_t stoch}
 \E f\left(\frac{1}{t} \sum_{s=1}^t X_s\right) - f(x^*) \leq \frac{LB}{\sqrt{t}}.
 \end{equation}
-\end{theorem}
-
 \begin{proof}
 For any $1 \leq s \leq t$ we have
 \begin{align*}
@@ -56,14 +56,51 @@ and using the assumption $\E[\|G_s\|^2]\le L^2$ we get
 \]
 Selecting $\eta = \frac{B}{L\sqrt{t}}$ to minimize the right-hand side of the above inequality gives the first result in \eqref{eqn:proj_subgrad_t} (since $f\left(\frac{1}{t}\sum_{s=1}^t X_s \right) \leq \frac{1}{t} \sum_{s=1}^t f(X_s)$ by Jensen's inequality).
 \end{proof}
+\end{theorem}
 
-Theorem \ref{thm:projectedgradLstoch} shows that, in expectation, the stochastic projected subgradient descent method yields the same convergence guarantees as the deterministic counterpart analyzed in Theorem \ref{thm:projectedgradL}.  In particular, the oracle complexity is the same\footnote{Note that different notions of accuracy are used, however, as we consider the expected value of the stochastic method.}: to get an accuracy $\varepsilon$, both methods requires $O(1/\varepsilon^2)$ calls to their respective oracles. The main advantage of the stochastic version lies in the fact that in some applications the \emph{computational} complexity involved in having access to a stochastic oracle is much cheaper than in the determinist case. We now show that the stochastic model yields substantial computational saving in machine learning.
 
-\subsection{Multiple passes over the data}
-TO DO.
 
-\subsection{Single pass over the data}
-We now show how the first order stochastic oracle model allows us to deal directly with expected risk minimization without invoking the empirical risk minimization paradigm.
+\begin{theorem}[$\alpha$-strongly convex Stochastic Projected Subgradient Descent]
+\label{thm:projectedgradalphastoch}
+Let $f$ be $\alpha$-strongly convex. Suppose that for every $X \in \X$ the stochastic oracle yields an unbiased estimator of the subgradient of $f$ at $X$ bounded in $L_2$, namely, $\E[G |X]\in \partial f(X)$ and $\E[\|G\|^2] \leq L^2$. Then, the projected subgradient descent method with $\eta_s = \frac{2}{\alpha(s+1)}$ satisfies 
+\begin{equation} \label{eqn:proj_subgrad_alpha stoch}
+\E f\left( \sum_{s=1}^t \frac{2s}{t(t+1)}X_s \right) - f(x^*) \leq \frac{2L^2}{\alpha(t+1)}.
+\end{equation}
+\begin{proof}
+For any $1 \leq s \leq t$ we have
+\begin{align*}
+	f(X_s) - f(x^*)
+	\le \E [G_s|X_s]^T(X_s - x^*) - \frac{\alpha}{2}\|X_s - x^*\|^2
+	= \E \left[G_s^T(X_s - x^*) - \frac{\alpha}{2}\|X_s - x^*\|^2 \large| X_s \right].
+\end{align*}
+Proceeding as before, we find
+\begin{align*}
+	G_s^T(X_s - x^*) - \frac{\alpha}{2}\|X_s - x^*\|^2
+	\le \left( \frac{1}{2\eta_s} - \frac{\alpha}{2} \right) \|X_s - x^*\|^2 - \frac{1}{2\eta_s}\|X_{s+1} - x^*\|^2 + \frac{\eta_s}{2} \|G_s\|^2.
+\end{align*}
+Taking the expectation and applying $\E[\|G_s\|^2] \le L^2$ gives
+\begin{align*}
+	\E f(X_s) - f(x^*)
+	\le \left( \frac{1}{2\eta_s} - \frac{\alpha}{2} \right) \E[\|X_s - x^*\|^2] - \frac{1}{2\eta_s}\E [\|X_{s+1} - x^*\|^2] + \frac{\eta_s L^2}{2}.
+\end{align*}
+Multiplying by $s$ and using $\eta_s = \frac{2}{\alpha(s+1)}$ we get
+\begin{align*}
+	s(\E f(X_s) - f(x^*))
+	\le \frac{\alpha}{4}s(s-1) \E[\|X_s - x^*\|^2] - \frac{\alpha}{4}s(s+1) \E [\|X_{s+1} - x^*\|^2] + \frac{L^2}{\alpha},
+\end{align*}
+which upon summing over $s$ leads to
+\[
+\sum_{s=1}^t s(\E f(X_s) - f(x^*)) \le \frac{tL^2}{\alpha} + \text{(telescopes)}.
+\]
+By multiplying through by $\frac{2}{t(t+1)}$ and applying Jensen's inequality to $f$ we have \eqref{eqn:proj_subgrad_alpha stoch}.
+\end{proof}
+\end{theorem}
+
+
+
+Theorem \ref{thm:projectedgradLstoch} shows that, in expectation, the stochastic projected subgradient descent method yields the same convergence guarantees as the deterministic counterpart analysed in Theorem \ref{thm:projectedgradL}.  In particular, the oracle complexity is the same\footnote{Note that different notions of accuracy are used, however, as we consider the expected value of the stochastic method.}: to get an accuracy $\varepsilon$, both methods requires $O(1/\varepsilon^2)$ calls to their respective oracles. The main advantage of the stochastic version lies in the fact that in some applications the \emph{computational} complexity involved in having access to a stochastic oracle is much cheaper than in the deterministic case. We now show that the stochastic model yields substantial computational saving in machine learning.
+
+\subsection{Expected risk minimization and empirical risk minimization revisited}
 Let us recall the original problem that motivates us in Section \ref{sec:intro}, namely, the expected risk minimization:
 \begin{align*}
 	\begin{aligned}
@@ -71,10 +108,151 @@ Let us recall the original problem that motivates us in Section \ref{sec:intro},
 		\text{subject to }\quad & x\in \mathcal{X}.
 	\end{aligned}
 \end{align*}
-The assumption here is that we know the loss function $\ell$ (indeed, we can choose it!) and the constraint set $\mathcal{X}$, but we do not know the distribution of $(W,Y)$. We only have access to $m$ i.i.d.\ samples $(W_1,Y_1),\ldots,(W_m,Y_m)$ from this unknown distribution. So we do not know the function $r$ that we want to minimize, and in particular we can not operate in the deterministic first order oracle model discussed in the previous weeks as for a given $x\in\mathcal{X}$ we do not have access to a subgradient in $\partial r(x)$. On the other hand, given $x\in\mathcal{X}$ we can have access to an unbiased estimator of a subgradient of $r$ evaluated at $x$. In fact, given the function $x \rightarrow R_i(x) := \ell(x^T\Phi(W_i),Y_i)$, which is known to us, we can compute a subgradient of $R_i$ at $x$. This is a random variable $G_i\in \partial R_i(x)$ that satisfies $\E G_i \in \partial r(x)$. The same is true if we want to get an estimate of the subgradient of $r$ at $X\in\X$ when $X$ is a random variable \emph{independent} of $(W_i,Y_i)$. In fact, in this case we can evaluate a subgradient of $R_i$ at $X$, and this random variable $G_i\in \partial R_i(X)$ satisfies $\E[G_i|X]\in r(X)$.\footnote{Note that if $X$ is random, then there are two sources of randomness in $G_i$: one source is $X$ itself, the other is the data point $(W_i,Y_i)$. The statement $\E[G_i|X]\in r(X)$ holds if $X$ and $(W_i,Y_i)$ are independent.} Hence, we satisfy the assumption of the first order stochastic oracle model. At the same time, as we have $m$ independent data points at out disposal, we can have access to at most $m$ independent unbiased estimators of subgradients evaluated at possibly different locations in $\mathcal{X}$. In other words, the requirement of independence restricts us to a \emph{single pass} over the data, which is not as general as in the stochastic block model defined above where we can have how many queries to the oracle as we want.
+The assumption here is that we know the loss function $\ell$ (indeed, we can choose it!) and the constraint set $\mathcal{X}$, but we do not know the distribution of $(W,Y)$. We only have access to $m$ i.i.d.\ samples $(W_1,Y_1),\ldots,(W_m,Y_m)$ from this unknown distribution.
+
+With the concept of a stochastic oracle in hand, one can now attack the expected risk minimization problem directly because $G \in \partial R_i$ is an unbiased estimator of the subgradient of $r$ where $R_i(x) = \ell(x^T\Phi(W_i), Y_i)$. Using this method, one can hope to solve the problem exactly. However, to ensure unbiasedness it is necessary to make only a \textit{single} gradient step with each independent $(W_i, Y_i)$, leading to a single pass through the data. Such an approach is well-suited to an online learning algorithm in which a data is processed and discarded in a stream.
+
+Alternatively, one could minimize the empirical risk $R(x) = \frac{1}{m}\sum R_i(x)$ (see \eqref{def:mainproblem empirical risk}). Proposition~\ref{prop:erm2} shows that the error can be controlled by breaking the resulting error into $STATISTICS$ and $OPTIMIZATION$ terms. Whilst $R$ and its subgradients may be tractable, such computations are typically $O(m)$. Stochastic oracle methods can reduce this to $O(1)$. One could select $I \sim \text{Uniform}(1, ..., m)$ and use $G \in \partial R_I$ as an unbiased estimator of the subgradient of $R$. Since unlimited i.i.d. samples of $I$ are available, multiple passes over the data can be made. The key difference is that the functions being optimized in the two cases are different.
+
+\subsection{Single pass over the data}
+In the expected risk minimization problem we do not know the function $r$ that we want to minimize, and in particular we can not operate in the deterministic first order oracle model discussed in the previous weeks as for a given $x\in\mathcal{X}$ we do not have access to a subgradient in $\partial r(x)$. On the other hand, given $x\in\mathcal{X}$ we can have access to an unbiased estimator of a subgradient of $r$ evaluated at $x$. In fact, given the function $x \mapsto R_i(x) := \ell(x^T\Phi(W_i),Y_i)$, which is known to us, we can compute a subgradient of $R_i$ at $x$. This is a random variable $G_i\in \partial R_i(x)$ that satisfies $\E G_i \in \partial r(x)$. The same is true if we want to get an estimate of the subgradient of $r$ at $X\in\X$ when $X$ is a random variable \emph{independent} of $(W_i,Y_i)$. In fact, in this case we can evaluate a subgradient of $R_i$ at $X$, and this random variable $G_i\in \partial R_i(X)$ satisfies $\E[G_i|X]\in r(X)$.\footnote{Note that if $X$ is random, then there are two sources of randomness in $G_i$: one source is $X$ itself, the other is the data point $(W_i,Y_i)$. The statement $\E[G_i|X]\in \partial r(X)$ holds if $X$ and $(W_i,Y_i)$ are independent.} Hence, we satisfy the assumption of the first order stochastic oracle model. At the same time, as we have $m$ independent data points at out disposal, we can have access to at most $m$ independent unbiased estimators of subgradients evaluated at possibly different locations in $\mathcal{X}$. In other words, the requirement of independence restricts us to a \emph{single pass} over the data, which is not as general as in the stochastic block model defined above where we can have how many queries to the oracle as we want.
 
 It is easy to check that under the assumptions of Proposition \ref{prop:Lip-stats}, Theorem \ref{thm:projectedgradLstoch} yields the following convergence guarantees for the stochastic projected descent method:
 $$
 	\E r(\hat X_m) - r(x^*) \leq \frac{GL_\textrm{loss}B}{\sqrt{m}},
 $$
-with $\hat X_m = \frac{1}{m}\sum_{i=1}^m X_i$. In other word, we can apply the stochastic gradient descent algorithm to \emph{directly} minimize the expected risk $r$, without invoking the empirical risk minimization paradigm, i.e., without breaking the problem into statistics and optimization as outlined in Section \ref{sec:intro}. The computational savings are clear. If computing a subgradient for each functions $R_i$ costs $O(1)$, then the computational complexity of stochastic gradient descent to achieve precision $\varepsilon$ (in expectation) is of order $O(1/\varepsilon^2)$. On the other hand, if we apply the deterministic gradient descent method to minimize the empirical risk $R$ up to precision $1/\sqrt{m}$, as discussed in Section \ref{sec:intro} and in Remark \ref{rem:optimization}, then we see that the computational complexity is $O(m/\varepsilon^2)$, as we need $O(1/\varepsilon^2)$ calls to the deterministic oracle but each call costs $O(m)$ base iterations, as $R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x)$.
+with $\hat X_m = \frac{1}{m}\sum_{i=1}^m X_i$. The computational savings are clear. If computing a subgradient for each functions $R_i$ costs $O(1)$, then the computational complexity of stochastic gradient descent to achieve precision $\varepsilon$ (in expectation) is of order $O(1/\varepsilon^2)$. On the other hand, if we apply the deterministic gradient descent method to minimize the empirical risk $R$ up to precision $1/\sqrt{m}$, as discussed in Section \ref{sec:intro} and in Remark \ref{rem:optimization}, then we see that the computational complexity is $O(m/\varepsilon^2)$, as we need $O(1/\varepsilon^2)$ calls to the deterministic oracle but each call costs $O(m)$ base iterations, as $R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x)$.
+
+\subsection{Multiple passes over the data}
+In the unconstrained empirical risk minimization problem
+\begin{align*}
+	\text{minimize }\quad   & R(x) = \frac{1}{m}\sum_{i=1}^m R_i(x)
+\end{align*}
+we assume henceforth that the $R_i$ are $\beta$-smooth and that $R$ is $\alpha$-strongly convex. Let $\kappa = \beta/\alpha$ which is typically very large. The problem is amenable to basic gradient descent
+\begin{equation}
+	x_{t+1}= x_t - \frac{\eta_t}{m}\sum_{i=1}^m \nabla R_i(x),
+\end{equation}
+and stochastic gradient descent
+\begin{equation}
+	x_{t+1}= x_t - \eta_t \nabla R_{I_t}(x),
+\end{equation}
+where $I_t$ are i.i.d $\text{Uniform}(1, ..., m)$. In \cite{bubeck} Theorem 3.10 it is shown that basic gradient descent can achieve an exponential rate $O(m\kappa\log(1/\varepsilon))$ whereas Theorem~\ref{thm:projectedgradalphastoch} showed that stochastic gradient descent achieves $O(1/(\alpha\varepsilon))$.
+
+This motivates Stochastic Variance Reduced Gradient descent (SVRG) algorithm. This is a stochastic oracle method which achieves $O((m+\kappa)\log(1/\varepsilon))$.
+
+The main idea of the algorithm is to introduce a reference $y$ and to compute the deterministic gradient $\nabla R(y)$. In place of $\nabla R_I(x)$ one uses $\nabla R_I(x) - \nabla R_I(y) + \nabla R(y)$. Lemma~\ref{lemma:randsmoothbound} is a preliminary result. The main algorithm is presented in Procedure~\ref{alg:svrg}.
+
+\begin{lemma}
+\label{lemma:randsmoothbound}
+Let $f_1, ..., f_m$ be $\beta$-smooth convex functions on $\mathbb{R}^n$ and $I \sim \text{Uniform}(1, ..., m)$. Then for all $x \in \mathbb{R}^n$
+\begin{equation}
+	\E \|\nabla f_I(x) - \nabla f_I(x^*)\|^2 \le 2\beta (f(x) - f(x^*))
+\end{equation} 
+\begin{proof}
+Let
+\begin{equation}
+	g_I(x) = f_I(x) - f_I(x^*) - \nabla f_I(x^*)^T(x-x^*) \ge 0
+\end{equation}
+by convexity. Note $g_I$ is a $\beta$-smooth function.
+For $\beta$-smooth $g$, it can be shown that
+\begin{equation}
+	g\left(x - \frac{1}{\beta}\nabla g(x)\right) - g(x) \le -\frac{1}{2\beta}\|\nabla g(x)\|^2.
+\end{equation}
+Since $g_I \ge 0$ we can discard $g_I\left(x - \frac{1}{\beta}\nabla g_I(x)\right)$ to obtain
+\begin{equation}
+ -g_I(x) \le -\frac{1}{2\beta}\|\nabla g_I(x)\|^2.
+\end{equation}
+Upon reintroducing the definition of $g_I$ this gives
+\begin{equation}
+	\|\nabla f_I(x) - \nabla f_I(x^*)\|^2 \le 2\beta \left(f_I(x) - f_I(x^*) - \nabla f_I(x^*)^T (x - x^*)\right).
+\end{equation}
+When we take expectations with respect to $I$ we note that $\E \nabla f_I(x^*) = 0$. The result follows.
+
+\end{proof}
+\end{lemma}
+
+\begin{algorithm}
+%\scriptsize
+\caption{Stochastic Variance Reduced Gradient descent (SVRG)}
+   \begin{algorithmic}[1] \label{alg:svrg}
+   \REQUIRE $R$ is an $\alpha$-strongly convex average of $\beta$-smooth convex functions $R_1, ..., R_m$.
+   
+   \STATE Let $y^{(1)} \in \mathbb{R}^n$ be an arbitrary initial point
+   \FOR {$s=1, 2, ...$}
+   	  \STATE $x_1^{(s)} = y^{(s)}$
+   	  \FOR {$t=1,..., T$}
+   	      \STATE $I_t^{(s)} \sim \text{Uniform}(1, ..., m)$ independently
+   	  	  \STATE $x_{t+1}^{(s)} = x_t^{(s)} - \eta \left(\nabla R_{I_t^{(s)}}(x_t^{(s)}) - \nabla R_{I_t^{(s)}}(y^{(s)}) + \nabla R(y^{(s)})\right)$
+   	  \ENDFOR
+   	  \STATE $y^{(s+1)} = \frac{1}{T}\sum_{t=1}^T x_t^{(s)}$
+   \ENDFOR	  
+\end{algorithmic}
+\end{algorithm}
+
+We now show that the errors in SVRG decrease exponentially.
+
+\begin{theorem}[Stochastic Variance Reduced Gradient descent]
+\label{thm:svrg}
+
+Let $R_1, ..., R_m$ be $\beta$-smooth convex functions on $\mathbb{R}^n$ and $R$ be $\alpha$-strongly convex. Let $0< \delta < 1$. Then SVRG with $\eta = \delta/2\beta$ and $T = 4\kappa/\delta$ satisfies
+\begin{equation}
+	\E R(y^{(s+1)}) - R(x^*) \le \left(\frac{1+2\delta}{2(1-\delta)}\right)^s \left(R(y^{(1)}) - R(x^*)\right)
+\end{equation}
+
+\begin{proof}
+Fix an epoch $s \ge 1$.
+
+\textbf{Aim}
+\begin{equation}
+	\label{eqn:aim}
+	\E R(y^{(s+1)}) - R(x^*) \le \left(\frac{1+2\delta}{2(1-\delta)}\right) (R(y^{(s)}) - R(x^*))
+\end{equation}
+which gives the main result by induction.
+
+Recall
+\begin{equation}
+	y^{(s+1)} = \frac{1}{T}\sum_{t=1}^T x_t^{(s)}
+\end{equation}
+
+To simplify notation, we omit the $s$ in the rest of the proof.
+
+To begin, it follows from our assumptions on $R$ and $R_1, , ..., R_m$ and \cite{bubeck} Theorem 3.10 that
+\begin{equation}
+	\label{eqn:vbound}
+	\|x_{t+1} - x^*\|^2 = \|x_t - x^*\|^2 - 2\eta v_t^T(x_t - x^*) + \eta^2\|v_t\|^2
+\end{equation}
+where
+\begin{equation}
+	v_t = \nabla R_{I_t}(x_t) - \nabla R_{I_t}(y) + \nabla R(y)
+\end{equation}
+We now upper bound $\E \|v_t\|^2$ as follows
+\begin{align}
+	\E \|v_t\|^2 &\le 2\E \|\nabla R_{I_t}(x_t) - \nabla R_{I_t}(x^*)\|^2 + 2\E \|\nabla R_{I_t}(y) - \nabla R_{I_t}(x^*) + \nabla R(y)\|^2 \\
+	& \qquad \text{Triangle inequality and Cauchy-Schwartz} \\
+	& \le 2\E \|\nabla R_{I_t}(x_t) - \nabla R_{I_t}(x^*)\|^2 + 2\E \|\nabla R_{I_t}(y) - \nabla R_{I_t}(x^*)\|^2 \\
+	& \qquad \text{Since } \E \|X - \E X\|^2 \le \E \|X\|^2 \text{ and } \nabla R(y) \text{ is the expectation} \\
+	& \le 4\beta(R (x_t) - R(x^*) + R(y) - R(x^*))\\
+	& \qquad \text{ by Lemma \ref{lemma:randsmoothbound}}
+\end{align}
+
+Also by convexity
+\begin{equation}
+	\E v_t^T(x_t - x^*) = \nabla R(x_t)^T(x_t - x^*) \ge R(x_t) - R(x^*),
+\end{equation}
+when we plug this into \eqref{eqn:vbound} along with the previous result we obtain
+\begin{equation}
+	\E \|x_{t+1} - x^*\|^2 \le \|x_t-x^*\|^2 - 2\eta (1 - 2\beta \eta)(R(x_t) - R(x^*))+ 4\beta \eta^2 (f(y) - f(x^*)).
+\end{equation}
+We now sum this inequality over $t=1, ..., T$ to give
+\begin{equation}
+	\E \|x_{T+1} - x^*\|^2 \le \|x_t-x^*\|^2 - 2\eta (1 - 2\beta \eta) \sum_{t=1}^T(R(x_t) - R(x^*))+ 4\beta \eta^2 T(f(y) - f(x^*)).
+\end{equation}
+We also have $x_1= y$ and by $\alpha$-strong convexity of $R$, $R(x) - R(x^*) \le \frac{\alpha}{2}\|x - x^*\|^2$. This then gives
+\begin{equation}
+	\E R\left(\frac{1}{T}\sum_{t=1}^T x_t \right) - R(x^*) \le \left(\frac{1}{\alpha \eta (1 - 2\eta \beta)T} + \frac{2\beta \eta}{1 - 2\beta \eta} \right)(R(y) - R(x^*))
+\end{equation}
+Using $\eta = \delta/2\beta$ and $T = 4\kappa/\delta$ we have \eqref{eqn:aim} and the result follows.
+
+\end{proof}
+
+\end{theorem}
