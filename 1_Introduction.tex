@@ -396,7 +396,7 @@ $$
 	h(Z_1,\ldots,Z_m) \le \mathbf{E}h(Z_1,\ldots,Z_m) + c\sqrt{\frac{m}{2}\log\frac{1}{\delta}}.
 $$
 \end{proposition}
-To apply the Bounded Difference inequality to the function $h$ defined in \eqref{def:h}, we need to find $c$ that satisfy the assumption of Proposition \ref{prop:BDI} to control the magnitude of the difference in the function $h$ upon changing only one coordinate. The next proposition shows how to do this we have boundedness assumptions with respect to the Euclidean norm.
+To apply the Bounded Difference inequality to the function $h$ defined in \eqref{def:h}, we need to find $c$ that satisfy the assumption of Proposition \ref{prop:BDI} to control the magnitude of the difference in the function $h$ upon changing only one coordinate. The next proposition shows how to do this if we have boundedness assumptions with respect to the Euclidean norm.
 \begin{proposition}
 \label{prop:c}
 Let $h$ be the function defined in \eqref{def:h}. Let $z\rightarrow \ell(z,y)$ be $L_\ell$-Lipschitz for any $y\in\mathcal{Y}$, $\sup_{x\in\mathcal{X}}\|x\|_2 \le B$ and $\|\Phi(W)\|_2\le G$ a.s.. Then, $c\in\mathbb{R}$ satisfying the requirement of the Bounded Difference inequality is given by
@@ -456,7 +456,7 @@ with $c = \frac{2}{m} (\ell_0 + BGL_\ell )$ by Proposition \ref{prop:c}, which y
 $$
 	\mathbf{P}\bigg(\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) \le c'\bigg) \ge 1-\delta,
 $$
-where $c':=(\ell_0+BGL_\ell)(2 + \sqrt{2\log(1/\delta)})/\sqrt{m}$. As the bounds we have derived holds also for $\sup_{x\in\mathcal{X}} ( R(x) - r(x) )$, we have
+where $c':=(\ell_0+BGL_\ell)(2 + \sqrt{2\log(1/\delta)})/\sqrt{m}$. As the bounds we have derived hold also for $\sup_{x\in\mathcal{X}} ( R(x) - r(x) )$, we have
 $$
 	\mathbf{P}\bigg(\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) ) \le 2c' \bigg)
 	\ge \mathbf{P}\bigg(\bigg\{\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) \le c' \bigg\} \bigcap \bigg\{\sup_{x\in\mathcal{X}} ( R(x) - r(x) ) \le c' \bigg\} \bigg) \ge 1-\delta.
