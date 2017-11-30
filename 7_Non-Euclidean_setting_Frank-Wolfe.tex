@@ -21,7 +21,7 @@ The method addresses general constrained convex optimization problems of the for
       \begin{equation} \label{eq:fw_update}
       s_t:= \argmin_{s \in \X } \langle s, \nabla f(x_t) \rangle
       \end{equation}
-      \STATE Update $x_{t+1} := (1-\gamma)x_t+ \gamma s_t = x_{t} + \gamma(s_t-x_t)$
+      \STATE Update $x_{t+1} := (1-\gamma_t)x_t+ \gamma_t s_t = x_{t} + \gamma_t (s_t-x_t)$
    \ENDFOR
    \STATE {\bfseries return} $x_T$
 \end{algorithmic}
@@ -110,7 +110,12 @@ conditional gradient descent. First, observe that:
 \nabla f (\beta)=X^\top (X\beta-Y) \nonumber
 \end{equation}
 
-Now assume that $z_t=X \beta_t - Y \in \mathbb{R}^n$ is already computed, then to compute the update \ref{eq:fw_update} one needs to find  the coordinate $i_t \in 1,\ldots,p$ that maximizes $| [\nabla f(\beta_t)](i) |$ which can be done by maximizing $x_i^\top z_t$ and $-x_i^\top z_t$. Thus \ref{eq:fw_update} takes time $O(p(n))$. Computing $\beta_{t+1}$ from $\beta_t$ and $i_t$ takes time $O(t)$ since $\|\beta_t \|_0 \leq t$, and computing $s_{t+1}$ from $s_t$ and $i_t$ takes time $O(n)$. Thus the overall time complexity of running t steps is (we assume $p(n) =\Omega(n)$)
+Now assume that $z_t=X \beta_t - Y \in \mathbb{R}^n$ is already computed, then to compute the update \ref{eq:fw_update} one needs to find  the coordinate $i_t \in 1,\ldots,p$ that maximizes $| [\nabla f(\beta_t)](i) |$ which can be done by maximizing $x_i^\top z_t$ and $-x_i^\top z_t$. Thus the update \ref{eq:fw_update} takes time $O(p(n))$
+\begin{equation}
+x_{t+1} = (1+\gamma_t) x_t + \gamma_t \cdot sign( \nabla f(x_t)_{i_t} ) \cdot e_{i_{t}}
+\end{equation}
+
+Computing $\beta_{t+1}$ from $\beta_t$ and $i_t$ takes time $O(t)$ since $\|\beta_t \|_0 \leq t$, and computing $z_{t+1}$ from $z_t$ and $i_t$ takes time $O(n)$. Thus the overall time complexity of running t steps is (we assume $p(n) =\Omega(n)$)
 \begin{equation} \label{eq:lasso_time_bound}
 O(tp(n) + t^2 )
 \end{equation}
