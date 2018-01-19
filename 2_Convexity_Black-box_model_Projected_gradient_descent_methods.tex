@@ -1,6 +1,6 @@
-%! TEX root = main.tex
+%!TEX root = optimization17.tex
 
-\section{Convexity. Black-box model. Projected gradient descent methods.}
+\chapter{Convexity. Black-box model. Projected gradient descent methods.}
 \emph{Speaker: Anthony Caterini, 19/10/2017.}\\
 
 We want to focus first on introducing the notion of convexity, which will admit some very nice properties for optimization. In particular, convex functions always have subgradients, and any local minimum is also a global minimum. We will also introduce projected subgradient descent methods and prove convergence rates in the cases where $f$ is convex and either $L$-Lipschitz continuous or $\beta$-smooth. In these two cases, the essence of the method is the same, although the particulars are slightly different.
@@ -10,7 +10,7 @@ The methods in this section relate to controlling the \emph{OPTIMIZATION} term i
 
 Note that in this section, we rely heavily on \cite{bubeck}, although the extension of projected gradient descent to time-varying step sizes comes from \cite[Lecture~11,~Page~5]{rigollet}.
 
-\subsection{Convexity}
+\section{Convexity}
 
 We begin by recalling the definition of a convex function and convex set.
 
@@ -107,10 +107,10 @@ i.e. $\nabla f(x^*)^T (x^* - y) \leq 0$ for all $y \in \X$.
 
 We will see that the above proposition proves to be very useful when proving the convergence rates of projected gradient descent methods. Of course the above proposition holds with equality when $x^*$ is an interior point, as $\nabla f(x^*) = 0$ in this case. However, it may also be the case that $x^*$ is on the boundary of $\X$ and not necessarily a minimum in the space in which $\X$ is embedded, and this is the less-intuitive case that \autoref{prop:fo_opt} handles well.
 
-\subsection{Black-box model}
+\section{Black-box model}
 In the black-box model of computation, we assume that we know the constraint set $\X$ but not the objective function $f : \X \rightarrow \R$. Nonetheless, we assume that we can make queries to an \emph{oracle} and receive some information about $f$ as output. Of particular interest to us is a \textbf{first order oracle}, which takes a point $x \in \X$ as input and outputs a subgradient of $f$ at $x$. Of course, if $f$ is convex, we will always be able to find a subgradient. We are interested in understanding the \emph{oracle complexity} of convex optimization -- the number of necessary and sufficient queries to the oracle to find an $\epsilon$-approximate minima. 
 
-\subsection{Projected gradient descent methods}
+\section{Projected gradient descent methods}
 We will now move into developing projected gradient descent algorithms for constrained optimization problems of the form 
 \begin{align*}
 \min_{x \in \X} f(x),
@@ -273,7 +273,7 @@ Therefore, \eqref{eqn:err_beta_subgrad} is true for all $t \in \mathbb{N}$.
 
 The above theorem demonstrates that for $\beta$-smooth convex functions, the error in estimating the optimal function value $O\left(\frac{\beta B^2}{t}\right)$, corresponding to an oracle complexity of $O\left(\frac{\beta B^2}{\epsilon}\right)$. We notice that the error rate decreasing faster in $t$ in this case than in the Lipschitz case, but the dependence on $B^2$ instead of $B$ is more loose, and we will see in \autoref{sec:lip_smooth_comp} that we cannot compare $\beta$ and $L$ directly. We also note here that the step size $\eta$ depends on $\beta$, which can be difficult to find in practice. As in the Lipschitz case, we again have no explicit reference to the underlying dimension $n$, although both $B$ and $\beta$ implicitly depend on $n$.
 
-\subsection{Remark on convexity, strong convexity, smoothness, and Lipschitz continuity} \label{sec:lip_smooth_comp}
+\section{Remark on convexity, strong convexity, smoothness, and Lipschitz continuity} \label{sec:lip_smooth_comp}
 Finally, having shown convergence results for convex $\beta$-smooth and $L$-Lipschitz functions, it is important to note the geometric connection between these types of functions and convex functions. Recall the Taylor series expansion of $f(y)$ around $x$:
 \[
 f(y) \approx f(x) + \nabla f(x)^T (y - x) + \frac{1}{2} (y - x)^T \nabla^2 f(x) (y - x) + \cdots

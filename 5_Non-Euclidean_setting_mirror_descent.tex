@@ -1,6 +1,6 @@
-%! TEX root = main.tex
+%!TEX root = optimization17.tex
 
-\section{Non-Euclidean setting: mirror descent}
+\chapter{Non-Euclidean setting: mirror descent}
 
 Let $f\colon \mathcal{X}\rightarrow \mathbb{R}$ denote a convex function and suppose we are interested in the following optimisation problem
 \begin{equation*}
@@ -65,7 +65,7 @@ In mirror descent allows us to circumvent this problem by mapping the current po
 where we used $\Phi$ to denote the \emph{mirror map} that helps map $x$ to the dual space and $\Pi_\mathcal{X}^\Phi$ denotes an appropriate projection. We will develop the steps in this algorithm more carefully in the following.
 
 
-\subsection{Mirror Maps}
+\section{Mirror Maps}
 We need the following two concepts.
 
 
@@ -106,7 +106,7 @@ Condition $ii)$ ensures that for every point in the dual $\mathcal{D}$ we need a
 
 
 
-\subsection{Mirror Descent: Examples}
+\section{Mirror Descent: Examples}
 
 We are now able to describe the algorithm in detail for two important examples. Our first example illustrates the generality of the algorithm and its connection to projected subgradient descent. With our second example we will go back to our boosting example and we will show in Section \ref{subsec:complexity} that by applying this mirror descent with an appropriate mirror map, we will recover the promised $\log(n)$ rate, thus matching the approximation quality of the STATISTICS term.
 
@@ -169,7 +169,7 @@ The first order condition yields
 \end{align*}
 Hence, $y_i = \lambda x_i$, $\sum_{i=1}^n y_i = \lambda$ and $x_i = y/\|y\|_1$.
 
-\subsection{Oracle complexity}
+\section{Oracle complexity}
 \label{subsec:complexity}
 We start with a useful Lemma.
 \begin{lemma}

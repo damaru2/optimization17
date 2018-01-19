@@ -1,6 +1,6 @@
 %!TEX root = optimization17.tex
 
-\section{Introduction}\label{sec:intro}
+\chapter{Introduction}\label{sec:intro}
 \emph{Speaker: Patrick Rebeschini, 12/10/2017.}\\
 
 \label{sec:introduction}
@@ -141,7 +141,7 @@ where for the last inequality we used Cauchy-Schwarz. Second, note that if we as
 
 Before we embark on the adventure of minimizing the empirical risk and bound the \emph{OPTIMIZATION} term in \eqref{bound:stats-opt}, we should try to develop some basic understanding of what to expect from the behavior of the \emph{STATISTICS} term as well. This understanding will give us insights on the type of precision that we should strive for to control the \emph{OPTIMIZATION} term. To this end, we now give a brief detour on statistical learning theory and derive an explicit bound in the case when the loss function $\ell$ is Lipschitz (no assumption on convexity is made for this result), the feature map is bounded, and also the parameter space $\mathcal{X}$ is bounded. The proof is instructive and relies on classical machinery of concentration inequalities and Rademacher complexity.
 
-\subsection{Statistics term}
+\section{Statistics term}
 \label{sec:Statistical learning theory}
 Statistical learning theory focuses on understanding how the estimation error $r(X^\star) - r(x^\star)$ converges to zero as a function of the sample size $m$, the loss function $\ell$, the parameter space $\mathcal{X}$, and possibly some properties of the distribution of $\Phi(W)$ and $Y$ (recall that the distribution of the data is not known). We will prove the following results, inspired by the presentation in \cite{bach}.
 
@@ -464,7 +464,7 @@ $$
 \end{proof}
 
 
-\subsection{Overview of the reading group}
+\section{Overview of the reading group}
 
 Given the analysis of the previous section, we can now describe the plan for the reading group this term.
 While we motivated our interest in optimization techniques by looking at the classical setting of supervised machine learning and empirical risk minimization, only in Week 8 (hopefully!) we will see how to develop specialized algorithms to minimize $R$ (that is, algorithms that can take advantage of the specific structure of $R$). In fact, most of our time will be devoted to reviewing classical algorithms to optimize a \emph{general} convex function $f$ over a convex set $\mathcal{X}$, namely, to solve:

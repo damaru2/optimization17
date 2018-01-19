@@ -1,10 +1,10 @@
-%! TEX root = main.tex
+%!TEX root = optimization17.tex
 
-\section{Acceleration by coupling gradient descent and mirror descent}
+\chapter{Acceleration by coupling gradient descent and mirror descent}
 %TODO we will only work with $\beta$-smooth functions it
 We have seen as a consequence of Theorem \ref{smooth_proj_gd} that if $f$ is $\beta$-smooth then projected gradient descent needs $T = O\left( \frac{\beta R^2}{\epsilon}\right)$ iterations to obtain an $\epsilon$-minimizer. However, we derived in Theorem \ref{lower_bound_smooth} a lower bound in which the dependence on $\beta$ and $\epsilon$ was $O\left(\sqrt{\frac{\beta}{\epsilon}}\right)$. Nesterov in \cite{nesterov1983method} designed a gradient descent method whose complexity matches this lower bound. This method only works for $\|{\cdot}\|_2$. Later, in \cite{nesterov2005smooth} he generalized his method to allow arbitrary norms. Algorithms whose complexity is optimal are said to be accelerated. Nesterov's accelerated gradient descent has always been regarded as an obscure and unintuitive method whose proof uses ``magical'' algebra tricks. Since he published his seminal work in 1983, several authors have proposed other accelerated methods, in order to give more intuition about acceleration and to show this from other points of view. For example, in \cite{bubeck} we can find a geometric interpretation of acceleration. Linear Coupling \cite{linearcoupling} (2014) is one of these methods. We think that it is one of the best methods to understand acceleration. We start giving some intuition about how gradient and mirror descent can be combined to obtain these accelerated method. We present first a simplified version of linear coupling that also achieves acceleration but under more restrictive assumptions and finally, we present linear coupling. This method works for any norm and for each of them, the analysis of Linear Coupling is the same. We will only work with convex,, $\beta$-smooth functions $f$, we note that \cite{linearcoupling}, the paper in which this section is based, contains other analysis like the $\alpha$-strictly convex and $\beta$-smooth case.
 
-\subsection{Intuition}
+\section{Intuition}
 
 To understand why combining gradient and mirror descent makes sense and why doing so is a good idea we will note some properties about both methods. As we have been doing in previous sections we use the notation $x^\ast$ for a minimizer of $f$ restricted to $\X$. We have seen in \ref{smooth_proj_gd} that projected gradient descent is defined by
 
@@ -72,7 +72,7 @@ Note that a mirror descent step is $x' = \Mirr_{x_k}(\eta \partial f(x_k))$. Her
 
 If $T$ gradient descent steps are performed, the objective decreases by at least $\frac{\|\nabla f(\cdot)\|_2^2}{2\beta} \geq \frac{K^2}{2\beta}$ per step and we only need $T \geq \Omega\left(\frac{\epsilon \beta}{K^2}\right)$ steps to achieve an $\epsilon$ accuracy. If $T$ mirror descent steps are performed, we need $T \geq \Omega\left(\frac{K^2}{\epsilon^2}\right)$ steps according to the mirror descent convergence (Remark \ref{mirror_descent_lemma_for_linear_coupling}). In sum, we need $T \geq \Omega\left( \max \left\{ \frac{\epsilon \beta}{K^2}, \frac{K^2}{\epsilon^2}\right\}\right)$ steps to converge to an $\epsilon$-minimizer. Setting K to be the magic number to balance the two terms, we only need $T \geq \Omega\left( \sqrt{\frac{\beta}{\epsilon}}\right)$ iterations. This means that in the general case in which $f(x_0) - f(x^\ast) \leq d $ we can repeat this procedure to obtain points such that the distances of their images to $f(x^\ast)$ halve after each iteration. So we only need $T \geq \Omega \left(\sqrt{\frac{\beta}{\epsilon}}\left(\sqrt{\frac{2\epsilon}{d}} + \sqrt{\frac{4\epsilon}{d}} + \dots + \sqrt{\frac{1}{2} }+ 1 \right)\right) = \Omega \left( \sqrt{\frac{\beta}{\epsilon}}\right)$.
 
-\subsection{Warm-Up Method with Fixed Step Length}
+\section{Warm-Up Method with Fixed Step Length}
 The key ideas of this method will be the same as the ones for the final method. As we mentioned previously, at each iteration linear coupling performs a gradient descent step and a mirror descent step and the point for the next iteration is a convex combination of the points obtained by gradient and mirror descent. The key of the proof is to see that the loss in which mirror descent incurs is something proportional to the gradient descent guaranteed decrease (plus a couple of Bregman divergences that will telescope) and using this fact to see that a particular convex combination of mirror and gradient descent incurs in a similar loss.
 
 Formally, we start with $x_0 = y_0 = z_0$. In each iteration $k= 0, 1, \dots, T-1$ we define $x_{k+1} \gets \tau z_k + (1-\tau) y_k$ and then we perform:
@@ -127,7 +127,7 @@ Suppose our initial point is of error at most $d$, that is $f (y_0 ) - f (x^\ast
 \]
 iterations. The value of $\eta = \sqrt{\Theta/(\beta d)}$ increases as time goes and therefore $\tau = \frac{1}{\eta \beta +1}$ decreases as time goes. This tells us that gradient descent is given more weight the mirror step when we are close to the minimum.  This fact can be counter-intuitive because when it is closer to the optimum, the observed gradients will become smaller, and therefore mirror steps should perform well according to the thought experiment. This understanding is incorrect, the reason is that when it is closer to the optimum, the threshold between large and small gradients also becomes smaller, so one cannot rely only on mirror steps.
 
-\subsection{Final Method with Variable Step Lengths}
+\section{Final Method with Variable Step Lengths}
 This final method will change $\eta$ and $\tau$ gradually to obtain an algorithm that does not need to know the bounds $\Theta$ and $d$. This approach will also work for any convex restriction set $\X$. The final algorithm is the following:
 
 \begin{algorithm}[H]\label{alg:AGM}
