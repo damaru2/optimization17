@@ -1,6 +1,6 @@
-%! TEX root = main.tex
+%!TEX root = optimization1718.tex
 
-\section{Stochastic oracle model}
+\chapter{Stochastic oracle model}
 \emph{Speaker: Adam Foster, 30/11/2017.}\\
 
 Assume that we want to solve the following problem:
@@ -16,7 +16,7 @@ where $f$ is a convex function, possibly not known. In previous work, we assumed
 Formally, a first order \emph{stochastic} oracle model defines the framework where given $x\in\mathcal{X}$ an oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $x$, namely, $\E[G] \in \partial f(x)$. If $X$ is a random variable, the oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $X$ conditionally on $X$, namely, $\E[G|X] \in \partial f(X)$.
 
 
-\subsection{Projected gradient descent with a stochastic oracle}
+\section{Projected gradient descent with a stochastic oracle}
 We analyse the behaviour of the projected gradient descent algorithm to solve problem \eqref{def:stochastic problem} when we replace exact knowledge of subgradients of $f$ with unbiased estimates of them. For a given initial point $X_1\in\X$, possibly random, and a given collection of step sizes $\eta_1,\eta_2,\ldots$, the stochastic projected gradient descent is defined by the sequence of random variables generated according to the following update:
 \begin{align*}
 Y_{s+1} &= X_s - \eta_s G_s,\\
@@ -105,7 +105,7 @@ By multiplying through by $\frac{2}{t(t+1)}$ and applying Jensen's inequality to
 
 Theorem \ref{thm:projectedgradLstoch} shows that, in expectation, the stochastic projected subgradient descent method yields the same convergence guarantees as the deterministic counterpart analysed in Theorem \ref{thm:projectedgradL}.  In particular, the oracle complexity is the same\footnote{Note that different notions of accuracy are used, however, as we consider the expected value of the stochastic method.}: to get an accuracy $\varepsilon$, both methods requires $O(1/\varepsilon^2)$ calls to their respective oracles. The main advantage of the stochastic version lies in the fact that in some applications the \emph{computational} complexity involved in having access to a stochastic oracle is much cheaper than in the deterministic case. We now show that the stochastic model yields substantial computational saving in machine learning.
 
-\subsection{Expected risk minimization and empirical risk minimization revisited}
+\section{Expected risk minimization and empirical risk minimization revisited}
 Let us recall the original problem that motivates us in Section \ref{sec:intro}, namely, the expected risk minimization:
 \begin{align*}
 	\begin{aligned}
@@ -119,7 +119,7 @@ With the concept of a stochastic oracle in hand, one can now attack the expected
 
 Alternatively, one could minimize the empirical risk $R(x) = \frac{1}{m}\sum R_i(x)$ (see \eqref{def:mainproblem empirical risk}). Proposition~\ref{prop:erm2} shows that the error can be controlled by breaking the resulting error into $STATISTICS$ and $OPTIMIZATION$ terms. Whilst $R$ and its subgradients may be tractable, such computations are typically $O(m)$. Stochastic oracle methods can reduce this to $O(1)$. One could select $I \sim \text{Uniform}(1, ..., m)$ and use $G \in \partial R_I$ as an unbiased estimator of the subgradient of $R$. Since unlimited i.i.d. samples of $I$ are available, multiple passes over the data can be made. The key difference is that the functions being optimized in the two cases are different.
 
-\subsection{Single pass over the data}
+\section{Single pass over the data}
 In the expected risk minimization problem we do not know the function $r$ that we want to minimize, and in particular we can not operate in the deterministic first order oracle model discussed in the previous weeks as for a given $x\in\mathcal{X}$ we do not have access to a subgradient in $\partial r(x)$. On the other hand, given $x\in\mathcal{X}$ we can have access to an unbiased estimator of a subgradient of $r$ evaluated at $x$. In fact, given the function $x \mapsto R_i(x) := \ell(x^T\Phi(W_i),Y_i)$, which is known to us, we can compute a subgradient of $R_i$ at $x$. This is a random variable $G_i\in \partial R_i(x)$ that satisfies $\E G_i \in \partial r(x)$. The same is true if we want to get an estimate of the subgradient of $r$ at $X\in\X$ when $X$ is a random variable \emph{independent} of $(W_i,Y_i)$. In fact, in this case we can evaluate a subgradient of $R_i$ at $X$, and this random variable $G_i\in \partial R_i(X)$ satisfies $\E[G_i|X]\in r(X)$.\footnote{Note that if $X$ is random, then there are two sources of randomness in $G_i$: one source is $X$ itself, the other is the data point $(W_i,Y_i)$. The statement $\E[G_i|X]\in \partial r(X)$ holds if $X$ and $(W_i,Y_i)$ are independent.} Hence, we satisfy the assumption of the first order stochastic oracle model. At the same time, as we have $m$ independent data points at out disposal, we can have access to at most $m$ independent unbiased estimators of subgradients evaluated at possibly different locations in $\mathcal{X}$. In other words, the requirement of independence restricts us to a \emph{single pass} over the data, which is not as general as in the stochastic block model defined above where we can have how many queries to the oracle as we want.
 
 It is easy to check that under the assumptions of Proposition \ref{prop:Lip-stats}, Theorem \ref{thm:projectedgradLstoch} yields the following convergence guarantees for the stochastic projected descent method:
@@ -128,7 +128,7 @@ $$
 $$
 with $\hat X_m = \frac{1}{m}\sum_{i=1}^m X_i$. The computational savings are clear. If computing a subgradient for each functions $R_i$ costs $O(1)$, then the computational complexity of stochastic gradient descent to achieve precision $\varepsilon$ (in expectation) is of order $O(1/\varepsilon^2)$. On the other hand, if we apply the deterministic gradient descent method to minimize the empirical risk $R$ up to precision $1/\sqrt{m}$, as discussed in Section \ref{sec:intro} and in Remark \ref{rem:optimization}, then we see that the computational complexity is $O(m/\varepsilon^2)$, as we need $O(1/\varepsilon^2)$ calls to the deterministic oracle but each call costs $O(m)$ base iterations, as $R(x) := \frac{1}{m} \sum_{i=1}^m R_i(x)$.
 
-\subsection{Multiple passes over the data}
+\section{Multiple passes over the data}
 In the unconstrained empirical risk minimization problem
 \begin{align*}
 	\text{minimize }\quad   & R(x) = \frac{1}{m}\sum_{i=1}^m R_i(x)

@@ -1,10 +1,10 @@
-%! TEX root = main.tex
+%!TEX root = optimization1718.tex
 
-\section{Lower bounds for oracle complexity}
+\chapter{Lower bounds for oracle complexity}
 
 \emph{Speaker: Dominic Richards, 26/10/2017.}\\
 
-\subsection{Week 2 Recap}
+\section{Week 2 Recap}
 
 Recall the objective is to minimise some convex function $f: \mathcal{X} \rightarrow \mathbb{R}$, being phrased as the following optimisation problem
 \begin{align}
@@ -80,7 +80,7 @@ giving a complexity of $O\left( R^2 \exp\left( - \frac{\alpha t}{\beta}\right) \
 
 
 
-\subsection{Week 3 - Lower Bounds}
+\section{Week 3 - Lower Bounds}
 
 To prove lower complexity bounds a "sufficiently hard" $f$, satisfying the various conditions, must be found, that, when giving a black-box procedure a fixed number of first order oracle calls, will remain a fixed distance away from its optimum.  An example of a black-box procedure being the projected gradient descent of previously - taking a position and sub gradient $(x_t,g_t)$ $g_t \in \partial f(x_t)$ and returning the next position $x_{t+1} = \Pi_{\mathcal{X}}(x_t - \eta g_t)$. Recalling that a first order oracle call at $f(x)$ returns to us a sub-gradient $g \in \partial f(x)$.
 

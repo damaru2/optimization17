@@ -1,6 +1,6 @@
-%!TEX root = optimization17.tex
+%!TEX root = optimization1718.tex
 
-\section{Application: Boosting}
+\chapter{Application: Boosting}
 
 \emph{Speaker: Patrick Rebeschini, 02/11/2017.}\\
 
@@ -31,7 +31,7 @@ where $\mathcal{H}$ is a given class of soft classifiers. In the setting of Boos
 
 This problem is a particular instance of the general formulation given in \eqref{def:mainproblem}, with the choice $\ell(z,y) = \varphi(-zy)$ for the loss function and $\X=\Delta_n$ for the constraint set. We can then work within the framework of empirical risk minimization as introduced in Section \ref{sec:intro}, and use the error decomposition given in Proposition \ref{prop:erm2} to bound the \emph{STATISTICS} term $\sup_{x\in\mathcal{X}} ( r(x) - R(x) ) + \sup_{x\in\mathcal{X}} ( R(x) - r(x) )$ and the \emph{OPTIMIZATION} term $R(\hat X_t) - R(X^\star)$, respectively.
 
-\subsection{Statistics term}
+\section{Statistics term}
 Note that in the case of Boosting, as $x\in\Delta_n$ and $\Phi\in[-1,1]^n$ and $\mathcal{Y}=\{-1,1\}$, the loss function $\varphi$ is only evaluated in the interval $[-1,1]$, as $-1 \le yx^T\Phi(w) \le 1$ for any $x\in\Delta_n,w\in\mathcal{W}$, and $y\in\mathcal{Y}$. So, we can restrict to this interval as far as the Lipschitz property of $\varphi$ goes. On $[-1,1]$ we have the following Lipschitz constants:
 \begin{itemize}
 \item Exponential loss: $\varphi(u) = \exp(u)$, $L_\varphi = e$.
@@ -274,7 +274,7 @@ $$
 $$
 \end{proof}
 
-\subsection{Optimization term?}
+\section{Optimization term?}
 Following the error decomposition given in Proposition \ref{prop:erm2}, Proposition \ref{prop:Lip-stats mean boosting} and Proposition \ref{prop:Lip-stats boosting} show that in the case of Boosting the \emph{STATISTICS} term is $O(\sqrt{\log n/m})$, which only grows logarithmically with the number of base classifiers $n$. This is a nice feature in applications where the number $n$ of base classifiers is very large, possibly exponential.
 Hence, one would hope to be able to design an algorithmic procedure that only uses $\sim\log n$ calls to the first order oracle in order to match the accuracy of the \emph{STATISTICAL} term to find an approximate solution to the empirical risk minimization problem:
 \begin{align*}

@@ -1,6 +1,6 @@
-%! TEX root = main.tex
+%!TEX root = optimization1718.tex
 
-\section{Non-Euclidean setting: Frank-Wolfe}
+\chapter{Non-Euclidean setting: Frank-Wolfe}
 \emph{Speaker: Chris Carmona, 23/10/2017.}\\
 
 The \emph{Conditional Gradient Descent} method, also known as \emph{Frank-Wolfe} is an iterative first-order optimization algorithm for constrained convex optimization, originally proposed in \cite{Frank1956} by Marguerite Frank and Philip Wolfe, then post-docs working in the Princeton logistics project led by Kuhn and Tucker. In recent years, Frank-Wolfe-type methods have re-gained interest, started by the valuable insights provided by \cite{Jaggi2013}, and fuelled by its good scalability and convergence properties properties (eg. convergence invariance under affine transformations).
@@ -39,7 +39,7 @@ much simpler problem.
 \end{figure}
 
 
-\subsection{Convergence analysis.}
+\section{Convergence analysis.}
 
 A major advantage of conditional gradient descent over projected gradient descent is that the former can adapt to smoothness in an arbitrary norm.
 
@@ -77,7 +77,7 @@ If we define $\delta_t = f(x_t)-f(x^*)$ then we get:
 Finally, the result is proved by induction using $\gamma_t =\frac{2}{t+1}$. We initialize at step 2, $t=1$, with the above inequality yielding $\delta_2 \leq \frac{\beta}{2} R^2$.
 \end{proof}
 
-\subsection{Sparse iterates property.}
+\section{Sparse iterates property.}
 In addition to being projection-free and "norm-free", the conditional gradient descent satisfies a perhaps even more important property: it produces \emph{sparse iterates}.
 
 Consider the situation where $\X \subset \mathbb{R}^n$ is a polytope, that is the convex hull of a finite set of points (these points are called the vertices of $\X$ ). Then Caratheodory's theorem states that any point $x \in \X$ can be written as a convex combination of at most $n+1$ vertices of $\X$ . On the other hand, by definition of the conditional gradient descent, one knows that the $t$-th iterate $x_t$ can be written as a convex combination of $t$ vertices (assuming that $x_1$ is a vertex). Thanks to the dimension-free rate of convergence one is usually interested in the regime where $t<<n$, and thus we see that the iterates of conditional gradient descent are very sparse in their vertex representation.
@@ -136,7 +136,7 @@ f(\beta_t)-f(\beta^*) \leq \frac{8 m^2}{t+1}
 
 Putting together \ref{eq:lasso_time_bound} and \ref{eq:lasso_fw_bound} we proved that one can get an $\epsilon$-optimal solution to \ref{eq:lasso_fw} with a computational effort of $O(m^2 p(n)/\epsilon+m^4/\epsilon^2)$ using the conditional gradient descent.
 
-\subsection{Frank-Wolfe variants.}
+\section{Frank-Wolfe variants.}
 
 \subsubsection{Line search.}
 
