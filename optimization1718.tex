@@ -8,6 +8,9 @@
 
 \usepackage{multirow} %For table in Week 3 lower Bounds - Dominic
 
+\usepackage{aliascnt} % To correctly label theorems, lemmas in autoref
+
+
 
 
 % Load Math packages
@@ -23,18 +26,26 @@
 % Define Problem environment
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{definition}{Definition}[section]
-\newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{remark}{Remark}[section]
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{fact}[theorem]{Fact}
 \theoremstyle{remark}
 \newtheorem*{example}{Example}
+
+\newaliascnt{lemma}{theorem} % To get the correct autoref for Lemma, Prop, Corollary
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
 
 % Some macros for typesetting ease
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\E}{\mathbf{E}}
 \newcommand{\R}{\mathbb{R}} % Real numbers
+\newcommand{\Lc}{\mathcal{L}}
 \newcommand{\Prog}{{\tt{Prog}}}
 \newcommand{\Grad}{{\tt{Grad}}}
 \newcommand{\Mirr}{{\tt{Mirr}}}
