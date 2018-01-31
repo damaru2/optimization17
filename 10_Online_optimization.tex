@@ -326,3 +326,24 @@ This is optimized when $\eta = \sqrt{\frac{2}{nK}}$, which gives us \eqref{eqn:F
 The first thing to note about \autoref{thm:FPL_regret} is that we assume that we know $n$ at the start so that we can choose $\eta$ optimally. In many applications, however, this is not the case: we do not always know for how many periods we will participate. In practice, it may be possible to assume that there may be some small number of periods, and then update $\eta$ accordingly if we exceed this number with a new, larger number of periods. 
 
 We also have selected a sub-optimal noise component in the above theorem. In the original paper on FPL, the authors show that they can recover the $\sqrt{\log K}$ dependency in the bound -- as seen in the exponential weighting strategy -- using an exponential noise term \cite{kalai2005efficient}. However, the proof is more complicated than the one presented above. There may also be theoretical gains realized by resampling $\xi$ at each iteration as opposed to at the start of the optimization. 
+
+\section{Stochastic Bandits} 
+\emph{Speakers: Dominic Richards and Anthony Caterini, 02/02/2018.}\\
+
+This week, we will be looking at stochastic bandits. This will be strongly based off the material in \cite[Lecture~18]{rigollet}. The stochastic multi-armed bandit is a well-known and well-studied model of decision making. We define the model as follows: suppose our bandit has $K$ \emph{arms} (i.e. possible actions), and at each time $t \in \{1, \ldots, n\}$, we receive reward $X_{k,t}$ for selecting action $k \in \{1, \ldots, K\}$. The sequence $\{X_{k, 1}, \ldots, X_{k, t}, \ldots, X_{k, n}\}$ is i.i.d. for each choice of $k$, with $\E[X_{k,t}] = \mu_k$. We define $\mu_* = \max_k \mu_k$, and we define a policy $\pi = \{\pi_1, \ldots, \pi_n\}$ such that $\pi_t$ specifies the action at time $t$ and is only dependent on information available before time $t$.
+
+We then define the regret in our policy $\pi$ as 
+\begin{align*}
+R_n &= \max_k \E\left[\sum_{t = 1}^n X_{k,t} \right] - \E\left[\sum_{t=1}^n X_{\pi_t, t} \right] \\
+&= n \mu_* - \sum_{t=1}^n \sum_{k=1}^K \E\left[ X_{\pi_t, t} | \pi_t = k\right] \Prob[\pi_t = k] \qquad \text{by the law of total probability} \\
+&= n \mu_* - \sum_{t=1}^n \sum_{k=1}^K \mu_k \E\left[ \mathbf{1}_{\pi_t = k}\right] \\
+&= n \mu_* - \sum_{k=1}^K \mu_k \E \left[\sum_{t=1}^n \mathbf{1}_{\pi_t = k} \right] \\
+&= \sum_{k=1}^K \Delta_k \E[T_k(n)],
+\end{align*}
+where $\Delta_k = \mu_* - \mu_k$ and $T_k(n) = \sum_{t=1}^n \mathbf{1}_{\pi_t = k}$. 
+
+\subsection{Warm Up: Full Info Case} 
+
+\subsection{Upper Confidence Bound}
+
+\subsection{Bounded Regret}
