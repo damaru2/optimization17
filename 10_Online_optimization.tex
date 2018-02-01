@@ -333,17 +333,108 @@ We also have selected a sub-optimal noise component in the above theorem. In the
 This week, we will be looking at stochastic bandits. This will be strongly based off the material in \cite[Lecture~18]{rigollet}. The stochastic multi-armed bandit is a well-known and well-studied model of decision making. We define the model as follows: suppose our bandit has $K$ \emph{arms} (i.e. possible actions), and at each time $t \in \{1, \ldots, n\}$, we receive reward $X_{k,t}$ for selecting action $k \in \{1, \ldots, K\}$. The sequence $\{X_{k, 1}, \ldots, X_{k, t}, \ldots, X_{k, n}\}$ is i.i.d. for each choice of $k$, with $\E[X_{k,t}] = \mu_k$. We define $\mu_* = \max_k \mu_k$, and we define a policy $\pi = \{\pi_1, \ldots, \pi_n\}$ such that $\pi_t$ specifies the action at time $t$ and is only dependent on information available before time $t$.
 
 We then define the regret in our policy $\pi$ as 
-\begin{align*}
-R_n &= \max_k \E\left[\sum_{t = 1}^n X_{k,t} \right] - \E\left[\sum_{t=1}^n X_{\pi_t, t} \right] \\
-&= n \mu_* - \sum_{t=1}^n \sum_{k=1}^K \E\left[ X_{\pi_t, t} | \pi_t = k\right] \Prob[\pi_t = k] \qquad \text{by the law of total probability} \\
-&= n \mu_* - \sum_{t=1}^n \sum_{k=1}^K \mu_k \E\left[ \mathbf{1}_{\pi_t = k}\right] \\
-&= n \mu_* - \sum_{k=1}^K \mu_k \E \left[\sum_{t=1}^n \mathbf{1}_{\pi_t = k} \right] \\
-&= \sum_{k=1}^K \Delta_k \E[T_k(n)],
-\end{align*}
+\begin{align}
+R_n &= \max_k \E\left[\sum_{t = 1}^n X_{k,t} \right] - \E\left[\sum_{t=1}^n X_{\pi_t, t} \right] \nonumber \\
+&= n \mu_* - \sum_{t=1}^n \sum_{k=1}^K \E\left[ X_{\pi_t, t} | \pi_t = k\right] \Prob[\pi_t = k] \qquad \text{by the law of total probability} \nonumber \\
+&= n \mu_* - \sum_{t=1}^n \sum_{k=1}^K \mu_k \E\left[ \mathbf{1}_{\pi_t = k}\right] \nonumber \\
+&= n \mu_* - \sum_{k=1}^K \mu_k \E \left[\sum_{t=1}^n \mathbf{1}_{\pi_t = k} \right] \nonumber \\
+&= \sum_{k=1}^K \Delta_k \E[T_k(n)], \label{eqn:bandit_regret}
+\end{align}
 where $\Delta_k = \mu_* - \mu_k$ and $T_k(n) = \sum_{t=1}^n \mathbf{1}_{\pi_t = k}$. 
 
 \subsection{Warm Up: Full Info Case} 
 
 \subsection{Upper Confidence Bound}
+Now we consider the case where we only observe a realization of $X_{k,t}$ if $\pi_t = k$. Given that we no longer have full information, what is a good strategy? A na\"ive idea is to pull all arms once, and from then on select action $\pi_t$ at time $t$ satisfying 
+\[
+\pi_t \in \argmax_{k \in [K]} \frac{1}{T_k(t)} \sum_{s=1}^{t-1}\mathbf{1}_{\pi_s = k} X_{k, s},
+\] 
+i.e. choose the action that currently has the highest empirical mean, where we slightly redefine $T_k(t)$ as 
+\[
+T_k(t) = \sum_{s=1}^{t-1} \mathbf{1}_{\pi_s = k}.
+\]
+Unfortunately, this strategy suffers from a major pitfall: it is entirely possible that we will completely ignore actions having high reward because of unlucky observations early on. To alleviate this issue, we instead select a strategy which maxmimizes some probabilistic upper bound on the average return of action $k$. In this way, actions which have not been chosen will have a higher-variance estimate of the mean, and thus a higher upper bound. We call this algorithm the Upper Confidence Bound (UCB) algorithm, and we present it in \autoref{alg:ucb}.
 
+Before proceeding, it is important to note the following: without loss of generality, we now assume that $X_{k, t}$ is subgaussian with variance proxy 1 in this section. Also, we will use the notation 
+\[
+\hat \mu_{k, t} = \frac{1}{T_k(t)} \sum_{s=1}^{t-1}\mathbf{1}_{\pi_s = k} X_{k, s}
+\]
+to denote the empirical mean of action $k$ at time $t$, and $\hat \mu_{*, t}$ to denote the empirical mean of the optimal action. 
+
+\begin{algorithm}
+%\scriptsize
+\caption{Upper Confidence Bound (UCB)}
+   \begin{algorithmic}[1] \label{alg:ucb}
+   \REQUIRE $X_{k, t}$ is 1-subgaussian for all $t \in [n], k \in [K]$. 
+   \FOR{$t = 1$ to $K$}
+   	\STATE $\pi_t = t$
+   \ENDFOR
+   \FOR{$t = K+1$ to $n$}
+   	\STATE $T_k(t) = \sum_{s=1}^{t-1} \mathbf{1}_{\pi_s = k}$
+	\STATE $\hat \mu_{k, t} = \frac{1}{T_k(t)} \sum_{s=1}^{t-1}\mathbf{1}_{\pi_s = k} X_{k, s}$   	
+   	\STATE $\pi_t \in \argmax_{k \in [K]}\left(\hat \mu_{k, t} + 2 \sqrt{\frac{2 \log t}{T_k(t)}} \right)$
+   \ENDFOR  
+\end{algorithmic}
+\end{algorithm}
+
+The UCB strategy is quite good: we will show below that we can bound our total regret by a $\mathcal{O}(\log n)$ function. \textbf{NOTE: I am not sure about the factor of $2$ in line 7 of \autoref{alg:ucb} -- it is messing up some later computations and does not seem to be standard in other references.}
+
+\begin{theorem}
+The UCB policy has regret satisfying
+\[
+R_n \leq 32 \sum_{k : \Delta_k} \frac{\log n}{\Delta_k} + \left(1 + \frac{\pi^2}{3} \right) \sum_{k=1}^K \Delta_k.
+\]
+\end{theorem}
+
+\begin{proof}
+First, a brief note: this is not the exact same result as the one in \cite[Lecture~18]{rigollet} -- the 32 here is replaced by an 8 there. However, that proof is riddled with errors and very tough to follow. In fact, some of the lines written below are provided with no justification because I could not determine why they were true. I provided some additional information, as I could find it, from multiple sources, but mainly from \cite[Theorem~2.1]{bubeck2012regret}, with $\alpha = 4$ and $\psi^*(\varepsilon) = 2 \varepsilon^2$. 
+
+That being said, let's start with choosing some $k$ such that $\Delta_k > 0$. Our goal is to bound $\E[T_k(n)]$, and then invoke \eqref{eqn:bandit_regret} to bound the regret $R_n$. We can start by saying that 
+\[
+\E[T_k(n)] = 1 + \sum_{t=K+1}^n \Prob[\pi_t = k],
+\]
+since action $k$ will be chosen once in the first $K$ iterations of UCB.
+
+Now, for $t > K$, we have that $\pi_t = k$ implies $\hat \mu_{k, t} + 2 \sqrt{\frac{2 \log t}{T_k(t)}} \geq \hat \mu_{*, t} + 2 \sqrt{\frac{2 \log t}{T_*(t)}}$, by virtue of the UCB strategy. This, in turn, implies that one of the following inequalities holds:
+\begin{align}
+\hat \mu_{k, t} &> \mu_k + 2 \sqrt{\frac{2 \log t}{T_k(t)}}, \label{eqn:UCB_1} \\
+\mu_* &\geq \hat \mu_{*, t} + 2 \sqrt{\frac{2 \log t}{T_*(t)}}, \label{eqn:UCB_2}\\
+\mu_* &\leq \mu_k + 4 \sqrt{\frac{2 \log t}{T_k(t)}}. \label{eqn:UCB_3}
+\end{align}
+To prove this, suppose all of the above inequalities were false. Then, 
+\begin{align*}
+\hat \mu_{k, t} + 2 \sqrt{\frac{2 \log t}{T_k(t)}} &\leq \mu_k + 4 \sqrt{\frac{2 \log t}{T_k(t)}} &\qquad \text{since \eqref{eqn:UCB_1} is false}\\
+&< \mu_* &\qquad \text{since \eqref{eqn:UCB_3} is false} \\
+&< \hat \mu_{*, t} + 2 \sqrt{\frac{2 \log t}{T_*(t)}} &\qquad \text{since \eqref{eqn:UCB_2} is false}
+\end{align*}
+This is a contradiction, however, since we assume that $\pi_t = k$.
+
+We can also bound the probability that equations \eqref{eqn:UCB_1} and \eqref{eqn:UCB_2} are true:
+\begin{align*}
+\Prob \left[\text{\eqref{eqn:UCB_2} holds} \right] & \leq \Prob \left[ \exists s \in \{1, \ldots, t\}: \hat \mu_{*, s} + 2 \sqrt{\frac{2 \log t}{s}} \leq \mu_* \right] \\
+&\leq \sum_{s = 1}^t \Prob \left[ \mu_* - \hat \mu_{*, s} \geq 2 \sqrt{\frac{2 \log t}{s}}\right] \qquad &\text{by the union bound}\\
+&\leq \sum_{s=1}^t \exp \left(\frac{-s}{2} \frac{8 \log t}{s}\right) \qquad &\text{by the subgaussian assumption} \\
+&= \frac{1}{t^3}.
+\end{align*}
+Similarly, we can show $\Prob \left[ \text{\eqref{eqn:UCB_1} holds}\right] \leq \frac{1}{t^3}$.  
+\allowdisplaybreaks
+Now, we can finally bound the item we are after: 
+\begin{align*}
+\sum_{t=K+1}^n \Prob \left[\pi_t = k \right] & \leq \sum_{t=1}^n \left(\Prob \left[ \text{\eqref{eqn:UCB_1} holds}, \pi_t = k\right] + \Prob\left[ \text{\eqref{eqn:UCB_2} holds}, \pi_t = k\right] + \Prob\left[\text{\eqref{eqn:UCB_3} holds}, \pi_t = k\right] \right) \\
+&\leq 2 \sum_{t=1}^\infty \frac{1}{t^3} + \sum_{t=1}^n \Prob \left[\mu_* \leq \mu_k + 4 \sqrt{\frac{2 \log t}{T_k(t)}}, \pi_t = k \right] \\
+&\leq 2 \sum_{t=1}^\infty \frac{1}{t^2} + \sum_{t=1}^n \Prob\left[T_k(t) \leq \frac{32 \log t}{\Delta_k^2}, \pi_t = k \right]
+\qquad \text{note the extra factor of $2^2 = 4$} \\
+& \leq \frac{\pi^2}{3} + \sum_{s=1}^\infty \Prob\left[T_k(t) \leq \frac{32 \log n}{\Delta_k^2}, \pi_t = k \right] \\
+&\leq \frac{\pi^2}{3} + \sum_{t=1}^n \Prob\left[s \leq \frac{32 \log n}{\Delta_k^2}\right] \qquad \text{reparametrizing $T_k(t) = s$?} \\
+&\leq \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \qquad \text{Completely unsure of this}
+\end{align*}
+\allowdisplaybreaks[0]
+Thus, we have that 
+\[
+R_n = \sum_{k=1}^K \Delta_k \E [T_k(n)] \leq \sum_{k, \Delta_k > 0} \Delta_k \left(1 + \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \right),
+\]
+completing the proof. 
+\end{proof}
+
+We will make a quick comment on this result before moving on. If we consider the case that $K = 2$, we know that $R_n \sim \frac{\log n}{\Delta}$, which is consistent with the idea that we will have a tough time deciding between the two actions if the difference in reward ($\Delta$) is small. However, $R_n$ is guaranteed to be less than $n \Delta$, so a small $\Delta$ does not generally imply large regret. Indeed, we can bound $R_n$ by $\min \{\frac{\log n}{\Delta}, n\Delta\}$, up to constants. 
 \subsection{Bounded Regret}
