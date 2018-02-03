@@ -389,7 +389,7 @@ R_n \leq 32 \sum_{k : \Delta_k} \frac{\log n}{\Delta_k} + \left(1 + \frac{\pi^2}
 \begin{proof}
 First, a brief note: this is not the exact same result as the one in \cite[Lecture~18]{rigollet} -- the 32 here is replaced by an 8 there. However, that proof is riddled with errors and very tough to follow. In fact, some of the lines written below are provided with no justification because I could not determine why they were true. I provided some additional information, as I could find it, from multiple sources, but mainly from \cite[Theorem~2.1]{bubeck2012regret}, with $\alpha = 4$ and $\psi^*(\varepsilon) = 2 \varepsilon^2$. 
 
-That being said, let's start with choosing some $k$ such that $\Delta_k > 0$. Our goal is to bound $\E[T_k(n)]$, and then invoke \eqref{eqn:bandit_regret} to bound the regret $R_n$. We can start by saying that 
+That being said, let us proceed with the proof. Our goal is to bound $\E[T_k(n)]$, and then invoke \eqref{eqn:bandit_regret} to bound the regret $R_n$. We can restrict ourselves to $k$ satisfying $\Delta_k > 0$,  since when $\Delta_k = 0$, we do not need to control $\E [T_k(n)]$ to control the regret. We can start by saying that 
 \[
 \E[T_k(n)] = 1 + \sum_{t=K+1}^n \Prob[\pi_t = k],
 \]
@@ -411,9 +411,9 @@ This is a contradiction, however, since we assume that $\pi_t = k$.
 
 We can also bound the probability that equations \eqref{eqn:UCB_1} and \eqref{eqn:UCB_2} are true:
 \begin{align*}
-\Prob \left[\text{\eqref{eqn:UCB_2} holds} \right] & \leq \Prob \left[ \exists s \in \{1, \ldots, t\}: \hat \mu_{*, s} + 2 \sqrt{\frac{2 \log t}{s}} \leq \mu_* \right] \\
-&\leq \sum_{s = 1}^t \Prob \left[ \mu_* - \hat \mu_{*, s} \geq 2 \sqrt{\frac{2 \log t}{s}}\right] \qquad &\text{by the union bound}\\
-&\leq \sum_{s=1}^t \exp \left(\frac{-s}{2} \frac{8 \log t}{s}\right) \qquad &\text{by the subgaussian assumption} \\
+\Prob \left[\text{\eqref{eqn:UCB_2} holds} \right] & \leq \Prob \left[ \left. \exists s \in \{1, \ldots, t\}: \hat \mu_{*, t} + 2 \sqrt{\frac{2 \log t}{s}} \leq \mu_* \right| T_*(t) = s \right] \\
+&\leq \sum_{s = 1}^t \Prob \left[ \left. \mu_* - \hat \mu_{*, t} \geq 2 \sqrt{\frac{2 \log t}{s}} \right| T_*(t) = s \right] \qquad \text{by the union bound}\\
+&\leq \sum_{s=1}^t \exp \left(\frac{-s}{2} \frac{8 \log t}{s}\right) \qquad \text{by the subgaussian assumption, since $\hat \mu_{*, t}$ has $s$ terms} \\
 &= \frac{1}{t^3}.
 \end{align*}
 Similarly, we can show $\Prob \left[ \text{\eqref{eqn:UCB_1} holds}\right] \leq \frac{1}{t^3}$.  
@@ -424,9 +424,10 @@ Now, we can finally bound the item we are after:
 &\leq 2 \sum_{t=1}^\infty \frac{1}{t^3} + \sum_{t=1}^n \Prob \left[\mu_* \leq \mu_k + 4 \sqrt{\frac{2 \log t}{T_k(t)}}, \pi_t = k \right] \\
 &\leq 2 \sum_{t=1}^\infty \frac{1}{t^2} + \sum_{t=1}^n \Prob\left[T_k(t) \leq \frac{32 \log t}{\Delta_k^2}, \pi_t = k \right]
 \qquad \text{note the extra factor of $2^2 = 4$} \\
-& \leq \frac{\pi^2}{3} + \sum_{s=1}^\infty \Prob\left[T_k(t) \leq \frac{32 \log n}{\Delta_k^2}, \pi_t = k \right] \\
-&\leq \frac{\pi^2}{3} + \sum_{t=1}^n \Prob\left[s \leq \frac{32 \log n}{\Delta_k^2}\right] \qquad \text{reparametrizing $T_k(t) = s$?} \\
-&\leq \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \qquad \text{Completely unsure of this}
+& \leq \frac{\pi^2}{3} + \sum_{t=1}^n \Prob\left[T_k(t) \leq \frac{32 \log n}{\Delta_k^2}, \pi_t = k \right] \\
+& \leq \frac{\pi^2}{3} + \sum_{t=1}^n \E \left[\mathbf{1}_{T_k(t) \leq \frac{32 \log n}{\Delta^2_k}}\right] \\
+&= \frac{\pi^2}{3} +  \E \left[\sum_{t=1}^n \mathbf{1}_{T_k(t) \leq \frac{32 \log n}{\Delta^2_k}}\right] \\
+&\leq \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \qquad \text{\textbf{Not exactly clear on this step -- what if $T_k(t)$ was always low?}}
 \end{align*}
 \allowdisplaybreaks[0]
 Thus, we have that 
