@@ -50,7 +50,7 @@ Note that the exception in case of the euclidean norm arises because we can writ
 
 In mirror descent allows us to circumvent this problem by mapping the current point of our descent algorithm to its dual, perform the gradient descent step and map back to our primal space. In general there is no guarantee that our new point in the primal space is in our restriction set $\mathcal{X}$ and, hence, an additional projection may be required. Summarised we get the following algorithm.
 
-\begin{algorithm} \label{alg:mirror_descent}
+\begin{algorithm}
 \caption{Mirror Descent}
 \label{alg:mirror_descent}
 \begin{algorithmic}

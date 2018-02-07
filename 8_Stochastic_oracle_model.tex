@@ -4,20 +4,20 @@
 \emph{Speaker: Adam Foster, 30/11/2017.}\\
 
 Assume that we want to solve the following problem:
-\begin{align*}
+\begin{align}
 	\begin{aligned}
 		\text{minimize }\quad   & f(x) \\
 		\text{subject to }\quad & x\in \mathcal{X},
 	\end{aligned}
-	\label{def:stochastic problem}
-\end{align*}
+	\label{def:stochastic_problem}
+\end{align}
 where $f$ is a convex function, possibly not known. In previous work, we assumed that we had a first order oracle which, given $x \in \mathcal{X}$, would yield a $g \in \partial f(x)$. When analysing our algorithms in terms of oracle complexity, it was the \textit{number of calls} to the oracle that was important. In many applications, an oracle may not exist, or a single call to the oracle may be very expensive. In such cases, we accept randomness in our oracle but require it to be unbiased.
 
 Formally, a first order \emph{stochastic} oracle model defines the framework where given $x\in\mathcal{X}$ an oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $x$, namely, $\E[G] \in \partial f(x)$. If $X$ is a random variable, the oracle yields back a random variable $G$ that is an unbiased estimator of a subgradient of $f$ at $X$ conditionally on $X$, namely, $\E[G|X] \in \partial f(X)$.
 
 
 \section{Projected gradient descent with a stochastic oracle}
-We analyse the behaviour of the projected gradient descent algorithm to solve problem \eqref{def:stochastic problem} when we replace exact knowledge of subgradients of $f$ with unbiased estimates of them. For a given initial point $X_1\in\X$, possibly random, and a given collection of step sizes $\eta_1,\eta_2,\ldots$, the stochastic projected gradient descent is defined by the sequence of random variables generated according to the following update:
+We analyse the behaviour of the projected gradient descent algorithm to solve problem \eqref{def:stochastic_problem} when we replace exact knowledge of subgradients of $f$ with unbiased estimates of them. For a given initial point $X_1\in\X$, possibly random, and a given collection of step sizes $\eta_1,\eta_2,\ldots$, the stochastic projected gradient descent is defined by the sequence of random variables generated according to the following update:
 \begin{align*}
 Y_{s+1} &= X_s - \eta_s G_s,\\
 X_{s+1} &= \Pi_{\X}(Y_{s+1}).
