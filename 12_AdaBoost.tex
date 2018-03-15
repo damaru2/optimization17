@@ -94,7 +94,7 @@ To see this, first apply the Law of Total Expectation
 \end{equation*}
 It suffices to minimize the conditional expectation pointwise
 \begin{equation*}
-	\E[\exp(-Yf(w))] = \E[e^{-f(w)}\Prob(Y=1|W=w) + e^{f(w)}\Prob(Y=-1|W=w)]
+	\E[\exp(-Yf(w))] = e^{-f(w)}\Prob(Y=1|W=w) + e^{f(w)}\Prob(Y=-1|W=w)
 \end{equation*}
 we then differentiate
 \begin{equation*}
@@ -156,7 +156,7 @@ Set $\mathcal{G}$ is a family of \textbf{$\gamma$-weak learners} if for every di
 
 With this definition, we can begin a theoretical analysis of AdaBoost.
 
-\begin{theorem}[AdaBoost with weak learners]
+\begin{theorem}[AdaBoost with $\gamma$-weak learners]
 The optimized empirical exponential loss of AdaBoost is 
 \begin{equation*}
 	\prod_{t=1}^T 2 \sqrt{\varepsilon_t (1 - \varepsilon_t)}.
@@ -178,7 +178,7 @@ Using equation~\eqref{eq:adaboost_alpha_optim} we have $e^{\pm \alpha_T} = \left
 	&= \prod_{t=1}^T 2\sqrt{\varepsilon_t (1-\varepsilon_t)} 
 \end{align*}
 
-Now suppose $\mathcal{G}$ is a family of $\gamma$-weak learners. Then (considering the empirical law on $(W, Y)$ in the definition of weak learners) we must have each $\varepsilon_t \le \frac{1 - \gamma}{2}$, since the choice of $g_t$ is optimal. Hence $2\sqrt{\varepsilon_t(1 - \varepsilon-t)} \le \sqrt{1 - \gamma^2}$
+Now suppose $\mathcal{G}$ is a family of $\gamma$-weak learners. Then (considering the empirical law on $(W, Y)$ in the definition of weak learners) we must have each $\varepsilon_t \le \frac{1 - \gamma}{2}$, since the choice of $g_t$ is optimal. Hence $2\sqrt{\varepsilon_t(1 - \varepsilon_t)} \le \sqrt{1 - \gamma^2}$
 
 Finally, since $\varphi_\text{exp} \ge \varphi_{01}$, we have
 \begin{align*}
@@ -193,9 +193,7 @@ Now, after $T = 2\log n/\gamma^2$ iterations, we have $(1 - \gamma^2)^{T/2} < e^
 \end{theorem}
 
 
-
-
-\section{Gradient boosting}
+\section{Generalizations of AdaBoost}
 AdaBoost can be generalized in a number of ways. Within the realm of classification, we can consider new loss functions like the logistic loss $\varphi(u) = \log_2 (1+ \exp(u))$. We can extend AdaBoost to multi-class classification. One way to do this is to let $Y \in \R^k$ with one component equal to $1$ and the others equal to $-1/(k-1)$. The Exponential Loss function becomes $\ell_\text{exp}(z, y) = \exp(-y^T z)$. The multi-class AdaBoost algorithm can then be derived exactly as in Section~\ref{sec:adaboost_derive}.
 
 Boosting is also applicable to regression, where $Y \in \R$. In this context, one typically uses the least-squares loss $\ell(z, y) = (z - y)^2$. In the regression context, the possible choices for $\mathcal{G}$ become much larger. For instance:
@@ -250,9 +248,9 @@ If $Y \in \R$ and $\ell(z, y) = (z - y)^2$ then we have
 \begin{align*}
 	-\langle \partial C(f_{t-1}), g \rangle &= -\frac{1}{n^2}\sum_{i=1}^n 2(f_{t-1}(W_i) - Y_i) \cdot g(W_i)
 \end{align*}
-so $g$ is chosen to align maximally with the residuals left by $f_{t-1}$.
+so $g$ is chosen to maximally counterbalance the residuals left by $f_{t-1}$.
 
-The gradient perspective gives rise to a very large number of boosting algorithms.
+The gradient perspective gives a recipe for producing a large number of Gradient Boosting algorithms as shown in Algorithm~\ref{alg:gradient_boosting}.
 
 \begin{algorithm}
 %\scriptsize
