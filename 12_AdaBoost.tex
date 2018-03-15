@@ -1,4 +1,326 @@
 %!TEX root = optimization1718.tex
 
 \chapter{AdaBoost}
-\emph{Speaker: ???}\\
+\emph{Speaker: Adam Foster, 16/03/2018.}\\
+
+In ensemble methods for machine learning we assume that
+\begin{equation*}
+	(W_1, Y_1), ..., (W_n, Y_n)
+\end{equation*}
+are i.i.d. with $W_i \in \mathcal{W}$. For binary classification, we have $Y_i \in \{\pm 1\}$. We have access to a set $\mathcal{G}$ of base (also called weak) procedures
+\begin{equation*}
+	g: \mathcal{W} \to \{\pm 1\} \text{ for } g \in \mathcal{G}
+\end{equation*}
+
+The aim is to construct an aggregate of base procedures which solves the following optimization problem
+\begin{align*}
+	\begin{aligned}
+		\min_f\quad   & \E \ell(f(W), Y) \\
+		\text{subject to }\quad & f = \sum_{t=1}^T \alpha_t g_t \text{ with } \alpha_t \ge 0, g_t \in \mathcal{G} \text{ for } t=1, ..., T.
+	\end{aligned}
+\end{align*}
+
+As in Section~\ref{sec:intro}, $\ell$ is a loss functions typically of the form $\ell(z,y) = \varphi(-zy)$ for a given $\varphi:\R\rightarrow\R$. A natural loss function in the classification regime is the Zero-One loss
+\begin{align*}
+	\ell_{01}(f(w), y) &= \mathbf{1}[\text{sign}(f(w)) \ne y] \\
+	\varphi_{01}(u)    &= \mathbf{1}[u \ge 0]
+\end{align*}
+but regrettably this is neither convex nor differentiable. In AdaBoost, we use the Exponential Loss 
+\begin{equation*}
+	\varphi_\text{exp}(u) = \exp(u)
+\end{equation*}
+which is an upper bound on $\varphi_{01}$.
+
+Since the distribution of $(W, Y)$ is unknown, we optimize the \textbf{empirical} loss
+\begin{equation*}
+	\E_n \ell(f(W), Y) = \frac{1}{n} \sum_{i=1}^n \ell(f(W_i), Y_i)
+\end{equation*}
+
+
+\section{The AdaBoost algorithm}
+\label{sec:adaboost_derive}
+
+AdaBoost is a recursive algorithm that greedily minimizes the empirical exponential loss, $\ell_\text{exp}$, at each step.
+
+Suppose that $f_{t-1}$ is given. Greedy minimization means that we choose $\alpha_t$ and $g_t$ to minimize
+\begin{equation*}
+	\E_n \ell_\text{exp} [f_{t-1}(W) + \alpha_t g_t(W), Y] = \frac{1}{n} \sum_{i=1}^n \exp[-Y_i f_{t-1}(W_i)]\exp[-\alpha_t Y_i g_t(W_i)]
+\end{equation*}
+define the normalized weights $D_t(i) \propto \exp[-Y_i f_{t-1}(W_i)]$. The objective is then proportional to
+\begin{align}
+	\label{eq:adaboost_empirical_loss}
+	&\sum_{i=1}^n D_t(i)\exp[-\alpha_t Y_i g_t(W_i)] = e^{-\alpha_t} + (e^{\alpha_t} - e^{-\alpha_t}) \sum_{i=1}^n D_t(i)\mathbf{1}[Y_i \ne g_t(W_i)]
+\end{align}
+Recall $\alpha_t \ge 0$, so $e^{\alpha_t} \ge e^{-\alpha_t}$. Thus we can first choose $g_t$ to minimize the weighted misclassification error
+\begin{equation*}
+	\varepsilon_t = \sum_{i=1}^n D_t(i)\mathbf{1}[Y_i \ne g_t(W_i)]
+\end{equation*}
+then the optimal $\alpha_t$ is simply
+\begin{equation}
+	\label{eq:adaboost_alpha_optim}
+	\alpha_t = \tfrac{1}{2}\log \left(\frac{1 - \varepsilon_t}{\varepsilon_t}\right)
+\end{equation}
+
+We have just derived the following algorithm
+\begin{algorithm}
+%\scriptsize
+\caption{AdaBoost}
+   \begin{algorithmic}[1] \label{alg:adaboost}
+   \STATE Let $f_0 \equiv 0$
+   \STATE Let $D_1(i) = \tfrac{1}{n}$
+   \FOR{$t = 1$ to $T$}
+   	\STATE Choose $g_t \in \mathcal{G}$ to minimize the weighted misclassification error $\varepsilon_t = \sum_{i=1}^n D_t(i)\mathbf{1}[Y_i \ne g_t(W_i)]$
+   	\STATE Let $\alpha_t = \tfrac{1}{2}\log \left(\frac{1 - \varepsilon_t}{\varepsilon_t}\right)$
+    \STATE Let $f_t$ = $f_{t-1} + \alpha_t g_t$
+    \STATE Reweight $D_{t+1}(i) \propto D_{t}(i)\exp(-\alpha_t Y_i g_t(W_i))$
+   \ENDFOR  
+   \STATE Normalize $f = f_T/\sum_{t=1}^T \alpha_t$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Choice of $\mathcal{G}$}
+In classification, it is extremely common to choose the base procedures to be some form of decision tree. Two common cases are:
+\begin{itemize}
+	\item Decision stumps. For $\mathcal{W} = \R^k$, the $(i, c, s)$-decision stump assigns $+s$ to $\{w : w_i \ge c\}$ and $-s$ to the rest. (We need $s=\pm 1, 1 \le i \le k, c \in \R$.)
+	\item Decision trees. For $\mathcal{W} = \R^k$, decision trees recursively split the input space into a number of (hyper)rectangles and assign $+1$ or $-1$ to each rectangle. They are a generalization of decision stumps.
+\end{itemize}
+
+\subsection{Benefits of exponential loss}
+A useful property of the Exponential Loss $\ell_\text{exp}$ is that it has the same population minimizer as $\ell_{01}$.
+
+To see this, first apply the Law of Total Expectation
+\begin{equation*}
+	\E[\exp(-Yf(W))] = \E[\E[\exp(-Yf(W))|W]].
+\end{equation*}
+It suffices to minimize the conditional expectation pointwise
+\begin{equation*}
+	\E[\exp(-Yf(w))] = \E[e^{-f(w)}\Prob(Y=1|W=w) + e^{f(w)}\Prob(Y=-1|W=w)]
+\end{equation*}
+we then differentiate
+\begin{equation*}
+	\frac{\partial}{\partial f(w)} \left( e^{-f(w)}\Prob(Y=1|W=w) + e^{f(w)}\Prob(Y=-1|W=w) \right) = -e^{-f(w)}\Prob(Y=1|W=w) + e^{f(w)}\Prob(Y=-1|W=w)
+\end{equation*}
+and set the derivative equal to zero
+\begin{align*}
+	e^{-f^*(w)} \left( -\Prob(Y=1|W=w) + e^{2f^*(w)}\Prob(Y=-1|W=w) \right) = 0 \\
+	f^*(w) = \tfrac{1}{2}\log \frac{\Prob(Y=1|W=w)}{\Prob(Y=-1|W=w)}
+\end{align*}
+which indeed gives the Zero-One minimizer.
+
+\subsection{A geometric perspective on AdaBoost}
+Recall the \textbf{Kullback-Leibler} (KL) divergence for distributions $p$ and $q$
+\begin{equation*}
+	KL(p, q) = \sum_{i=1}^n p(i) \log \frac{p(i)}{q(i)}
+\end{equation*}
+Let $u$ denote the uniform distribution on $1, ..., n$. Consider the following optimization problem
+\begin{align*}
+	\begin{aligned}
+		\min_p\quad   & KL(p, u)\\
+		\text{subject to }\quad & p\in \Delta_n, \\
+								& \sum_{i=1}^n p(i)Y_i g(W_i) = 0 \text{ for } g \in \mathcal{G}
+	\end{aligned}
+\end{align*}
+The Lagrangian for this problem is
+\begin{equation*}
+	L(p, \alpha, \lambda) = \sum_{i=1}^n p(i) \log (np(i)) + \sum_{g \in \mathcal{G}} \alpha_g \left( \sum_{i=1}^n p(i)Y_i g(W_i) \right) + \lambda \left(\sum_{i=1}^n p(i) - 1\right) 
+\end{equation*}
+(we have ignored the non-negativity constraints but it turns out we get them for free).
+
+We differentiate $L$ w.r.t. $p(i)$
+\begin{equation*}
+	\frac{\partial L}{\partial p(i)} = \log(np(i)) + 1 + \sum_{g \in \mathcal{G}} \alpha_g Y_i g(W_i) + \lambda
+\end{equation*}
+and solve equal to 0
+\begin{equation*}
+	p(i) = \exp \left( - \sum_{g \in \mathcal{G}} \alpha_g Y_i g(W_i) \right)/Z
+\end{equation*}
+where $Z$ is a normalization constant.
+The Lagrangian dual function is
+\begin{equation*}
+	g(\alpha, \lambda) = \log n - \log Z = \log n - \log \sum_{i=1}^n \exp \left( - \sum_{g \in \mathcal{G}} \alpha_g Y_i f(W_i) \right)
+\end{equation*}
+and the dual problem $\max_{\alpha, \lambda} g(\alpha, \lambda)$ is equivalent to
+\begin{equation*}
+	\min_\alpha \frac{1}{n}\sum_{i=1}^n \exp\left( - Y_i \sum_{g \in \mathcal{G}} \alpha_g g(W_i)\right)
+\end{equation*}
+which is the AdaBoost objective.
+
+\section{Weak learning implies strong learning}
+The set $\mathcal{G}$ of base procedures must have sufficient flexibility to give an edge over random guessing. More formally
+\begin{definition}[Weak learners of parameter $\gamma$]
+Set $\mathcal{G}$ is a family of \textbf{$\gamma$-weak learners} if for every distribution on $(W, Y)$ there exists $g \in \mathcal{G}$ such that
+\begin{equation*}
+	\Prob_{(W, Y)}[Yg(W) \le 0] \le \frac{1 - \gamma}{2}
+\end{equation*}
+\end{definition}
+
+With this definition, we can begin a theoretical analysis of AdaBoost.
+
+\begin{theorem}[AdaBoost with weak learners]
+The optimized empirical exponential loss of AdaBoost is 
+\begin{equation*}
+	\prod_{t=1}^T 2 \sqrt{\varepsilon_t (1 - \varepsilon_t)}.
+\end{equation*}
+Suppose now that $\exists \gamma > 0$ such that $\mathcal{G}$ is a family of $\gamma$-weak learners. Then the empirical misclassification rate decreases to zero at the following exponential rate
+\begin{equation*}
+	\Prob_n [Yf(W) \le 0] \le (1 - \gamma^2)^{T/2}
+\end{equation*}
+and equals zero after at most $2\log n/\gamma^2$ iterations.
+
+\begin{proof}
+From equation~\eqref{eq:adaboost_empirical_loss} taking $t=T$ we first note that the constant of proportionality is $\frac{1}{n}\sum D_T(i)(W_i) = \E_n [\exp(-Yf_{T-1}(W))]$. Thus,
+\begin{equation*}
+	\E_n[\exp(-Yf_T(W)] = \left( e^{-\alpha_T} + \varepsilon_T(e^{\alpha_T} - e^{-\alpha_T}) \right) \E_n [\exp(-Yf_{T-1}(W))] \\
+\end{equation*}
+Using equation~\eqref{eq:adaboost_alpha_optim} we have $e^{\pm \alpha_T} = \left(\frac{1 - \varepsilon_T}{\varepsilon_T}\right)^{\pm 1/2}$, giving
+\begin{align*}
+	\E_n[\exp(-Yf_T(W)] &= 2\sqrt{\varepsilon_T (1-\varepsilon_T)} \E_n [\exp(-Yf_{T-1}(W))] \\
+	&= \prod_{t=1}^T 2\sqrt{\varepsilon_t (1-\varepsilon_t)} 
+\end{align*}
+
+Now suppose $\mathcal{G}$ is a family of $\gamma$-weak learners. Then (considering the empirical law on $(W, Y)$ in the definition of weak learners) we must have each $\varepsilon_t \le \frac{1 - \gamma}{2}$, since the choice of $g_t$ is optimal. Hence $2\sqrt{\varepsilon_t(1 - \varepsilon-t)} \le \sqrt{1 - \gamma^2}$
+
+Finally, since $\varphi_\text{exp} \ge \varphi_{01}$, we have
+\begin{align*}
+	\Prob_n(Yf_T(W) \le 0) &\le \prod_{t=1}^T 2\sqrt{\varepsilon_t (1-\varepsilon_t)} \\
+	&\le (1 - \gamma^2)^{T/2}
+\end{align*}
+as claimed.
+
+Now, after $T = 2\log n/\gamma^2$ iterations, we have $(1 - \gamma^2)^{T/2} < e^{-\gamma^2 T/2} = 1/n$. But $\Prob _n(Yf_T(W))$ takes a minimum positive value $1/n$ and hence must be $0$.
+
+\end{proof}
+\end{theorem}
+
+
+
+
+\section{Gradient boosting}
+AdaBoost can be generalized in a number of ways. Within the realm of classification, we can consider new loss functions like the logistic loss $\varphi(u) = \log_2 (1+ \exp(u))$. We can extend AdaBoost to multi-class classification. One way to do this is to let $Y \in \R^k$ with one component equal to $1$ and the others equal to $-1/(k-1)$. The Exponential Loss function becomes $\ell_\text{exp}(z, y) = \exp(-y^T z)$. The multi-class AdaBoost algorithm can then be derived exactly as in Section~\ref{sec:adaboost_derive}.
+
+Boosting is also applicable to regression, where $Y \in \R$. In this context, one typically uses the least-squares loss $\ell(z, y) = (z - y)^2$. In the regression context, the possible choices for $\mathcal{G}$ become much larger. For instance:
+\begin{itemize}
+	\item Decision trees. Like classification trees, regression trees split the space recursively into rectangles and assign a real number to each rectangle.
+	\item Single-hidden-layer neural networks. These take as output $\sigma(b + \langle x, W \rangle )$ where $\sigma$ is a nonlinear function, $b \in \R, x \in \mathcal{W}$.
+	\item Wavelets.
+	\item Regression splines.
+	\item Reproducing kernel Hilbert spaces (RHKS). If $k: \mathcal{W} \times \mathcal{W} \to \R$ is a positive definite kernel, we may take $\mathcal{G}$ as the set $\{k(\cdot, w): w \in A\}$ where $A \subseteq \mathcal{W}$ is a collection of points
+\end{itemize}
+In the last three cases, suitable choices of $\mathcal{G}$ ensure that $\text{span}(\mathcal{G})$ consists of all (appropriate) real functions on $\mathcal{W}$.
+
+\subsection{Boosting as variational gradient descent}
+(This section is based on \cite{mason2000boosting}) \\
+We can phrase the optimization problem that boosting targets as 
+\begin{equation}
+	\min_{f \in \mathcal{F}} \; C(f)
+\end{equation}
+where $\mathcal{F} = \text{span}(\mathcal{G})$ consists of finite linear combinations of base procedures and $C(f) = \E_n \ell(f(W), Y)$ is the empirical loss. Under suitable conditions\footnote{for instance, if $\mathcal{F}$ is a Hilbert space and $C$ a differentiable functional}, one could approach this problem directly using gradient descent methods
+\begin{equation*}
+	f_t = f_{t-1} - \eta_t \partial C (f_{t-1}).
+\end{equation*}
+As an approximation, one could find
+\begin{equation}
+	\label{eq:functional_gradient_approx}
+	g_t = \argmax_{g\in\mathcal{G}} \; -\langle \partial C(f_{t-1}), g \rangle
+\end{equation}
+and then 
+\begin{equation*}
+	f_t = f_{t-1} + \alpha_t g_t
+\end{equation*}
+optimizing the non-negative coefficient $\alpha_t$ separately.
+
+Whilst $\partial C(f_{t-1})$ may seem a daunting functional derivative, if we take the inner product
+\begin{equation}
+	\label{eq:boost_inner_prod}
+	\langle f_1, f_2 \rangle = \frac{1}{n} \sum_{i=1}^n f_1(W_i)f_2(W_i)
+\end{equation}
+we have a more explicit form for the objective in \eqref{eq:functional_gradient_approx}
+\begin{equation*}
+	-\langle \partial C(f_{t-1}), g \rangle = -\frac{1}{n^2} \sum_{i=1}^n \frac{\partial \ell}{\partial z}(f_{t-1}(W_i), Y_i) \cdot g(W_i)
+\end{equation*}
+
+There are two interesting special cases. If $Y \in \{\pm 1\}$ and $\ell(z, y) = \varphi(-yz)$ then we have
+\begin{align*}
+	-\langle \partial C(f_{t-1}), g \rangle &= \frac{1}{n^2}\sum_{i=1}^n Y_i\varphi '(-Y_i f_{t-1}(W_i)) \cdot g(W_i) \\	
+	&= \frac{1}{n^2}\sum_{i=1}^n \varphi ' (-Y_i f_{t-1}(W_i)) - \frac{2}{n^2} \sum_{i=1}^n \varphi ' (-Y_i f_{t-1}(W_i)) \mathbf{1}[Y_i \ne g(W_i)]
+\end{align*}
+assuming that $\varphi ' \le 0$ (sensible for classification) we see that $g$ is chosen to minimize the weighted empirical misclassification error.
+
+If $Y \in \R$ and $\ell(z, y) = (z - y)^2$ then we have
+\begin{align*}
+	-\langle \partial C(f_{t-1}), g \rangle &= -\frac{1}{n^2}\sum_{i=1}^n 2(f_{t-1}(W_i) - Y_i) \cdot g(W_i)
+\end{align*}
+so $g$ is chosen to align maximally with the residuals left by $f_{t-1}$.
+
+The gradient perspective gives rise to a very large number of boosting algorithms.
+
+\begin{algorithm}
+%\scriptsize
+\caption{Gradient Boosting}
+   \begin{algorithmic}[1] \label{alg:gradient_boosting}
+   \STATE Let $f_0 \equiv 0$
+   \FOR{$t = 1$ to $T$}
+   	\STATE Choose $g_t \in \mathcal{G}$ to maximize $-\langle \partial C(f_{t-1}), g \rangle$, using the inner product of \eqref{eq:boost_inner_prod}
+   	\STATE Choose $\alpha_t$ to minimize $C(f_{t-1} + \alpha_t g_t)$
+    \STATE Let $f_t$ = $f_{t-1} + \alpha_t g_t$
+   \ENDFOR  
+   \STATE Normalize $f = f_T/\sum_{t=1}^T \alpha_t$
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+\section{Universal consistency of AdaBoost}
+
+References: 
+\begin{itemize}
+\item \verb|https://bcourses.berkeley.edu/courses/1409209/files/67384944|
+\item \verb|http://statistics.berkeley.edu/sites/default/files/tech-reports/722.pdf|
+\end{itemize}
+
+We begin with a number of definitions. Recall the \textbf{classification risk}
+\begin{equation*}
+	R(f) = \Prob [f(W) \ne Y]
+\end{equation*}
+Let $R^* = \inf_f R(f)$ where the inf is taken over all classification rules\footnote{Note that classification rules are derived from training data. Classification rules generated from $n$ examples are therefore measurable w.r.t. the $\sigma$-algebra, $\Sigma_n$, generated by $(W_1, Y_1), ..., (W_n, Y_n)$. The class considered here is all classification rules measurable under $\Sigma = \cup_n \Sigma_n$.} $f:\mathcal{W} \to \{\pm 1\}$.
+
+A sequence $(f_n)$ of classification rules is \textbf{universally consistent} if
+\begin{equation}
+	\label{eq:universally_consistent}
+	R(f_n) \to R^* \text{ a.s. as } n \to \infty
+\end{equation}
+for every distribution of $(W, Y)$.
+
+A proof that AdaBoost is universally consistent can be found in (cite Bartlett).
+
+\subsection{Classification calibration}
+We want
+\begin{equation*}
+	R_\varphi (f_n) \to R^*_\varphi \implies R(f_n) \to R^*
+\end{equation*}
+
+\subsection{Sieves}
+Let $\mathcal{F}_n$ be all classification rules obtainable with a sample of size $n$. Let $\bar{f}_n$ be the optimizer of $R_\varphi$ over this family. Then we want to prove that
+\begin{equation}
+	R_\varphi(\bar{f}_n) \to R^*
+\end{equation}
+and that the empirical risk and population risk get close
+\begin{equation}
+	|R_\varphi(\bar{f}_n) - R_{\varphi, n}(\bar{f}_n)| \to 0
+\end{equation}
+
+The concentration inequalities we seek to use require bounded $\varphi$. Hence, we clip them using $\pi_C$.
+
+
+
+
+
+
+
+
+
+
+
+
