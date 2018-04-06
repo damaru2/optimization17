@@ -11,7 +11,7 @@ The following sections provides some background material on support vector machi
 We consider the problem of binary classification for linearly separable data. In this case, we are looking for a hyperplane, given by $\mathbf{w}^\top\mathbf{x}+b=0$ such that the margin between the hyperplane and the two classes in the training set is maximised (see Figure). For such a hyperplane, we define the `support vectors' to be the data closest to the hyperplane. Intuitively, often there will only be three support vectors at most, two members of one class and one member of the other class. The line intersecting the two support vectors of the same class will be tangent to the hyperplane (given without proof).
 \begin{figure}
 \center
-\includegraphics[width=0.9\textwidth]{svm_pic.png}
+\includegraphics[width=0.9\textwidth]{img/svm_pic.png}
 \caption{SVM classification}
 \end{figure}
 
@@ -59,7 +59,7 @@ Note, in particular that the implied cost function can be differentiated w.r.t. 
 
 \begin{figure}
 \center
-\includegraphics[width=0.9\textwidth]{slack_var.png}
+\includegraphics[width=0.9\textwidth]{img/slack_var.png}
 \caption{SVM classification with slack variables}
 \label{fig:svm_slack}
 \end{figure}
