@@ -425,11 +425,12 @@ Now, we can finally bound the item we are after:
 &\leq 2 \sum_{t=1}^\infty \frac{1}{t^2} + \sum_{t=1}^n \Prob\left[T_k(t) \leq \frac{32 \log t}{\Delta_k^2}, \pi_t = k \right]
 \qquad \text{note the extra factor of $2^2 = 4$} \\
 & \leq \frac{\pi^2}{3} + \sum_{t=1}^n \Prob\left[T_k(t) \leq \frac{32 \log n}{\Delta_k^2}, \pi_t = k \right] \\
-& \leq \frac{\pi^2}{3} + \sum_{t=1}^n \E \left[\mathbf{1}_{T_k(t) \leq \frac{32 \log n}{\Delta^2_k}}\right] \\
-&= \frac{\pi^2}{3} +  \E \left[\sum_{t=1}^n \mathbf{1}_{T_k(t) \leq \frac{32 \log n}{\Delta^2_k}}\right] \\
-&\leq \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \qquad \text{\textbf{Not exactly clear on this step -- what if $T_k(t)$ was always low?}}
+& \leq \frac{\pi^2}{3} + \sum_{t=1}^n \E \left[\mathbf{1}_{T_k(t) \leq \frac{32 \log n}{\Delta^2_k}, \pi_t = k}\right] \\ 
+&= \frac{\pi^2}{3} +  \E \left[\sum_{t=1}^n \mathbf{1}_{T_k(t) \leq \frac{32 \log n}{\Delta^2_k}, \pi_t = k}\right] \\
+&\leq \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \qquad 
 \end{align*}
 \allowdisplaybreaks[0]
+The last inequality is true because $\pi_t = k$ can only hold $\frac{32 \log n}{\Delta^2_k}$ times at the same time that $T_k(t) \leq \frac{32 \log n}{\Delta^2_k}$ holds.
 Thus, we have that 
 \[
 R_n = \sum_{k=1}^K \Delta_k \E [T_k(n)] \leq \sum_{k, \Delta_k > 0} \Delta_k \left(1 + \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \right),
