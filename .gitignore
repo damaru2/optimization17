@@ -8,6 +8,11 @@ build/
 *.fls
 *.out
 *.toc
+*.tcp
+*.tps
+*.mpgraph.mp
+*.top
+*.tui
 *.fmt
 *.fot
 *.cb

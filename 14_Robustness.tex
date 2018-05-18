@@ -1,4 +1,80 @@
 %!TEX root = optimization1718.tex
 
 \chapter{Robustness}
-\emph{Speaker: ???}\\
+\emph{Speakers: Amartya Sanyal, Mario Lezcano Casado and David Martínez Rubio }\\
+
+% Change of notation with respect to the paper to maintain the symbols we have been using in the reading group:
+%   Paper                          Us
+% --------------------------------------------------------------------------------
+%   R(\theta)                      r(\theta)         - True risk
+%     -                            R(\theta)         - Empirical risk
+%   R(\theta, \mathcal{P}_n)     R(\theta, \rho)   - robust risk
+%
+%
+
+
+\section{Introduction}
+The generalization problem we have mostly been focusing on. Let $\mathcal{X}$ be a sample space $P$ an unknown distribution on $\mathcal{X}$ from which we can sample and $\Theta$ a parameter space. Given a loss function $\ell : \Theta \times \mathcal{X} \rightarrow \mathcal{R}$, we want to minimize over $\Theta$ the risk
+\[
+    r(\theta) := \mathbb{E}_{X\sim P} [\ell(\theta, X)]\\
+\]
+
+for solving this task, we take samples $x_1, \dots, x_n$ i.i.d. from $P$ and then one usually compute the empirical risk
+\[
+    R(\theta) := \frac{1}{n} \sum_{i=1}^n \ell(\theta, x_i)
+\]
+and minimize it over $\Theta$. In the literature we can find in different bounds contexts bounds of the following form, with high probability:
+\[
+    r(\theta) \leq \frac{1}{n} \sum_{i=0}^n \ell(\theta, x_i) + C_1 \sqrt{\frac{\Var(\ell(\theta, X))}{n}} + \frac{C_2}{n} \text{ for all } \theta \in \Theta
+\]
+where $C_1$ and $C_2$ depend on the parameters of the problem and the desired confidence guarantee. These bounds justify empirical risk minimization (ERM), i.e. minimizing $R(\theta)$. ERM is the most natural way to tackle our problem, we take an unbiased estimator of the value we want to minimize and minimize that one instead. However, while choosing $\theta$ we do not make any attempt to control the variance of our losses and thus the quantity we really want to bound could be big. 
+
+It seems natural to ask if we can get trade-offs between bias and variance in the generalization error, or more concretely if minimizing the weighted sum
+\begin{equation}\label{empirical_biased_estimator}
+R(\theta) + C\sqrt{\frac{\Var_{\hat{P}_n}(\ell(\theta, X))}{n}}
+\end{equation}
+we can get a lower generalization error. This idea was considered previously, but unfortunately the previous expression is not necessarily convex when $\ell$ is convex.  The paper we present, \textit{Variance-based regularization with convex objectives} \cite{duchi17roubust} proposes a different estimator, convex on $\theta$, that under some assumptions it is close to \eqref{empirical_biased_estimator}. They call their estimator the \textit{robustly regularized risk} and prove some generalization guarantees depending on the Rademacher complexities, covering numbers or localized Rademacher complexities.
+
+\section{Robustly Regularized Risk}
+
+Before defining the robustly regularized risk, we need to define first some concepts.
+
+Let $\phi : \mathbb{R}_+ \rightarrow \mathbb{R}$ be a convex function with $\phi(1) = 0$. Then the $\phi$-\textit{divergence} between distributions $P$ and $Q$ defined on a space $\mathcal{X}$ is 
+\[
+    D_{\phi}(P\|Q) = \int \phi\left(\frac{dP}{dQ} dQ\right) = \int_{\mathcal{X}} \phi\left(\frac{p(X)}{q(X)}\right) q(X) d\mu(X),
+\]
+where $\mu$ is any measure for which $P,Q  \ll \mu$, and $p= \frac{dP}{d\mu}$, $q = \frac{dQ}{d\mu}$. The paper makes use of the $\chi^2$-divergence, which corresponds with $\phi(t)=(t-1)^2$. Given $\phi$ and a sample $X_1, \dots, X_n$, we define the \textit{local neighborhood of the empirical distribution with radius} $\rho$ by 
+\[
+    \mathcal{P}_n := \left\{ \text{distributions } P \text{ such that } D_\phi\left(P \| \hat{P}_n\right)\leq \frac{\rho}{n } \right\}
+\]
+where $\hat{P}_n$ denotes the empirical distribution of the sample. Then, the robustly regularized risk is defined as
+\[
+    R_n(\theta, \rho) := \sup_{P\in\mathcal{P}_n} \mathbb{E}_P [\ell(\theta, X)] = \sup_{P}\left\{\mathbb{E}_P[\ell(\theta, X)]: D_{\phi}(P\|\hat{P}_n) \leq \frac{\rho}{n}\right\}.
+\]
+It is convex on $\theta$ because it is defined as the supremum of convex functions. The proposed estimation is to choose a parameter $\hat{\theta}^\rob$ that minimizes $R_n(\theta, \rho)$. The authors prove that this estimator is close to \eqref{empirical_biased_estimator}, in particular it is $O(1/n)$ lower than  \eqref{empirical_biased_estimator} uniformly in $\theta$ and if the variance of $\ell(\theta, X)$ is big enough we will see that with high probability the two estimators are the same.
+
+\section{Variance expansion}
+We want to see that the risk $R_n(\theta, \rho)$ is a good approximation to the empirical risk plus a variance term. In order to understand this kind of variance expansion it is useful to study first the following problem
+\begin{align}\label{variance_expansion}
+	\begin{aligned}
+         &\text{maximize}_{p} \sum_{i=1}^n p_i z_i \\
+         &\text{subject to } p \in \mathcal{P}_n = \left\{p\in \mathbb{R}_+^n : \frac{1}{2} \|np-\textbf{1}\|_2^2 \leq \rho, \langle \textbf{1}, p \rangle = 1\right\},
+	\end{aligned}
+\end{align}
+where $z \in \mathbb{R}^n$ is a vector. Let $s_n^2 := \frac{1}{n} \|z\|_2^2 - (\bar{z})^2 $ be the empirical variance of the vector $z$, where $\bar{z} = \frac{1}{n} \langle \textbf{1}, z\rangle$ is the mean value of $z$. Then by introducing the variable $u=p-\frac{1}{n} \textbf{1}$, the objective in problem \eqref{variance_expansion} satisfies $\langle p, z \rangle = \bar{z} + \langle u, z \rangle = \bar{z} + \langle u, z-\bar{z} \rangle$ because $\langle u, \textbf{1}=0\rangle$. Thus problem \eqref{variance_expansion} is equivalent to solving
+\[
+    \text{maximize}_{u\in \mathbb{R}^n}  \bar{z} + \langle  u, z-\bar{z}\rangle \text{  subject to } \|u\|_2^2 \leq \frac{2\rho}{n^2}, \langle \textbf{1}, u\rangle = 0, u \geq -\frac{1}{n}.
+\]
+If there is $u \propto z-\bar{z}$ that satisfies the constraints, the maximum is attained at such vector. This would be 
+\[
+    u_i = \frac{\sqrt{2\rho}(z_i -\bar{z})}{n\|z-\bar{z}\|_2} = \frac{\sqrt{2\rho} (z_i -\bar{z})}{n\sqrt{ns^2_n}}.
+\]
+It is possible to satisfy the constraint $u_i \geq -1/n$  if and only if 
+\[
+    \min_{i\in [n]} \frac{\sqrt{2\rho}(z_i - \bar{z})}{\sqrt{ns_n^2}} \geq -1.
+\]
+Thus if variance is large enough and thus the previous inequality holds for the vector $z$ we have 
+\[
+    \sup_{p\in\mathcal{P}_n} \langle p, z\rangle = \bar{z} + \sqrt{\frac{2\rho s_n^2}{n}}.
+\]
+This will correspond to an equality between $R_n(\theta, \rho)$ and \eqref{variance_expansion} when the variance is large enough.
