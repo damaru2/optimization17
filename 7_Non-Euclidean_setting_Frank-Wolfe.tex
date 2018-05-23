@@ -3,7 +3,7 @@
 \chapter{Non-Euclidean setting: Frank-Wolfe}
 \emph{Speaker: Chris Carmona, 23/10/2017.}\\
 
-The \emph{Conditional Gradient Descent} method, also known as \emph{Frank-Wolfe} is an iterative first-order optimization algorithm for constrained convex optimization, originally proposed in \cite{Frank1956} by Marguerite Frank and Philip Wolfe, then post-docs working in the Princeton logistics project led by Kuhn and Tucker. In recent years, Frank-Wolfe-type methods have re-gained interest, started by the valuable insights provided by \cite{Jaggi2013}, and fuelled by its good scalability and convergence properties properties (eg. convergence invariance under affine transformations).
+The \emph{Conditional Gradient Descent} method, also known as \emph{Frank-Wolfe} is an iterative first-order optimization algorithm for constrained convex optimization, originally proposed in \cite{Frank1956} by Marguerite Frank and Philip Wolfe, then post-docs working in the Princeton logistics project led by Kuhn and Tucker. In recent years, Frank-Wolfe-type methods have re-gained interest, started by the valuable insights provided by \cite{Jaggi2013}, and fuelled by its good scalability and convergence properties properties (e.g. convergence invariance under affine transformations).
 
 The method addresses general constrained convex optimization problems of the form $\min_{x \in \X} f(x)$. It assumes that the objective function $f$ is convex and continuously differentiable, and that the domain $\X$ is a compact convex subset of any vector space. Procedure \ref{alg:frank_wolfe} describes the method. In each iteration, the algorithm considers a linear approximation of the objective function, and moves towards a minimizer of this linear function, taken over the domain $\X$. Figure \ref{fig:frank_wolfe} illustrates one iteration of the algorithm (the domain $\X$ is denoted by $\mathcal{D}$ here).
 
@@ -13,7 +13,7 @@ The method addresses general constrained convex optimization problems of the for
    \begin{algorithmic}[1] \label{alg:frank_wolfe}
    \REQUIRE $f$ a differentiable and convex function on $\X$ that is $\beta$-smooth w.r.t. some norm $\|\cdot\|$.
    \ENSURE $x_T$ such that $f(x_T)-f(x^\ast) \leq \frac{4 \beta R^2 }{T+1}$ with $R = \sup_{x,y \in \X} \| x - y\|$
-   
+
    \STATE Let $x_{0} \in \X$
    \FOR {$t \in 0,\ldots,T$}
       \STATE Set $\gamma_t=\frac{2}{t+2}$
@@ -46,7 +46,7 @@ A major advantage of conditional gradient descent over projected gradient descen
 \if
 The convergence analysis of Frank-Wolfe type algorithms crucially relies on a measure of “non-linearity” of our objective function f over the domain $\X$. The \emph{curvature constant} $C_f$ of a convex and differentiable function $f:\mathbb{R}^n \rightarrow \mathbb{R}$, with respect to a compact domain $\X$ is defined as:
 
-\begin{equation} \label{eq:curv_const}
+\begin{equation}
 C_f := \sup_{ \substack{x,s \in \X,\\ \gamma \in [0,1],\\ y=x+\gamma(s-x)} } \frac{2}{\gamma^2} (f(y)-f(x)-\nabla f(x)^\top (y-x))
 \end{equation}
 
@@ -163,9 +163,8 @@ Suppose we choose $s_t$ with some "small" inaccuracy so that:
 \begin{equation}
       \langle s_t, \nabla f(x_t) \rangle = \min_{s \in \X } \langle s, \nabla f(x_t) \rangle + \delta \frac{\gamma_{t+1}C_f}{2}
 \end{equation}
-
 where $\delta$ is our \emph{inaccuracy parameter}. $C_f$ is known as the \emph{curvature constant}, measures how far $f$ is from being linear, getting $C_f=0$ when $f$ is linear, and defined as:
-\begin{equation} \label{eq:curv_const}
+\begin{equation}
 C_f := \sup_{ \substack{x,s \in \X,\\ \gamma \in [0,1],\\ y=x+\gamma(s-x)} } \frac{2}{\gamma^2} (f(y)-f(x)-\nabla f(x)^\top (y-x))
 \end{equation}
 

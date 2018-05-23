@@ -4,7 +4,7 @@
 \emph{Speakers: Dominic Richards and Anthony Caterini, 26/01/2018.}\\
 
 %%%%%%%%%%%%%%%%%%%%%%% DOMINIC'S SECTION %%%%%%%%%%%%%%%%%%%%%%
-The objective in this context is to make a sequence of predictions say, given $(X_1,Y_1),\dots,(X_{t-1},Y_{t-1})$ of iid random variables as well as $X_t$, to then predict $Y_t$. We will cover an adversarial method which can be viewed as playing against an opponent to which we are trying to minimise losses against.  The first method considered is expert advice where by we must select an action from a series of experts. 
+The objective in this context is to make a sequence of predictions say, given $(X_1,Y_1),\dots,(X_{t-1},Y_{t-1})$ of iid random variables as well as $X_t$, to then predict $Y_t$. We will cover an adversarial method which can be viewed as playing against an opponent to which we are trying to minimise losses against.  The first method considered is expert advice where by we must select an action from a series of experts.
 
 \section{Expert Advice}
 
@@ -14,77 +14,61 @@ Note that this section is based on \cite[Lecture~15]{rigollet}.
 
 Let $\mathcal{A}$ be a convex set of actions we can take and $\mathcal{Z}$ the adversary's set of moves. At time $t$ simultaneously reveal $a_t \in \mathcal{A}$ and $z_t \in \mathcal{Z}$ with $\ell(a_t,z_t)$  being the loss associated to the player/decision maker and adversary choosing $a_t$ and $z_t$ respectively. The game will go on for $n$ time steps, the total loss accumulated being $\sum_{t=1}^{n} \ell(a_t,z_t)$.
 
-Due to $\sum_{t=1}^{n} \ell(a_t,z_t)$ being arbitrarily large, compare ourselves to the loss of an \textbf{expert}. An expert simply being $b \in \mathcal{A}^n$, $b=(b_1,\dots,b_t,\dots,b_n)^T$. Choosing $K$ experts $b^{(1)},\dots,b^{(n)}$ in a sense restricts us to a subspace of $\mathcal{A}^n$, avoiding the need to consider all possible strategies. This gives us one possible benchmark, the minimum loss from sticking to a single expert 
-
+Due to $\sum_{t=1}^{n} \ell(a_t,z_t)$ being arbitrarily large, compare ourselves to the loss of an \textbf{expert}. An expert simply being $b \in \mathcal{A}^n$, $b=(b_1,\dots,b_t,\dots,b_n)^T$. Choosing $K$ experts $b^{(1)},\dots,b^{(n)}$ in a sense restricts us to a subspace of $\mathcal{A}^n$, avoiding the need to consider all possible strategies. This gives us one possible benchmark, the minimum loss from sticking to a single expert
 $$
-	\text{benchmark} = \min_{1 \leq j \leq K} \sum_{t=1}^n \ell(b_t^{(j)},z_t). 
+	\text{benchmark} = \min_{1 \leq j \leq K} \sum_{t=1}^n \ell(b_t^{(j)},z_t).
 $$
-
-A notion of \textbf{cumulative regret} can be defined to be 
-
+A notion of \textbf{cumulative regret} can be defined to be
 $$
-	R_n:= 
+	R_n:=
 	\sum_{t=1}^{n} \ell(a_t,z_t) - \min_{1 \leq j \leq K} \sum_{t=1}^n \ell(b_t^{(j)},z_t)
 $$
+which we hope to minimise.
 
-which we hope to minimise. 
-
-The information we have at time $t$ is the following 
-
+The information we have at time $t$ is the following
 \begin{itemize}
 \item All previous moves $a_1,\dots,a_{t-1}$
-\item All adversary's previous moves $z_1,\dots,z_{t-1}$ 
-\item All experts' strategies $b^{(1)},\dots,b^{(K)}$. 
+\item All adversary's previous moves $z_1,\dots,z_{t-1}$
+\item All experts' strategies $b^{(1)},\dots,b^{(K)}$.
 \end{itemize}
 
-Ultimately our strategy is going to consist of taking convex combinations of experts that have previously performed well. Noting that simply picking $b^{*}$ the best performing expert thus far would be too easily exploitable from the adversary's point of view, as he can maximise the loss with respect to that choice. 
+Ultimately our strategy is going to consist of taking convex combinations of experts that have previously performed well. Noting that simply picking $b^{*}$ the best performing expert thus far would be too easily exploitable from the adversary's point of view, as he can maximise the loss with respect to that choice.
 
-Actions are now $a_t = p_t b^T_t = \sum_{k=1}^K p_{t,k} b_t^{(k)} $ where $p_t \in \Delta^{K}$ is the $K$-dimensional simplex. Denote the associated loss $\ell(a_t,z_t) = \ell(p_t,z_t)$ with regret 
-
+Actions are now $a_t = p_t b^T_t = \sum_{k=1}^K p_{t,k} b_t^{(k)} $ where $p_t \in \Delta^{K}$ is the $K$-dimensional simplex. Denote the associated loss $\ell(a_t,z_t) = \ell(p_t,z_t)$ with regret
 $$
 	R_n = \sum_{t=1}^n \ell(p_t,z_t) - \min_{1 \leq j \leq K} \sum_{t=1}^n \ell(e_j,z_t)
 $$
-
-$e_j$ denoting the standard basis with zeros everywhere but the $j$th entry. Within this setting \cite{rigollet} states that our goal has reduced to the following optimisation problem 
-
+$e_j$ denoting the standard basis with zeros everywhere but the $j$th entry. Within this setting \cite{rigollet} states that our goal has reduced to the following optimisation problem
 $$
 	\min_{\theta \in \Delta^{K}} \sum_{j=1}^K \theta_j \sum_{t=1}^n l(e_j,z_t)
 $$
-
 which, unmentioned in the notes, upper bounds the Regret when $\ell$ is convex in $p_t$. Specifically if $\ell$ is convex we get
-
 \begin{align*}
 \sum_{t=1}^n \ell(p,z_t) = \sum_{t=1}^n \ell \left(\sum_{k=1}^K p_k e_k ,z_t \right) & \leq \sum_{t=1}^n \sum_{k=1}^K  p_k \ell(e_k ,z_t)\\
 & = \sum_{k=1}^K p_k  \sum_{t=1}^n   \ell(e_k ,z_t)\\.
 \end{align*}
 
-
-The aforementioned optimisation problem can be attacked with standard project gradient descent, updates being 
-
+The aforementioned optimisation problem can be attacked with standard project gradient descent, updates being
 $$
 	q_{t+1} = p_t - \eta \left( \ell(e_1,z_t),\dots,\ell(e_K,z_t)\right)^T
 $$
-
-and then $p_{t+1} = \Pi_{\Delta^K}(p_t)$, a projection back onto the simplex. But the topology gives a natural opportunity to apply mirror descent, which in this setting is interpreted as exponential weights. 
+and then $p_{t+1} = \Pi_{\Delta^K}(p_t)$, a projection back onto the simplex. But the topology gives a natural opportunity to apply mirror descent, which in this setting is interpreted as exponential weights.
 
 \subsection{Exponential Weights}
 
 The \textbf{Exponential Weighting (EW) strategy}, or equivalently mirror descent steps with $\Phi = \text{negative entropy}$, becomes
-
 $$
-	q_{t+1,j} = p_{t,j} \exp( -\eta \ell(e_j,z_t)), \quad  
+	q_{t+1,j} = p_{t,j} \exp( -\eta \ell(e_j,z_t)), \quad
 	p_{t+1,j} = \frac{q_{t+1,j} }{\sum_{l=1}^K q_{t+1,l} }
 $$
-
-which equivalently can be written as 
-
+which equivalently can be written as
 $$
-	p_t = \frac{1}{W_{t}} \sum_{j=1}^K \left( 
+	p_t = \frac{1}{W_{t}} \sum_{j=1}^K \left(
 	w_{t,j} e_j
-	\right), \quad 
+	\right), \quad
 	W_{t}:= \sum_{j=1}^K w_{t,j},
-	 \quad 
-	w_{t,j}:= \exp \left( 
+	 \quad
+	w_{t,j}:= \exp \left(
 	- \eta \sum_{s=1}^{t-1} \ell( e_j,z_s)
 	\right).
 $$
@@ -92,36 +76,30 @@ $$
 Intuitively observe that those experts that have a low loss previously $\sum_{s=1}^{t-1} \ell( e_j,z_s)$ gain extra weight. Now we have the following theorem to bound the regret.
 
 \begin{theorem}
-Assume $\ell(\cdot,z)$ is convex for all $z \in \mathcal{Z}$ and that $\ell(p,z) \in [0,1]$ for all $p \in \Delta^L, z \in \mathcal{Z}$. Then the EW strategy has regret 
-
+Assume $\ell(\cdot,z)$ is convex for all $z \in \mathcal{Z}$ and that $\ell(p,z) \in [0,1]$ for all $p \in \Delta^L, z \in \mathcal{Z}$. Then the EW strategy has regret
 $$
-	R_n \leq \frac{\log K}{\eta} + \frac{\eta n}{2} 
+	R_n \leq \frac{\log K}{\eta} + \frac{\eta n}{2}
 $$
-
-Optimising $\eta^* = \sqrt{\frac{2 \log K}{n}}$ gives 
-
+Optimising $\eta^* = \sqrt{\frac{2 \log K}{n}}$ gives
 $$
 	R_n \leq \sqrt{ 2n \log K}
 $$
-
 \end{theorem}
 
 From here two proofs can be given: a shorter non-optimal proof using results from mirror descent, or a longer version that gives optimal constants. We favour the latter to save deriving mirror descent results.
 
 \begin{proof}
-
-Observe that we have the following recursion for the normalising constants 
-
+Observe that we have the following recursion for the normalising constants
 \begin{align*}
-	W_{t+1} = 
+	W_{t+1} =
 	\sum_{j=1}^K \exp
 	\left(
 	-\eta \sum_{s=1}^{t}\ell(e_j,z_s)
-	\right) & = 
+	\right) & =
 	\sum_{j=1}^K 	\underbrace{ \exp
 	\left(
 	-\eta \sum_{s=1}^{t-1}\ell(e_j,z_s)
-	\right)	
+	\right)
 	}_{
 	\propto p_{t-1,j}
 	}
@@ -131,45 +109,41 @@ Observe that we have the following recursion for the normalising constants
 	\right]
 \end{align*}
 
-Now Hoeffding’s lemma states that if $a \leq X \leq b$  and $E[X] = 0$ then 
+Now Hoeffding’s lemma states that if $a \leq X \leq b$  and $E[X] = 0$ then
 $$
 	E[\exp(\lambda X )] \leq \exp(\lambda^2 ( a - b)^2 /8).
-$$ 
+$$
 
 Therefore with $X = - \ell(e_J,z_t) + E[\ell(e_J,z_t)]$ and $a = E[\ell(e_J,z_t)] - 1, b =  E[\ell(e_J,z_t)]$ as well as $\lambda = \eta$ the expectation becomes bounded
-
 \begin{align*}
-	E_{J \sim p_{t-1}}\left[\exp\left(-\eta \ell(e_J,z_t)\right)\right] 
+	E_{J \sim p_{t-1}}\left[\exp\left(-\eta \ell(e_J,z_t)\right)\right]
 	&\leq \exp\left( \eta^2/8 - \eta E_{J}[\ell(e_J,z_t)]\right) \\
 	&\leq \exp\left( \eta^2/8 - \eta \ell(E_{J}[e_J],z_t)\right) \\
 	& = \exp\left( \eta^2/8 - \eta \ell(p_t,z_t)\right) \\
 \end{align*}
-
-the later inequality arising due to convexity and equality due to $E_Je_J = \sum_{j=1}^K p_{t,j}e_j$. Recursively applying this bound gives with $W_1 = K$ due to $w_{1,j} = 1$ 
+the later inequality arising due to convexity and equality due to $E_Je_J = \sum_{j=1}^K p_{t,j}e_j$. Recursively applying this bound gives with $W_1 = K$ due to $w_{1,j} = 1$
 
 \begin{align*}
 W_{t+1} \leq K \exp(n \eta^2/8) \exp\left( - \eta \sum_{s=1}^{n} \ell(p_s,z_s)\right)
 \end{align*}
 
-Observe, that the right most quantity is the running regret, the quantity we wish to upper bound. Therefore we must lower bound $W_{t+1}$. Specifically we have 
+Observe, that the right most quantity is the running regret, the quantity we wish to upper bound. Therefore we must lower bound $W_{t+1}$. Specifically we have
 
 \begin{align*}
 	W_{t+1} & = \sum_{j=1}^K \exp\left( - \eta \sum_{s=1}^n\ell(e_j,z_s)\right) \\
 	& \geq  \max_{j =1,\dots,K} \exp\left( - \eta \sum_{s=1}^n\ell(e_j,z_s)\right)\\
 \end{align*}
 
-Combining the two bounds and taking the log of both sides gives 
-
+Combining the two bounds and taking the log of both sides gives
 \begin{align*}
-\max_{j =1,\dots,K} - \eta \sum_{s=1}^n\ell(e_j,z_s)  \leq \log(K) + 
-\frac{n \eta^2}{8} - \eta \sum_{s=1}^{n} \ell(p_s,z_s)  
+\max_{j =1,\dots,K} - \eta \sum_{s=1}^n\ell(e_j,z_s)  \leq \log(K) +
+\frac{n \eta^2}{8} - \eta \sum_{s=1}^{n} \ell(p_s,z_s)
 \end{align*}
 
 
 Therefore rearranging and turn max into a min by pulling out a minus gives
-
 \begin{align*}
-\sum_{s=1}^{n} \ell(p_s,z_s)   - \min_{j =1,\dots,K} \sum_{s=1}^n \ell(e_j,z_s) \leq \frac{\log(K)}{\eta} + \frac{n \eta}{8}. 
+\sum_{s=1}^{n} \ell(p_s,z_s)   - \min_{j =1,\dots,K} \sum_{s=1}^n \ell(e_j,z_s) \leq \frac{\log(K)}{\eta} + \frac{n \eta}{8}.
 \end{align*}
 
 \end{proof}
@@ -178,7 +152,7 @@ Therefore rearranging and turn max into a min by pulling out a minus gives
 
 \section{Follow the Perturbed Leader}
 
-We would now like to consider another strategy for online learning known as \emph{Follow the Perturbed Leader} (FPL), as described (mostly) in \cite[Lecture~16]{rigollet}. 
+We would now like to consider another strategy for online learning known as \emph{Follow the Perturbed Leader} (FPL), as described (mostly) in \cite[Lecture~16]{rigollet}.
 
 \subsection{New Notation}
 In this section, it will be more convenient to \emph{vectorize} our notation from the previous section\footnote{The notation in \cite[Lecture~16]{rigollet} is quite difficult to follow, as terms are redefined in terms of themselves and used in multiple places to mean the same thing.}. To this end, let us define the vector $Z_t$ as the loss associated to all experts at time $t$:
@@ -193,14 +167,14 @@ Then, we can rewrite the upper bound on regret as  as
 \begin{equation} \label{eqn:regret_bound}
 R_n = \sum_{t=1}^n \ell(p_t, z_t) - \min_{1 \leq j \leq K} \sum_{t=1}^n \ell(e_j, z_t) \leq \sum_{t=1}^n p_t^T Z_t - \min_{p \in \Delta^K} \sum_{t=1}^n p^T.
 \end{equation}
-Note that the first term is from Jensen's inequality, i.e. 
+Note that the first term is from Jensen's inequality, i.e.
 \[
 \sum_{t=1}^n p_t^T Z_t \geq \sum_{t=1}^n \ell(p_t, z_t),
 \]
 and the second term comes from the fact that minimizing a linear function over the probability simplex corresponds to selecting one of the vertices.
 
 \subsection{Follow the Leader}
-Before describing FPL, we will describe the associated \emph{unperturbed} version simply called Follow the Leader (FL). In FL, at time $t$, we select a strategy that would have minimized the cumulative loss over the previous $t-1$ timesteps. Mathematically, if we call $p_t$ our strategy at time $t$, then we select 
+Before describing FPL, we will describe the associated \emph{unperturbed} version simply called Follow the Leader (FL). In FL, at time $t$, we select a strategy that would have minimized the cumulative loss over the previous $t-1$ timesteps. Mathematically, if we call $p_t$ our strategy at time $t$, then we select
 \[
 p_t = \argmin_{p \in \Delta^K} \sum_{s=1}^{t-1} p^T Z_s.
 \]
@@ -211,7 +185,7 @@ Z_t = \begin{bmatrix}
 \mathbf{1}_{t \text{ even}}
 \end{bmatrix}.
 \]
-In this example, the FL strategy would be to first choose $p_1$ arbitrarily ($p_1 = (0, 1)^T$ in the best case), and then for $t \geq 2$, 
+In this example, the FL strategy would be to first choose $p_1$ arbitrarily ($p_1 = (0, 1)^T$ in the best case), and then for $t \geq 2$,
 \[
 p_t = \begin{bmatrix}
 \mathbf{1}_{t \text{ odd}} \\
@@ -220,7 +194,7 @@ p_t = \begin{bmatrix}
 \]
 Thus, with the FL strategy, we have
 \[
-n - 1 \leq \sum_{t=1}^n p_t^T Z_t \leq n - 1 + \varepsilon, 
+n - 1 \leq \sum_{t=1}^n p_t^T Z_t \leq n - 1 + \varepsilon,
 \]
 On the other hand, the optimal choice of $p$ to minimize this sum incurs cost equal to
 \[
@@ -230,7 +204,7 @@ On the other hand, the optimal choice of $p$ to minimize this sum incurs cost eq
     \frac{n}{2} - (1 - \varepsilon), & \text{for $n$ even}.
   \end{cases}
 \]
-Thus, we can only bound the regret $R_n$ from \eqref{eqn:regret_bound} linearly. However, we would like to do better, which is where the FPL strategy comes in. 
+Thus, we can only bound the regret $R_n$ from \eqref{eqn:regret_bound} linearly. However, we would like to do better, which is where the FPL strategy comes in.
 
 \subsection{FPL Algorithm and Analysis}
 FPL can be considered to be a \emph{regularization} of FL, as we add a small amount of noise to the selection of the strategy, but we can guarantee that the expected cumulative regret increases no faster than the order of $\sqrt{n}$ in the case of an oblivious adversary\footnote{This means the sequence $\{Z_t\}_{t=1}^n$ is chosen ahead of time}. The exact FPL strategy is as follows: for some $\eta > 0$, we first draw $\xi$ from a uniform distribution on $[0, \frac{1}{\eta}]^K$. Then, at time $t$, we select $p_t$ according to
@@ -240,7 +214,7 @@ p_t = \argmin_{p \in \Delta^K} \left\{p^T \left( \sum_{s = 1}^{t-1} Z_s + \xi\ri
 
 We will show that the FPL strategy incurs expected regret at worst proportionally to $\sqrt{n}$, but we first describe an intermediate result.
 \begin{lemma}[Be The Leader]\label{lem:be_the_leader}
-For any loss function $\Lc : \Delta^K \times \R^K \rightarrow \R$, let 
+For any loss function $\Lc : \Delta^K \times \R^K \rightarrow \R$, let
 \[
 q_t^* = \argmin_{q \in \Delta^K} \sum_{s=1}^t \Lc(q, Z_s).
 \]
@@ -249,7 +223,7 @@ Then, we have
 \sum_{t=1}^n \Lc(q_t^*, Z_t) \leq \sum_{t=1}^n \Lc(q^*_n, Z_t).
 \]
 \begin{proof}
-This can be proven by induction on $n$. It is clearly true for the base case $n = 1$. Then, assuming it is true for $n = k$, we have that 
+This can be proven by induction on $n$. It is clearly true for the base case $n = 1$. Then, assuming it is true for $n = k$, we have that
 \begin{align*}
 \sum_{t=1}^{k+1} \Lc(q_t^*, Z_t) &= \sum_{t=1}^k \Lc(q_t^*, Z_t) + \Lc(q_{k+1}^*, Z_{k+1}) &\\
 &\leq \sum_{t=1}^k \Lc(q_k^*, Z_t) + \Lc(q_{k+1}^*, Z_{k+1}) &\text{by the induction hypothesis} \\
@@ -274,7 +248,7 @@ Let us first define the quantity $q_t$ as the optimal strategy given the adversa
 \[
 q_t = \argmin_{p \in \Delta^K} p^T \left(\xi + \sum_{s = 1}^t Z_s\right).
 \]
-Then, invoking \autoref{lem:be_the_leader} with the loss function 
+Then, invoking \autoref{lem:be_the_leader} with the loss function
 \[
 \mathcal{L} (p, Z_t) = p^T Z_t + p^T \xi\, \mathbf{1}_{t = 1},
 \]
@@ -282,7 +256,7 @@ we have
 \[
 \sum_{t=1}^n \mathcal{L}(q_t, Z_t) = q_1^T \xi + \sum_{t=1}^n q_t^T Z_t \leq \sum_{t=1}^n \mathcal{L}(q_n, Z_t) = \min_{q \in \Delta^K} q^T \left(\xi + \sum_{t=1}^n Z_t\right).
 \]
-Thus, for any $q \in \Delta^K$, 
+Thus, for any $q \in \Delta^K$,
 \begin{align*}
 q_1^T \xi + \sum_{t=1}^n q_t^T Z_t &\leq q^T \left(\xi + \sum_{t=1}^n Z_t\right) \\
 \implies \sum_{t=1}^n\left(q_t^T Z_t - q^T Z_t\right) &\leq \left(q^T - q_1^T\right) \xi \leq \left\|q - q_1\right\|_1 \left\|\xi\right\|_{\infty} \leq \frac{2}{\eta}
@@ -297,11 +271,11 @@ We can now bound part of the expected regret term:
 \end{align}
 where $p^* = \argmin_{p \in \Delta^K} \sum_{t=1}^n p^T Z_t$.
 
-To handle the other term, we first define a function $h_t : [0, \frac{1}{\eta}]^K$ as 
+To handle the other term, we first define a function $h_t : [0, \frac{1}{\eta}]^K$ as
 \[
 h_t(\xi) = Z_t^T \left(\argmin_{p \in \Delta^K} p^T \left[\xi + \sum_{s=1}^{t-1} Z_s \right] \right).
 \]
-Then, we can easily see that 
+Then, we can easily see that
 \[
 \E\left[Z_t^T \left(p_t - q_t\right) \right] = \E\left[h_t(\xi)\right] -  \E\left[h_t(\xi + Z_t)\right].
 \]
@@ -314,25 +288,25 @@ We can therefore bound this term according to
 &\leq \sum_{i=1}^K \Prob\left(\xi^i \leq Z_t^i\right) &\text{union bound} \\
 &\leq \eta K Z_t^i \leq \eta K &\text{since $Z_t^i \leq 1$}.
 \end{align*}
-Substituting this result into \eqref{eqn:e_regret_half} gives us the bound 
+Substituting this result into \eqref{eqn:e_regret_half} gives us the bound
 \[
 \E[R_n] \leq \eta K n + \frac{2}{\eta}.
 \]
-This is optimized when $\eta = \sqrt{\frac{2}{nK}}$, which gives us \eqref{eqn:FPL_regret}. 
+This is optimized when $\eta = \sqrt{\frac{2}{nK}}$, which gives us \eqref{eqn:FPL_regret}.
 \end{proof}
 \end{theorem}
 
 \subsection{Closing Remarks on FPL}
-The first thing to note about \autoref{thm:FPL_regret} is that we assume that we know $n$ at the start so that we can choose $\eta$ optimally. In many applications, however, this is not the case: we do not always know for how many periods we will participate. In practice, it may be possible to assume that there may be some small number of periods, and then update $\eta$ accordingly if we exceed this number with a new, larger number of periods. 
+The first thing to note about \autoref{thm:FPL_regret} is that we assume that we know $n$ at the start so that we can choose $\eta$ optimally. In many applications, however, this is not the case: we do not always know for how many periods we will participate. In practice, it may be possible to assume that there may be some small number of periods, and then update $\eta$ accordingly if we exceed this number with a new, larger number of periods.
 
-We also have selected a sub-optimal noise component in the above theorem. In the original paper on FPL, the authors show that they can recover the $\sqrt{\log K}$ dependency in the bound -- as seen in the exponential weighting strategy -- using an exponential noise term \cite{kalai2005efficient}. However, the proof is more complicated than the one presented above. There may also be theoretical gains realized by resampling $\xi$ at each iteration as opposed to at the start of the optimization. 
+We also have selected a sub-optimal noise component in the above theorem. In the original paper on FPL, the authors show that they can recover the $\sqrt{\log K}$ dependency in the bound -- as seen in the exponential weighting strategy -- using an exponential noise term \cite{kalai2005efficient}. However, the proof is more complicated than the one presented above. There may also be theoretical gains realized by resampling $\xi$ at each iteration as opposed to at the start of the optimization.
 
-\section{Stochastic Bandits} 
+\section{Stochastic Bandits}
 \emph{Speakers: Dominic Richards and Anthony Caterini, 02/02/2018.}\\
 
 This week, we will be looking at stochastic bandits. This will be strongly based off the material in \cite[Lecture~18]{rigollet}. The stochastic multi-armed bandit is a well-known and well-studied model of decision making. We define the model as follows: suppose our bandit has $K$ \emph{arms} (i.e. possible actions), and at each time $t \in \{1, \ldots, n\}$, we receive reward $X_{k,t}$ for selecting action $k \in \{1, \ldots, K\}$. The sequence $\{X_{k, 1}, \ldots, X_{k, t}, \ldots, X_{k, n}\}$ is i.i.d. for each choice of $k$, with $\E[X_{k,t}] = \mu_k$. We define $\mu_* = \max_k \mu_k$, and we define a policy $\pi = \{\pi_1, \ldots, \pi_n\}$ such that $\pi_t$ specifies the action at time $t$ and is only dependent on information available before time $t$.
 
-We then define the regret in our policy $\pi$ as 
+We then define the regret in our policy $\pi$ as
 \begin{align}
 R_n &= \max_k \E\left[\sum_{t = 1}^n X_{k,t} \right] - \E\left[\sum_{t=1}^n X_{\pi_t, t} \right] \nonumber \\
 &= n \mu_* - \sum_{t=1}^n \sum_{k=1}^K \E\left[ X_{\pi_t, t} | \pi_t = k\right] \Prob[\pi_t = k] \qquad \text{by the law of total probability} \nonumber \\
@@ -340,40 +314,40 @@ R_n &= \max_k \E\left[\sum_{t = 1}^n X_{k,t} \right] - \E\left[\sum_{t=1}^n X_{\
 &= n \mu_* - \sum_{k=1}^K \mu_k \E \left[\sum_{t=1}^n \mathbf{1}_{\pi_t = k} \right] \nonumber \\
 &= \sum_{k=1}^K \Delta_k \E[T_k(n)], \label{eqn:bandit_regret}
 \end{align}
-where $\Delta_k = \mu_* - \mu_k$ and $T_k(n) = \sum_{t=1}^n \mathbf{1}_{\pi_t = k}$. 
+where $\Delta_k = \mu_* - \mu_k$ and $T_k(n) = \sum_{t=1}^n \mathbf{1}_{\pi_t = k}$.
 
-\subsection{Warm Up: Full Info Case} 
+\subsection{Warm Up: Full Info Case}
 
 \subsection{Upper Confidence Bound}
-Now we consider the case where we only observe a realization of $X_{k,t}$ if $\pi_t = k$. Given that we no longer have full information, what is a good strategy? A na\"ive idea is to pull all arms once, and from then on select action $\pi_t$ at time $t$ satisfying 
+Now we consider the case where we only observe a realization of $X_{k,t}$ if $\pi_t = k$. Given that we no longer have full information, what is a good strategy? A na\"ive idea is to pull all arms once, and from then on select action $\pi_t$ at time $t$ satisfying
 \[
 \pi_t \in \argmax_{k \in [K]} \frac{1}{T_k(t)} \sum_{s=1}^{t-1}\mathbf{1}_{\pi_s = k} X_{k, s},
-\] 
-i.e. choose the action that currently has the highest empirical mean, where we slightly redefine $T_k(t)$ as 
+\]
+i.e. choose the action that currently has the highest empirical mean, where we slightly redefine $T_k(t)$ as
 \[
 T_k(t) = \sum_{s=1}^{t-1} \mathbf{1}_{\pi_s = k}.
 \]
-Unfortunately, this strategy suffers from a major pitfall: it is entirely possible that we will completely ignore actions having high reward because of unlucky observations early on. To alleviate this issue, we instead select a strategy which maxmimizes some probabilistic upper bound on the average return of action $k$. In this way, actions which have not been chosen will have a higher-variance estimate of the mean, and thus a higher upper bound. We call this algorithm the Upper Confidence Bound (UCB) algorithm, and we present it in \autoref{alg:ucb}.
+Unfortunately, this strategy suffers from a major pitfall: it is entirely possible that we will completely ignore actions having high reward because of unlucky observations early on. To alleviate this issue, we instead select a strategy which maximimizes some probabilistic upper bound on the average return of action $k$. In this way, actions which have not been chosen will have a higher-variance estimate of the mean, and thus a higher upper bound. We call this algorithm the Upper Confidence Bound (UCB) algorithm, and we present it in \autoref{alg:ucb}.
 
-Before proceeding, it is important to note the following: without loss of generality, we now assume that $X_{k, t}$ is subgaussian with variance proxy 1 in this section. Also, we will use the notation 
+Before proceeding, it is important to note the following: without loss of generality, we now assume that $X_{k, t}$ is subgaussian with variance proxy 1 in this section. Also, we will use the notation
 \[
 \hat \mu_{k, t} = \frac{1}{T_k(t)} \sum_{s=1}^{t-1}\mathbf{1}_{\pi_s = k} X_{k, s}
 \]
-to denote the empirical mean of action $k$ at time $t$, and $\hat \mu_{*, t}$ to denote the empirical mean of the optimal action. 
+to denote the empirical mean of action $k$ at time $t$, and $\hat \mu_{*, t}$ to denote the empirical mean of the optimal action.
 
 \begin{algorithm}
 %\scriptsize
 \caption{Upper Confidence Bound (UCB)}
    \begin{algorithmic}[1] \label{alg:ucb}
-   \REQUIRE $X_{k, t}$ is 1-subgaussian for all $t \in [n], k \in [K]$. 
+   \REQUIRE $X_{k, t}$ is 1-subgaussian for all $t \in [n], k \in [K]$.
    \FOR{$t = 1$ to $K$}
    	\STATE $\pi_t = t$
    \ENDFOR
    \FOR{$t = K+1$ to $n$}
    	\STATE $T_k(t) = \sum_{s=1}^{t-1} \mathbf{1}_{\pi_s = k}$
-	\STATE $\hat \mu_{k, t} = \frac{1}{T_k(t)} \sum_{s=1}^{t-1}\mathbf{1}_{\pi_s = k} X_{k, s}$   	
+	\STATE $\hat \mu_{k, t} = \frac{1}{T_k(t)} \sum_{s=1}^{t-1}\mathbf{1}_{\pi_s = k} X_{k, s}$
    	\STATE $\pi_t \in \argmax_{k \in [K]}\left(\hat \mu_{k, t} + 2 \sqrt{\frac{2 \log t}{T_k(t)}} \right)$
-   \ENDFOR  
+   \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
@@ -387,9 +361,9 @@ R_n \leq 32 \sum_{k : \Delta_k} \frac{\log n}{\Delta_k} + \left(1 + \frac{\pi^2}
 \end{theorem}
 
 \begin{proof}
-First, a brief note: this is not the exact same result as the one in \cite[Lecture~18]{rigollet} -- the 32 here is replaced by an 8 there. However, that proof is riddled with errors and very tough to follow. In fact, some of the lines written below are provided with no justification because I could not determine why they were true. I provided some additional information, as I could find it, from multiple sources, but mainly from \cite[Theorem~2.1]{bubeck2012regret}, with $\alpha = 4$ and $\psi^*(\varepsilon) = 2 \varepsilon^2$. 
+First, a brief note: this is not the exact same result as the one in \cite[Lecture~18]{rigollet} -- the 32 here is replaced by an 8 there. However, that proof is riddled with errors and very tough to follow. In fact, some of the lines written below are provided with no justification because I could not determine why they were true. I provided some additional information, as I could find it, from multiple sources, but mainly from \cite[Theorem~2.1]{bubeck2012regret}, with $\alpha = 4$ and $\psi^*(\varepsilon) = 2 \varepsilon^2$.
 
-That being said, let us proceed with the proof. Our goal is to bound $\E[T_k(n)]$, and then invoke \eqref{eqn:bandit_regret} to bound the regret $R_n$. We can restrict ourselves to $k$ satisfying $\Delta_k > 0$,  since when $\Delta_k = 0$, we do not need to control $\E [T_k(n)]$ to control the regret. We can start by saying that 
+That being said, let us proceed with the proof. Our goal is to bound $\E[T_k(n)]$, and then invoke \eqref{eqn:bandit_regret} to bound the regret $R_n$. We can restrict ourselves to $k$ satisfying $\Delta_k > 0$,  since when $\Delta_k = 0$, we do not need to control $\E [T_k(n)]$ to control the regret. We can start by saying that
 \[
 \E[T_k(n)] = 1 + \sum_{t=K+1}^n \Prob[\pi_t = k],
 \]
@@ -401,7 +375,7 @@ Now, for $t > K$, we have that $\pi_t = k$ implies $\hat \mu_{k, t} + 2 \sqrt{\f
 \mu_* &\geq \hat \mu_{*, t} + 2 \sqrt{\frac{2 \log t}{T_*(t)}}, \label{eqn:UCB_2}\\
 \mu_* &\leq \mu_k + 4 \sqrt{\frac{2 \log t}{T_k(t)}}. \label{eqn:UCB_3}
 \end{align}
-To prove this, suppose all of the above inequalities were false. Then, 
+To prove this, suppose all of the above inequalities were false. Then,
 \begin{align*}
 \hat \mu_{k, t} + 2 \sqrt{\frac{2 \log t}{T_k(t)}} &\leq \mu_k + 4 \sqrt{\frac{2 \log t}{T_k(t)}} &\qquad \text{since \eqref{eqn:UCB_1} is false}\\
 &< \mu_* &\qquad \text{since \eqref{eqn:UCB_3} is false} \\
@@ -416,9 +390,9 @@ We can also bound the probability that equations \eqref{eqn:UCB_1} and \eqref{eq
 &\leq \sum_{s=1}^t \exp \left(\frac{-s}{2} \frac{8 \log t}{s}\right) \qquad \text{by the subgaussian assumption, since $\hat \mu_{*, t}$ has $s$ terms} \\
 &= \frac{1}{t^3}.
 \end{align*}
-Similarly, we can show $\Prob \left[ \text{\eqref{eqn:UCB_1} holds}\right] \leq \frac{1}{t^3}$.  
+Similarly, we can show $\Prob \left[ \text{\eqref{eqn:UCB_1} holds}\right] \leq \frac{1}{t^3}$.
 \allowdisplaybreaks
-Now, we can finally bound the item we are after: 
+Now, we can finally bound the item we are after:
 \begin{align*}
 \sum_{t=K+1}^n \Prob \left[\pi_t = k \right] & \leq \sum_{t=1}^n \left(\Prob \left[ \text{\eqref{eqn:UCB_1} holds}, \pi_t = k\right] + \Prob\left[ \text{\eqref{eqn:UCB_2} holds}, \pi_t = k\right] + \Prob\left[\text{\eqref{eqn:UCB_3} holds}, \pi_t = k\right] \right) \\
 &\leq 2 \sum_{t=1}^\infty \frac{1}{t^3} + \sum_{t=1}^n \Prob \left[\mu_* \leq \mu_k + 4 \sqrt{\frac{2 \log t}{T_k(t)}}, \pi_t = k \right] \\
@@ -427,16 +401,16 @@ Now, we can finally bound the item we are after:
 & \leq \frac{\pi^2}{3} + \sum_{t=1}^n \Prob\left[T_k(t) \leq \frac{32 \log n}{\Delta_k^2}, \pi_t = k \right] \\
 & \leq \frac{\pi^2}{3} + \sum_{t=1}^n \E \left[\mathbf{1}_{T_k(t) \leq \frac{32 \log n}{\Delta^2_k}, \pi_t = k}\right] \\ 
 &= \frac{\pi^2}{3} +  \E \left[\sum_{t=1}^n \mathbf{1}_{T_k(t) \leq \frac{32 \log n}{\Delta^2_k}, \pi_t = k}\right] \\
-&\leq \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \qquad 
+&\leq \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \qquad
 \end{align*}
 \allowdisplaybreaks[0]
 The last inequality is true because $\pi_t = k$ can only hold $\frac{32 \log n}{\Delta^2_k}$ times at the same time that $T_k(t) \leq \frac{32 \log n}{\Delta^2_k}$ holds.
-Thus, we have that 
+Thus, we have that
 \[
 R_n = \sum_{k=1}^K \Delta_k \E [T_k(n)] \leq \sum_{k, \Delta_k > 0} \Delta_k \left(1 + \frac{\pi^2}{3} + \frac{32 \log n}{\Delta_k^2} \right),
 \]
-completing the proof. 
+completing the proof.
 \end{proof}
 
-We will make a quick comment on this result before moving on. If we consider the case that $K = 2$, we know that $R_n \sim \frac{\log n}{\Delta}$, which is consistent with the idea that we will have a tough time deciding between the two actions if the difference in reward ($\Delta$) is small. However, $R_n$ is guaranteed to be less than $n \Delta$, so a small $\Delta$ does not generally imply large regret. Indeed, we can bound $R_n$ by $\min \{\frac{\log n}{\Delta}, n\Delta\}$, up to constants. 
+We will make a quick comment on this result before moving on. If we consider the case that $K = 2$, we know that $R_n \sim \frac{\log n}{\Delta}$, which is consistent with the idea that we will have a tough time deciding between the two actions if the difference in reward ($\Delta$) is small. However, $R_n$ is guaranteed to be less than $n \Delta$, so a small $\Delta$ does not generally imply large regret. Indeed, we can bound $R_n$ by $\min \{\frac{\log n}{\Delta}, n\Delta\}$, up to constants.
 \subsection{Bounded Regret}

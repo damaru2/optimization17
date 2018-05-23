@@ -1,3 +1,4 @@
+%!TEX root = optimization1718.tex
 \documentclass{book}
 
 \usepackage[utf8]{inputenc}
@@ -17,14 +18,13 @@
 \usepackage{amsmath, mathtools, amssymb}
 \usepackage{amsthm}
 \usepackage{color}
+\usepackage{xparse}
 \usepackage[section]{algorithm}
 \usepackage{algorithmic}
 \floatname{algorithm}{Procedure}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 
-\newcommand{\Var}{\text{Var}}
-\newcommand{\rob}{\text{rob}}
 
 % Define Problem environment
 \newtheorem{theorem}{Theorem}[section]
@@ -54,6 +54,7 @@
 \newcommand{\Grad}{{\tt{Grad}}}
 \newcommand{\Mirr}{{\tt{Mirr}}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\DeclareMathOperator{\Var}{Var}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 

@@ -13,13 +13,13 @@ To understand why combining gradient and mirror descent makes sense and why doin
     x_{k+1} &= \Pi_{\X}(y_{k+1}). \\
 \end{align*}
 
-One should not be surprised that in the case that $\X = \R^n$ regular gradient descent in unconstrained optimization is defined by the rule $ x_{k+1} = x_k -\frac{1}{\beta} g_k$. But, why is gradient descent, constrained or not, defined in that way? Of course, it works and it provides a non trivial convergence rate, but the proofs of this rate usually only define the method and prove convergence without explaining where the method comes from, specially regarding the choice of the learning rate. It can be useful to see gradient descent from the following point of view. Let's do it first for unconstrained gradient descent with $\|{\cdot}\|_2$ only. If we are at point $x_k \in \R^n$ and we compute the next point by moving against the gradient, the choice of $\frac{1}{\beta}$ is the best choice for the learning rate, in the sense that we can guarantee maximal local decrease for that choice of the learning rate. This is not difficult to see using the assumptions we have at hand. The smoothness assumption tells us that along the line defined by $x_k$ and $\nabla f(x_k)$, $f$ is lower bounded by a parabola with leading coefficient $\frac{\beta}{2}$ (blue graph in Figure \ref{parabolas}) whose derivative in $x_k$ coincides with the one of $f$ (restricted to the line, i.e. it is $\lVert \nabla f(x_k) \rVert$). Therefore, the derivative of $x^2\beta/2 $ is $x\beta = \lVert \nabla f(x_k) \rVert$ so the distance to the minimum in the parabola is ${\tt x} = \frac{1}{\beta}\lVert \nabla f(x_k) \rVert$ and it is clear now that maximal guaranteed progress is the evaluation of $x^2\beta/2 $ at $\tt{x}$, i.e. $\frac{1}{2\beta} \lVert \nabla f(x_k) \rVert^2$. And we have just proved that the guaranteed decrease is maximal for that choice of the learning rate and we have computed how much. All these arguments can be written using inequalities, but hopefully this can be considered cleaner by some people. %rephrase
+One should not be surprised that in the case that $\X = \R^n$ regular gradient descent in unconstrained optimization is defined by the rule $ x_{k+1} = x_k -\frac{1}{\beta} g_k$. But, why is gradient descent, constrained or not, defined in that way? Of course, it works and it provides a non trivial convergence rate, but the proofs of this rate usually only define the method and prove convergence without explaining where the method comes from, specially regarding the choice of the learning rate. It can be useful to see gradient descent from the following point of view. Let's do it first for unconstrained gradient descent with $\|{\cdot}\|_2$ only. If we are at point $x_k \in \R^n$ and we compute the next point by moving against the gradient, the choice of $\frac{1}{\beta}$ is the best choice for the learning rate, in the sense that we can guarantee maximal local decrease for that choice of the learning rate. This is not difficult to see using the assumptions we have at hand. The smoothness assumption tells us that along the line defined by $x_k$ and $\nabla f(x_k)$, $f$ is upper bounded by a parabola with leading coefficient $\frac{\beta}{2}$ (blue graph in Figure \ref{parabolas}) whose derivative in $x_k$ coincides with the one of $f$ (restricted to the line, i.e. it is $\lVert \nabla f(x_k) \rVert$). Therefore, the derivative of $x^2\beta/2 $ is $x\beta = \lVert \nabla f(x_k) \rVert$ so the distance to the minimum in the parabola is ${\tt x} = \frac{1}{\beta}\lVert \nabla f(x_k) \rVert$ and it is clear now that maximal guaranteed progress is the evaluation of $x^2\beta/2 $ at $\tt{x}$, i.e. $\frac{1}{2\beta} \lVert \nabla f(x_k) \rVert^2$. And we have just proved that the guaranteed decrease is maximal for that choice of the learning rate and we have computed how much. All these arguments can be written using inequalities, but hopefully this can be considered cleaner by some people. %rephrase
 Proving the rate of convergence of gradient descent given the guaranteed progress at each step is straightforward. With this picture in mind, it is also very easy to derive the rate of convergence of gradient descent in the case that $f$ is also $\mu$-strongly convex. Since this assumption lower bounds $f$ by another parabola with leading coefficient $\mu/2$, we can see that the guaranteed progress is proportional to $1/2\beta$ and $f(x_k) - f(x^\ast)$ is upper bounded by something proportional to $1/2\mu$ so after one step the value $f(x_k)-f(x^\ast)$ decreases to at least $(f(x_k)-f(x^\ast))\left(1 - \frac{\lVert \nabla f(x_k) \rVert/2\beta}{\lVert \nabla f(x_k) \rVert/2\mu}\right) = (f(x_k)-f(x^\ast))\left(1- \frac{\mu}{\beta}\right)$. And therefore $f(x_T)-f(x^\ast) \leq (f(x_0) - f(x^\ast))\left(1- \frac{\mu}{\beta}\right)^T$, so an $\epsilon$-minimizer is found in $O\left((f(x_0) - f(x^\ast))\log \frac{1}{\epsilon}\right)$ iterations.
 
 
 \begin{figure}[h!] \label{parabolas}
 \centering
-        \includegraphics[width=0.5\textwidth]{img/parabolas} 
+        \includegraphics[width=0.5\textwidth]{img/parabolas}
         \caption{Visualization of the smoothness bound (blue) and the strong convexity bound (green) of a function $f$ (black). }
 \end{figure}
 
@@ -34,7 +34,7 @@ for every $y \in \X$. Note that for enough regular functions, the smoothness con
     = &\argmin_{y \in \X} \left\{ \langle \nabla f(x_k), y-x_k \rangle  +\frac{\beta}{2}\|{y-x_k}\|^2\right\}.
     \end{aligned}
 \end{align}
-If we take $\|{\cdot}\|_2$ and $\X = \R^n$ we are searching for the minimizer in a quadratic function $a y^t y + b^t y + c $, ($a \in \R; b, c \in \R^n$) which is $-\frac{b}{2a}$ or in our case
+If we take $\|{\cdot}\|_2$ and $\X = \R^n$ we are searching for the minimizer in a quadratic function $a y^t y + b^t y + c $, ($a, c \in \R; b \in \R^n$) which is $-\frac{b}{2a}$ or in our case
 \[
     -\frac{\nabla f(x_k) - 2 x_k \beta/2}{2 \beta/2} = x_k - \frac{1}{\beta}\nabla f(x_k).
 \]
@@ -43,7 +43,7 @@ which matches our previous analysis. Maybe the following, for a general convex s
     \argmin_{y \in \X} \left\{ \left\|{\left(x_k - \frac{1}{\beta}\nabla f(x_k)\right) - y}\right\|^2 \right\} \stackrel{?}{=} \argmin_{y \in \X} \left\{ \langle \nabla f(x_k), y-x_k \rangle  +\frac{\beta}{2}\|{y-x_k\|}^2\right\} \\
     \Leftrightarrow \argmin_{y \in \X} \left\{ \langle y, y\rangle - 2\left\langle y, \left(x_k - \frac{1}{\beta} \nabla f(x_k)\right)\right\rangle\right\} \stackrel{?}{=} \argmin_{y \in \X} \left\{ \langle \nabla f(x_k), y\rangle + \frac{\beta}{2}(\langle y, y\rangle - 2\langle x_k, y\rangle)\right\}. \\
 \end{align*}
-It is clear that the two $\argmin$'s of the last expression are the same, since we can obtain the left hand side by dividing by $\frac{\beta}{2}$ in the $\argmin$ of the right hand side. This means that our rule for projected gradient descent (left hand side) computes the point in $\X$ whose decrease guarantee given by the $\beta$-smoothness of $f$ is maximal among all the points in $\X$ (right hand side). It is natural now to define gradient descent for general norms by rule (\ref{general_grad_descent}). We denote 
+It is clear that the two $\argmin$'s of the last expression are the same, since we can obtain the left hand side by dividing by $\frac{\beta}{2}$ in the $\argmin$ of the right hand side. This means that our rule for projected gradient descent (left hand side) computes the point in $\X$ whose decrease guarantee given by the $\beta$-smoothness of $f$ is maximal among all the points in $\X$ (right hand side). It is natural now to define gradient descent for general norms by rule (\ref{general_grad_descent}). We denote
 
 \[
     \Prog(x) := - \min_{y\in\X} \left\{ \langle \nabla f(x), y-x \rangle + \frac{\beta}{2} \|{y-x}\|^2\right\} \geq 0.
@@ -51,20 +51,20 @@ It is clear that the two $\argmin$'s of the last expression are the same, since 
 
 By the definition of $x_{k+1}$ it is clear that $f(x_{k+1}) \leq f(x_k) - \Prog(x)$ (and $\Prog(x) = \frac{1}{2\beta} \|\nabla f(x)\|_\ast^2$ if $\X = \R^n$). We will call $\Grad(x)$ to the $\argmin$ of the previous expression.
 
-In short, we can say that \textbf{gradient descent at each iteration maximizes the guaranteed local decrease}. 
+In short, we can say that \textbf{gradient descent at each iteration maximizes the guaranteed local decrease}.
 
 
 Our second remark was that with $\X = \R^n$ and $\|\cdot \|_2$ the decrease is better if $\|\nabla f(x)\|$ is larger. An intuition that we will formalize later is that mirror descent for $\X = \R^n$ and $\|\cdot \|_2$ suffers from a small loss if $\|\nabla f(x)\|$ is small. In general we will prove that a bound for the mirror descent loss is going to have a term that will be easy to control and something proportional to $\Prog(x)$. So when mirror descent suffers from a large loss, gradient descent decreases the objective a lot, and when gradient descent does not have a large guaranteed decrease, mirror descent's loss will be small. This is the key idea of linear coupling.
 
 We saw last week that mirror descent tackles the dual optimization problem by constructing lower bounds to the optimum. Recall that each queried gradient $\nabla f(x)$ can be viewed as a hyperplane lower bounding the objective $f$, that is, $f (y) \geq f (x)+ \langle \nabla f (x), y-x \rangle$ for all $y$. Mirror-descent methods attempt to carefully construct a convex combination of these hyperplanes in order to yield even a stronger lower bound. From this point of view our claimed intuition about mirror descent having a small loss when $\|\nabla f(x)\|_2$ is small should be clear, because the planes are closer to being horizontal. We will denote
 \[
-    \Mirr_{x_k}(\xi):= \argmin_{x \in \X} \left\{ D(x, x_k) + \langle \xi, x-x_k \rangle \right\}. 
+    \Mirr_{x_k}(\xi):= \argmin_{x \in \X} \left\{ D(x, x_k) + \langle \xi, x-x_k \rangle \right\}.
 \]
 Note that a mirror descent step is $x' = \Mirr_{x_k}(\eta \partial f(x_k))$. Here, $D$ is the Bregman divergence of a mirror map $\Phi$ which for simplicity we will assume that is $1$-strongly convex.  \footnote{Note that this is equivalent to the mirror descent step in Algorithm \ref{alg:mirror_descent}. We defined $x_{k+1}$ to be in $ \Pi_\mathcal{X}^\Phi(y_{k+1}) = \argmin_{x\in\X}D(x, y_{k+1}) = \argmin_{x\in\X}\left\{ \Phi(x) - \Phi(y_{k+1}) - \langle \nabla \Phi(y_{k+1}), x\rangle \right\} = \argmin_{x\in\X}\left\{ \Phi(x) - \langle \nabla \Phi(x_k) - \eta \nabla f(x_k), x\rangle \right\}$ where in the last step we have removed constant terms from the $\argmin$ and used the definition of $\nabla \Phi(y_{k+1})$. On the other hand $\argmin_{x\in\X}\{D_(x, x_k) + \langle \eta \nabla f(x_k), x-x_k \rangle\} = \argmin_{x\in\X}\{\Phi(x)  - \Phi(x_k) - \langle \nabla \Phi(x_k), x-x_k\rangle + \langle \eta \nabla f(x_k), x- x_k \}  = \argmin_{x\in\X}\left\{ \Phi(x) - \langle \nabla \Phi(x_k) - \eta \nabla f(x_k), x\rangle \right\}$ where in the last step we have also removed constant terms. We observe that thus the two expressions lead to the same result. However, the second one (or the simplified version of both for that matter) does not need to obtain $y_{k+1}$ from $\nabla \Phi(y_{k+1})$.}
 
 \begin{figure}[h!] \label{mirror_descent_dual_loss}
 \centering
-        \includegraphics[width=0.5\textwidth]{img/mirror_descent_dual_loss} 
+        \includegraphics[width=0.5\textwidth]{img/mirror_descent_dual_loss}
         \caption{Mirror combines several linear lower bounds obtained by convexity to give a lower bound on the optimum.}
 \end{figure}
 
@@ -125,7 +125,7 @@ Suppose our initial point is of error at most $d$, that is $f (y_0 ) - f (x^\ast
 \[
     T = O \left(\sqrt{\beta \Theta / \epsilon} + \sqrt{\beta \Theta / 2\epsilon} + \sqrt{\beta \Theta / 4 \epsilon} + \dots \right) = O\left(\sqrt{\beta\Theta / \epsilon}  \right)
 \]
-iterations. The value of $\eta = \sqrt{\Theta/(\beta d)}$ increases as time goes and therefore $\tau = \frac{1}{\eta \beta +1}$ decreases as time goes. This tells us that gradient descent is given more weight the mirror step when we are close to the minimum.  This fact can be counter-intuitive because when it is closer to the optimum, the observed gradients will become smaller, and therefore mirror steps should perform well according to the thought experiment. This understanding is incorrect, the reason is that when it is closer to the optimum, the threshold between large and small gradients also becomes smaller, so one cannot rely only on mirror steps.
+iterations. The value of $\eta = \sqrt{\Theta/(\beta d)}$ increases as time goes and therefore $\tau = \frac{1}{\eta \beta +1}$ decreases as time goes. This tells us that gradient descent is given more weight the mirror step when we are close to the minimum. This fact can be counter-intuitive because when it is closer to the optimum, the observed gradients will become smaller, and therefore mirror steps should perform well according to the thought experiment. This understanding is incorrect, the reason is that when it is closer to the optimum, the threshold between large and small gradients also becomes smaller, so one cannot rely only on mirror steps.
 
 \section{Final Method with Variable Step Lengths}
 This final method will change $\eta$ and $\tau$ gradually to obtain an algorithm that does not need to know the bounds $\Theta$ and $d$. This approach will also work for any convex restriction set $\X$. The final algorithm is the following:
@@ -188,7 +188,7 @@ which after simplification implies $f(y_T)\leq f(x^\ast) + \frac{4\Theta \beta}{
 
 
 \begin{proof}[Proof of Lemma \ref{lemma:mirror_bound_general}]
-    The second inequality of the lemma is again by the gradient descent guarantee $f(x_{k+1}) - f(y_{k+1})) \geq \Prog(x_{k+1})$. To prove the first one, we first write down the key inequality of mirror-descent analysis (whose proof is identical to the one given in the previous section). 
+    The second inequality of the lemma is again by the gradient descent guarantee $f(x_{k+1}) - f(y_{k+1})) \geq \Prog(x_{k+1})$. To prove the first one, we first write down the key inequality of mirror-descent analysis (whose proof is identical to the one given in the previous section).
 \begin{align*}
     \begin{aligned}
         \eta_{k+1} \langle \nabla f(x_{k+1}), z_{k} - u \rangle &= \langle \eta_{k+1} \nabla f(x_{k+1}), z_k - z_{k+1} \rangle + \langle \eta_{k+1} \nabla f(x_{k+1}), z_{k+1} - u \rangle \\
