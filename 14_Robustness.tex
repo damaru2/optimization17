@@ -219,61 +219,61 @@ We present here an example of an application of this theorem.
       $\norm{v - v_i}\le \epsilon$. The covering number of $\V$ with
       respect to $\norm{\cdot}$ is hence defined as
       \[N(\V,\epsilon,\norm{\cdot})\coloneqq
-        \mathrm{inf}\{N\in\mathbb{N} : \exists~\epsilon\text{-cover of
+        \inf\{N\in\mathbb{N} : \exists~\epsilon\text{-cover of
           $\V$ with respect to }\norm{\cdot} \}\]
     
       Next, we look at the $L_\infty$ covering numbers. Let $\F$ be a
       collection of functions $f:\X\rightarrow\R$ defined on $\V$. The
       $L^{\infty}(\X)$ norm on $\F$ is defined as
       \[\norm{f_i-f_j}_{L^{\infty}(\X)} =
-        \underset{x\in\X}{\mathrm{sup}}~|f_i(x) - f_j(x)|\] A relaxed
+        \underset{x\in\X}{\sup}~|f_i(x) - f_j(x)|\] A relaxed
       version of the $L_\infty$ covering number is the empirical
       $L_\infty$ covering number. Let
       $\F(X) = \{(f(x_1),\cdots,f(x_n))~:~f\in\F\}$. The empirical
       $L_\infty$ covering number is defined as
       \[N_{\infty}(\F,\epsilon, n) =
-        \underset{x\in\X}{\mathrm{sup}}~N(\F(x),\epsilon,\norm{\cdot}_{\infty})\]
+        \underset{x\in\X^n}{\sup}~N(\F(x),\epsilon,\norm{\cdot}_{\infty})\]
     
       It is easy to see that by definition
       $N_{\infty}(\F,\epsilon, n) \le N(\F, \epsilon,
       \norm{\cdot}_{L^{\infty}(\X)})$.
 
-      Finally, the Dudley inequality, as folllows, is used to relate
+      Finally, the Dudley inequality, as follows, is used to relate
       the covering number argument to the Rademacher complexities.
-      \[\radworst(\F) \lesssim\underset{\delta\ge 0}{\mathrm{inf}}
+      \[\radworst(\F) \lesssim\underset{\delta\ge 0}{\inf}
         \bc{\delta +
-          \dfrac{1}{\sqrt{n}}\int_{\delta}^M\sqrt{\mathrm{log}~N_{\infty}(\F,\epsilon,n)}~d\epsilon}\]
+          \frac{1}{\sqrt{n}}\int_{\delta}^M\sqrt{\log N_{\infty}(\F,\epsilon,n)}~d\epsilon}\]
 
       Let $\Theta\subset\R^d$ and let
-      $l:\Theta\times\X\rightarrow[0,M]$ be a $L$-Lipscitz function in
+      $\loss:\Theta\times\X\rightarrow[0,M]$ be an $L$-Lipschitz function in
       $\Theta$ with respect to the $L_2$ norm. If
-      $\F = \bc{\ell(\theta,\cdot):~\theta\in\Theta}$ and
+      $\F = \bc{\loss(\theta,\cdot):~\theta\in\Theta}$ and
       $\epsilon$-cover ($\theta_1\cdots,\theta_n$) of $\Theta$ will be
       such that
-      $\underset{i}{\mathrm{min}}~|\ell(\theta, x) -
-      \ell(\theta_i,x)|\le L\epsilon$ forall $\theta\in\Theta$ and
+      $\underset{i}{\min}~|\loss(\theta, x) -
+      \loss(\theta_i,x)|\le L\epsilon$ for all $\theta\in\Theta$ and
       $x\in\X$. Therefore,
       \[N(\F, \epsilon, \norm{\cdot}_{L^{\infty}(\X)} )\le
         N_{\infty}(\Theta,\epsilon/L, \norm{\cdot}_2)\le\br{1 +
-          \dfrac{\mathrm{diam}(\Theta)L}{\epsilon}}^d\] where
+          \frac{\mathrm{diam}(\Theta)L}{\epsilon}}^d\] where
       $\mathrm{diam}(\cdot)$ represents the usual diameter of a
       set. By combining the above definitions and arguments we get
       \begin{align*}
         \radworst(\F) &\lesssim
-                        \dfrac{1}{\sqrt{n}}\int_{0}^M\sqrt{\mathrm{log}~N_{\infty}(\F,\epsilon,n)}~d\epsilon\\
-                      &\le \dfrac{1}{\sqrt{n}}\int_{0}^M\sqrt{\mathrm{log}~N(\F,
+                        \frac{1}{\sqrt{n}}\int_{0}^M\sqrt{\log N_{\infty}(\F,\epsilon,n)}~d\epsilon\\
+                      &\le \frac{1}{\sqrt{n}}\int_{0}^M\sqrt{\log N(\F,
                         \epsilon, \norm{\cdot}_{L^{\infty}(\X)}
-                        )~d\epsilon}\\
+                    )}~d\epsilon\\
                       &\lesssim
-                        \sqrt{\dfrac{d}{n}} \int_{0}^M \sqrt{\mathrm{log}
-                        \dfrac{\mathrm{diam} (\Theta)L}{\epsilon}~d\epsilon}\\
-                      & \lesssim \mathrm{diam}(\Theta)L\sqrt{\dfrac{d}{n}}
+                        \sqrt{\frac{d}{n}} \int_{0}^M \sqrt{\log
+                        \frac{\mathrm{diam} (\Theta)L}{\epsilon}}~d\epsilon\\
+                      & \lesssim \mathrm{diam}(\Theta)L\sqrt{\frac{d}{n}}
       \end{align*}
       Substituting this in Theorem~\ref{thm:2}, we get that with high
       probability, the variance expansion in~\eqref{thm:2} holds for
       all $\theta\in\Theta$ such that
-      $\Var(\ell(\theta, X))\ge \frac{M^2\rho}{n}+
-      \frac{CdL^2\mathrm{diam}(\Theta)^2\mathrm{log}^3n}{n}$.
+      $\Var(\loss(\theta, X))\ge \frac{M^2\rho}{n}+
+      \frac{CdL^2\mathrm{diam}(\Theta)^2\log^3n}{n}$.
     \end{example}
 
 
@@ -291,18 +291,18 @@ derivations are more intricate for that.
 
 The main result in this section is as follows
 \begin{theorem}\label{thm:3}
-  Let $n\ge 8M^2/t,~t\ge \mathrm{log}~12,~\epsilon\ge0,~\rho\ge 9t$
-  and let $N_\infty = N_\infty(\F,\epsilon,2n)$. Then w.p. atleast $1 -
+  Let $n\ge 8M^2/t,~t\ge \log 12,~\epsilon\ge0,~\rho\ge 9t$
+  and let $N_\infty = N_\infty(\F,\epsilon,2n)$. Then w.p. at least $1 -
   2(3N_\infty +1)e^{-t}$ for $f\in\F$
-  \[ \E[f(X)]\le \underset{P\in\Pn}{\mathrm{sup}}~\E f(X) +
-    \dfrac{11M\rho}{3n} + \br{2 + 4\sqrt{\dfrac{2t}{n}}}\epsilon\]
+  \[ \E[f(X)]\le \underset{P\in\Pn}{\sup}~\E f(X) +
+    \frac{11M\rho}{3n} + \br{2 + 4\sqrt{\frac{2t}{n}}}\epsilon\]
 
   Let $\hat{\theta}\in\argmin_{\theta\in\Theta}\robRisk$. The
-  emprirical robust risk minimizer is defined as $\hat{f} =
-  \ell(\hat{\theta},\cdot)$. We have with the same probability 
- \[ \E[\hat{f}(X)]\le \underset{f\in\F}{\mathrm{inf}}~\bc{~\E f(X)  +
-     2\sqrt{\dfrac{2\rho \Var(f)}{n}}}+
-    \dfrac{19M\rho}{3n} + \br{ 2+ 4\sqrt{\dfrac{2t}{n}}}\epsilon\]
+  empirical robust risk minimizer is defined as $\hat{f} =
+  \loss(\hat{\theta},\cdot)$. We have with the same probability 
+ \[ \E\hat{f}(X)\le \underset{f\in\F}{\inf}~\bc{~\E f(X)  +
+     2\sqrt{\frac{2\rho \Var(f)}{n}}}+
+    \frac{19M\rho}{3n} + \br{ 2+ 4\sqrt{\frac{2t}{n}}}\epsilon\]
   
 \end{theorem}
  Let's look an alternative version of the theorem that provides more
@@ -310,18 +310,17 @@ The main result in this section is as follows
  during the explanation of Variance Expansion.
 
  In addition to the conditions of the aforementioned example, we
- assume that $\underset{\theta\in\Theta}{\mathrm{min}}~\ell(\theta, x)
+ assume that $\underset{\theta\in\Theta}{\min}~\loss(\theta, x)
  = 0~\forall x\in\X$. If we define $\rho =
- \mathrm{log}~\frac{2}{\delta} + d\mathrm{log}~(2nDL)$ and set
+ \log \frac{2}{\delta} + d\log (2nDL)$ and set
  $t=\rho$, $\epsilon=\frac{1}{n}$, and choose $\delta = \frac{1}{n}$
  in Theorem~\ref{thm:3}, we get
  \begin{align}
- \E[\ell(\hat{\theta}; X)] &\le
-   \underset{\theta\in\Theta}{\mathrm{inf}}~\bc{\E[\ell(\theta; X)] + \sqrt{\frac{d\Var(f\ell(\theta;X))}{n}\mathrm{log}~(n)
-     } }+ C\dfrac{dLD\mathrm{log}~n}{n}
+ \E\loss(\hat{\theta}; X) &\le
+   \underset{\theta\in\Theta}{\inf}~\bc{\E\loss(\theta; X) + \sqrt{\frac{d\Var(\loss(\theta;X))}{n}\log (n)
+     } }+ C\frac{dLD\log n}{n}
    \label{corr:1}
  \end{align}
-
 where $C$ is a constant and $D\lesssim n^k, $and $L\lesssim n^k$ for
 some $k$.
 
@@ -331,7 +330,7 @@ expectation of $f$ is with high probability within $O(\frac{1}{n})$
 distance away from its robustly regularized counterpart. The second
 part of Theorem~\ref{thm:3} and its variant in~\eqref{corr:1}
 guarantees that, with enough samples, the empirical minimizer
-converges to a risk that is atmost $O(\frac{\mathrm{log}}{n})$
+converges to a risk that is at most $O(\frac{\log n}{n})$
 larger than the best variance corrected risk.
 
 While, this bounds are very interesting, there are rarely any concrete
