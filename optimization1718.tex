@@ -12,6 +12,7 @@
 \usepackage{aliascnt} % To correctly label theorems, lemmas in autoref
 
 
+\usepackage{natbib}
 
 
 % Load Math packages
@@ -70,6 +71,35 @@
 \def\lemmaautorefname{Lemma}
 \def\remarkautorefname{Remark}
 \def\algorithmautorefname{Algorithm}
+
+% commands for neural networks part
+\newcommand\N{\mathcal{N}}
+\newcommand\calD{\mathcal{D}}
+\def\Pbb{\mathbb{P}}
+
+\renewcommand\t{{\scriptscriptstyle\top}}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Astar}{\tilde{A}}
+\DeclareMathOperator{\Bstar}{\tilde{B}}
+\DeclareMathOperator{\Cstar}{\tilde{C}}
+\DeclareMathOperator{\wstar}{\tilde{w}}
+\DeclareMathOperator{\astar}{\tilde{a}}
+\DeclareMathOperator{\bstar}{\tilde{b}}
+\DeclareMathOperator{\cstar}{\tilde{c}}
+\newcommand\wh{\widehat}
+\newcommand\wt{\widetilde}
+\newcommand\eps{\varepsilon}
+%\newcommand\veps{\varepsilon}
+\newcommand\h{\hat}
+\newcommand\rcu{\hat{\mu}}
+\newcommand\icu{\mu_{i\rightarrow}}
+
+\newcommand\tl{\tilde}
+%\newcommand\bar{\overline}
+\newcommand\inner[1]{\langle #1 \rangle}
+\newcommand\sign{\operatorname{sign}}
+
+\newcommand\indicator[1]{\ensuremath{\mathbf{1}_{#1}}}
 
 % Start section numbering at 1
 \addtocounter{section}{0}

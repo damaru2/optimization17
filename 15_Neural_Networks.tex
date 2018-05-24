@@ -1,4 +1,589 @@
 %!TEX root = optimization1718.tex
 
 \chapter{Neural Networks}
-\emph{Speaker: ???}\\
+
+\emph{Speaker:} Thomas Orton, Guillermo Valle P'{e}rez\\
+
+
+\section{Introduction}
+
+\ 
+
+Neural networks emperically show good generalization when trained on real life data; however, we have been unable to theoretically explain why this is the case. In particular, traditional techniques which try to give generalization bounds based on the number of parameters of a neural network significantly overestimate the number of training samples required for the network to generalize. This paper does two things to help make progress in this area: 
+
+\begin{enumerate}
+
+\item Introduce a new conceptial "compression" framework for getting generalization bounds (section 2).
+
+\item Give new generalization bounds for neural networks based on metrics of networks which are found to be emperically favourable when trained on real life data (section 3). 
+
+\end{enumerate}
+
+
+\section{Compression and Generalization}
+
+\subsection{Setting and notation}
+
+We consider a multiclass classification setting, where labels come from $\{1,...,k\}$ and for a sample $x$ we map $x \rightarrow f(x) \in \mathbb{R}^{k}$, where the classification loss is defined as
+
+$$\mathbb{P}_{(x,y)\sim \mathcal{D}} \left[f(x)[y] <  \max_{i\neq y} f(x)[i]\right]$$
+
+If  $\gamma>0$ is some desired margin, then the expected margin loss is
+
+$$
+L_{\gamma}(f) = \mathbb{P}_{(x,y)\sim \mathcal{D}} \left[f(x)[y] \leq \gamma + \max_{i\neq y} f(x)[i]\right]
+$$
+
+We let $\hat{L}_{\gamma}$ denote the emperical margin loss, and $L_{\gamma}$ the true margin loss. The generalization error is the difference between the two. 
+
+\ 
+
+\subsection{Compressibility}
+
+The high level idea of this section is the following: Suppose we have a classifier $f$ from a complicated hypothesis class which has very low emperical loss on $m$ samples. We can try to approximate $f$ by compressing it to a function $g$, where $g$ belongs to a family of functions with fewer than $m$ effective parameters. This allows us to get generalization bounds on $g$. The following definitions make this idea formal:
+
+\
+
+\begin{definition}[($\gamma$,$S$)-compressible using helper string $s$] Suppose $G_{\mathcal{A},s} =\{g_{A,s}|A\in \mathcal{A}\}$ is a class of classifiers indexed by trainable parameters $A$ and fixed strings $s$.  A classifier $f$ is  ($\gamma,S$)-compressible with respect to $G_{\mathcal{A},s}$ using helper string $s$ if there exists $A\in \mathcal{A}$ such that for any $x\in S$, we have for all $y$
+\begin{equation}
+    |f(x)[y] - g_{A,s}(x)[y]| \le \gamma.
+\end{equation}
+
+\end{definition}
+
+\
+
+
+\begin{theorem}\label{thrm21} Suppose $G_{\mathcal{A},s} =\{g_{A,s}|A\in \mathcal{A}\}$ where $A$ is a set of $q$ parameters each of which can have at most $r$ discrete values and $s$ is a helper string. Let $S$ be a training set with $m$ samples. If the trained classifier $f$ is $(\gamma,S)$-compressible via $G_{\mathcal{A},s}$ with helper string $s$, then there exists $A\in\mathcal{A}$ s.t. with high probability over the training set,
+\begin{equation}
+    L_0(g_A) \le \hat{L}_\gamma(f)+ O\left(\sqrt{\frac{q\log r}{m}}\right).
+\end{equation}
+
+\end{theorem}
+
+\begin{proof}
+
+We can use the Chernoff bound to give 
+
+\begin{equation}
+Pr[L_{0}(g_{A}) - \hat{L}_{\gamma}(g_{A})\geq \tau ] \leq \exp(-2\tau^2 m)
+\end{equation}
+
+Choosing $\tau=\left(\sqrt{\frac{q\log r}{m}}\right)$, and taking a union bound over all $r^{q}$ different $A \in \mathcal{A}$, we have that with probability at least $1-\exp(-q\log r)$, for all $A \in \mathcal{A}$
+
+\begin{equation}
+L_{0}(g_{A}) \leq \hat{L}_{\gamma}(g_{A})+\left(\sqrt{\frac{q\log r}{m}}\right)
+\end{equation}
+
+Since $f$ is $(\gamma,\mathcal{S})-$compressible with respect to $g$, we can pick an $A \in \mathcal{A}$ such that for all $x \in S$, and any $y$, we have
+
+\begin{equation}
+|f(x)[y]-g_{A}(x)[y]|\leq \gamma
+\end{equation}
+
+For each training example, if $f$ has margin at least $\gamma$, then $g_{A}$ also classifies this example correctly. Thus
+
+\begin{equation}
+\hat{L}_{0}(g_{A})\leq \hat{L}_{\gamma}(f)
+\end{equation}
+
+\end{proof}
+
+\textbf{Comment}: In the setting of Theorem 2.1, if the compression works for $1-\zeta$ fraction of the training sample, then with high probability
+$$
+    L_0(g_A) \le \hat{L}_\gamma(f)+ \zeta+O\left(\sqrt{\frac{q\log r}{m}}\right).
+    $$
+
+
+
+
+\subsection{Examples}
+
+\subsection{Example 1: Linear classifiers with margin}
+
+Consider a binary linear classifier $c \in \mathbb{R}^{h}$, $\|c\|=1$ with high margin. Namely $c(x):=sgn(c \cdot x)$, where $\forall x,y$ we have  $\|x\|=1$, $y \in \{-1,1\}$, and for all $(x,y)\in S$ in our training set, we have $y(c^{T}x)\geq \gamma$. We can now consider how to compress such a classifier to a simpler family of classifiers:
+
+\iffalse
+
+\subsubsection{First compression attempt}
+
+\begin{algorithm}
+\caption{Vector-Compress($\gamma$, $c$)}
+\begin{algorithmic}
+\REQUIRE vector $c$ with $\|c\| \le 1$, $\eta$.
+\ENSURE vector $\hat{c}$ s.t. for any fixed vector $\|u\| \le 1$, with probability at least $1-\eta$, $|c^\top u - \hat{c}^\top u| \le \gamma$. Vector $\hat{c}$ has $O((\log h)/\eta\gamma^2)$ nonzero entries. 
+\FOR{$i = 1$ to $h$}
+\STATE Let $z_i = 1$ with probability $p_i = \frac{2c_i^2}{\eta\gamma^2}$ (and $0$ otherwise)
+\STATE Let $\hat{c}_i = z_i c_i/p_i$.
+\ENDFOR
+\STATE Return $\hat{c}$
+\end{algorithmic}
+\label{alg:vec-compress}
+\end{algorithm}
+
+
+(Lemma 4): Vector-Compress($\gamma$, $c$) returns a vector $\hat{c}$ such that for any fixed $u$ (independent of choice of $\hat{c}$), with probability at least $1-\eta$, $|\hat{c}^\top u - c^\top u| \le \gamma$. The vector $\hat{c}$ has at most $O((\log h)/\eta\gamma^2)$ non-zero entries with high probability.
+
+
+\begin{proof}
+
+$\forall i \in [h]$ we have $E[\hat{c}_i]=E[x_{i}c_{i}/p_i]= c_i$ and 
+
+$$[Var[\hat{c}]]_{i,j}=E[\hat{c}_{i}\hat{c}_{j}]-E[\hat{c}_{i}]E[\hat{c}_{j}]$$
+
+$=0$ for $i \not =j$. For $i=j$, this equals $\frac{c_i^2}{p_i^2}\times p_i -c_i^2=p_i(1-p_i) \frac{c_i^2}{p_i^2} \le \frac{2c_i^2}{p_i} \le \eta\gamma^2$
+
+\
+
+For any fixed vector $u$ with $\|u\|\leq1$, we have $E[\hat{c}^\top u] = c^\top u$ and $Var[\hat{c}^\top u] =u^{\top} Var[\hat{c}]u \leq \sum_{i=1}^h u_i^2 \eta\gamma^2 \leq \eta\gamma^2$. Applying Chebyshev's inequality gives $Pr[|\hat{c}^\top u - c^\top u| \ge \gamma] \le \frac{\eta\gamma^2}{\gamma^2}=\eta$.
+
+\ 
+
+Moreover, the expected number of non-zero entries in $\hat{c}$ is $\sum_{i=1}^h p_i=\frac{2}{\eta \gamma^2}\sum_{i=1}^h  c_i^2 \leq \frac{2}{\eta \gamma^2}$. Let $X$ be the number of non-zero entries. Then Chernoff bound gives us that
+
+$$P\left[X>(1+O(\log(h)))\frac{2}{\eta \gamma^2}\right]\leq \left(\frac{e}{1+O(\log(h))}\right)^{\frac{2}{\eta \gamma^2}O(\log(h))}$$
+
+Which is small since $\eta,\gamma\leq 1$. Thus we know with high probability the number of non-zero entries is at most $O((\log h)/\eta\gamma^2)$. 
+\end{proof}
+
+\ 
+
+Next we handle the discretization:
+
+\
+
+Lemma: Let $\tilde{c} = \mbox{Vector-Compress}(\gamma/2, c)$. For each coordinate $i$, let $\hat{c}_i = 0$ if $|\tilde{c}_i| \ge 2\eta\gamma\sqrt{h}$, otherwise let $\hat{c}_i$ be the rounding of $\tilde{c}_i$ to the nearest multiple of $\gamma/2\sqrt{h}$. For any fixed $u$  with probability at least $1-\eta$, $|\hat{c}^\top u - c^\top u| \le \gamma$.
+
+
+\begin{proof}
+Let $c'$ be a truncated version of $c$: $c'_i = c_i$ if $|c_i| \ge \gamma/4\sqrt{h}$, and $c'_i = 0$ otherwise. Then $\|c'-c\| \le \sqrt{h\frac{ \gamma^2}{8h}}=\gamma/4$. By Algorithm~\ref{alg:vec-compress}, we observe that $\tilde{c} = \mbox{Vector-Compress}(\gamma/2, c')$ ($|\tilde{c}_i| \ge 2\eta\gamma\sqrt{h}$ if and only if $|c_i| \le \gamma/4\sqrt{h}$). Finally, by the rounding we know $\|\hat{c}-\tilde{c}\|\le \gamma/4$. Combining these three terms, we know with probability at least $1-\eta$,
+\begin{align*}
+|\hat{c}^\top u - c^\top u| &\le  |\hat{c}^\top u - \tilde{c}^\top u|+|\tilde{c}^\top u - (c')^\top u|+|(c')^\top u - c^\top u| \\
+& \le \gamma/4+\gamma/2+\gamma/4 = \gamma.
+\end{align*}
+\end{proof}
+
+\ 
+
+Combining the above two lemmas, we know there is a compression algorithm with $O((\log h)/\eta\gamma^2)$ discrete parameters that works with probability at least $1-\eta$. 
+
+\ 
+
+Lemma: For any number of sample $m$, there is an efficient algorithm to generate a compressed vector $\hat{c}$, such that 
+$$
+L(\hat{c}) \le \tilde{O}((1/\gamma^2 m)^{1/3})
+$$
+
+
+\begin{proof}
+We will choose $\eta = (1/\gamma^2 m)^{1/3}$. By the previous two lemmas, we know there is a compression algorithm that works with probability $1-\eta$, and has at most $\tilde{O}((\log h)/\eta\gamma^2)$ parameters. By Corollary~\ref{cor:compression}, we know
+$$
+L(\hat{c}) \le \tilde{O}(\eta + \sqrt{q/m}) = \tilde{O}\left(\eta + \sqrt{\frac{1}{\eta\gamma^2m}}\right) = \tilde{O}((1/\gamma^2 m)^{1/3} + \sqrt{1/\eta\gamma^2m}) = \tilde{O}((1/\gamma^2 m)^{1/3}).
+$$
+\end{proof}
+
+
+Note that the rate we have here is not optimal as it depends on $m^{1/3}$ instead of $\sqrt{m}$. This is mostly due to cannot give a high probability bound (indeed if we consider all the basis vectors as the test vectors $u$, Vector-Compress is always going to fail on some of them). 
+
+\fi
+
+\begin{algorithm}
+\caption{Vector-Project($\gamma$, $c$)}
+\begin{algorithmic}
+\REQUIRE vector $c$ with $\|c\| \le 1$, $\eta$.
+\ENSURE vector $\hat{c}$ s.t. for any fixed vector $\|u\| \le 1$, with probability at least $1-\eta$, $|c^\top u - \hat{c}^\top u| \le \gamma$. 
+\STATE Let $k = 16\log(1/\eta)/\gamma^2$
+\STATE Sample $k$ random Gaussian vectors $v_1,...,v_k\sim N(0,I)$.
+\STATE Compute $z_i = \langle v_i,c\rangle$
+\STATE (Optional): Round $z_i$ to the closes multiple of $\gamma/2\sqrt{hk}$.
+\STATE Return $\hat{c} = \frac{1}{k}\sum_{i=1}^k z_i v_i$
+\end{algorithmic}
+\label{alg:vec-proj}
+\end{algorithm}
+
+\ 
+
+\begin{lemma} For any fixed vector $u$, Algorithm $\mbox{Vector-Project}(c, \gamma)$ produces a vector $\hat{c}$ such that with probability at least $1-\eta$, we have $|\hat{c}^\top u - c^\top u| \le \gamma$.
+
+\end{lemma}
+
+\ 
+
+\begin{proof}
+This is in fact a well-known corollary of Johnson-Lindenstrauss Lemma. Observe that 
+
+\begin{equation}
+\hat{c}^\top u = \frac{1}{k} \sum_{i=1}^k \langle v_i,c\rangle\langle v_i,u\rangle
+\end{equation}
+
+
+The expectation $E[\langle v_i,c\rangle \langle v_i,u\rangle] = E[c^\top v_iv_i^\top u] = c^\top E[v_iv_i^\top] u = c^\top u$. Also
+
+\begin{align*}
+Var[\frac{1}{k} \sum_{i=1}^k \langle v_i,c\rangle\langle v_i,u\rangle]&=\frac{1}{k} Var[\langle w,c\rangle\langle w,u\rangle]\\
+&\leq \frac{1}{k}E\left [ ((c^{T} w)(u^{T} w))^{2}\right]\\
+=&\frac{1}{k}E\left[\sum_{i,j,k,l} c_{i} c_{j} u_{k} u_{l} w_{i} w_{j}w_{k}w_{l}\right]\\
+&\leq \frac{1}{k}\left[E\left[\sum_{i,k} c_{i}^2 u_{k}^2 w_{i}^2 w_{k}^2\right]+2E\left[\sum_{i,k} c_{i}u_{i} c_{k}u_{k} w_{i}^2w_{k}^2\right]\right]\\
+=&O\left(\frac{1}{k}\right)\left [\sum_{i,k} c_{i}^2 u_{k}^2+\sum_{i,k} c_{i}u_{i} c_{k}u_{k}\right]=O\left(\frac{1}{k}\right)
+\end{align*}
+
+Since $c,u$ have norm less than $1$, and $\sum_{i} c_iu_i \leq \|c\|\|u\|$. 
+
+\ 
+
+%$O(1/k)\le O(\gamma/\sqrt{\log n})$. 
+
+Standard concerntration inequalities give that
+\begin{equation}
+\Pr[|\hat{c}^\top u - c^\top u| > \gamma/2] \le \exp(-\gamma^2k/16)= \exp(\log(\eta))=\eta.
+\end{equation}
+
+\ 
+
+It remains to show that by rounding $z_i$ to the closest multiples of $\gamma/2\sqrt{hk}$, our error increases by at most $\gamma/2$. 
+
+\
+
+\textbf{Claim:} a matrix with $i.i.d.$ Consider the matrix $V$ with columns $v_1,...,v_k$. Then with high probability, its spectral norm is at most $2\sqrt{h}$. 
+
+\
+
+Notice that $\hat{c}=Vz$, where $z$ is the vector of the $z_i$'s. If the spectral norm of $V$ is at most $2\sqrt{h}$, then changing each $z_i$ coordinate-wise by at most $\gamma/4\sqrt{hk}$ can change $\hat{c}$ in $l_2$ norm by at most $\gamma/2$.
+
+\ 
+
+
+\end{proof}
+
+\
+
+\begin{lemma} For any number of sample $m$, there is an efficient algorithm with helper string to generate a compressed vector $\hat{c}$, such that 
+\begin{equation}
+L(\hat{c}) \le \tilde{O}(\sqrt{1/\gamma^2 m}).
+\end{equation}
+
+\end{lemma}
+
+\begin{proof}
+We will choose $\eta = 1/m$. By Lemma, we know there is a compression algorithm that works with probability $1-\eta$, and has at most $O((\log 1/\eta)/\gamma^2)$ parameters. By Corollary, we know
+$$
+L(\hat{c}) \le \tilde{O}(\eta + \sqrt{1/\gamma^2m}) \le \tilde{O}(\sqrt{1/\gamma^2 m}).
+$$
+\end{proof}
+
+
+\subsection{Example 2: Existing generalization bounds}
+
+\textbf{Notation:} We define the outputs of the ith layer of a neural network by $x^{i}=A^{i} \phi (x^{i-1})$, where $\phi$ is a RelU activation function. 
+
+\
+
+\begin{theorem} A deep net with layers $A^1, A^2, \ldots A^d$ 
+and output margin $\gamma$ on a training set $S$, the generalization error can be bounded by
+
+
+\begin{equation}
+\tilde{O}\left(\sqrt{\frac{hd^2\max_{x\in S}\|x\| \prod_{i=1}^{d} \|A^i\|_2^2 \sum_{i=1}^d \frac{\|A^i\|_F^2}{\|A^i\|_2^2}}{\gamma^2m}}\right).
+\end{equation}
+
+\end{theorem}
+
+
+
+Note that ($\sum_{i=1}^d \frac{\|A^i\|_F^2}{\|A^i\|_2^2}$) is  sum of stable ranks of the layers, and that ($\prod_{i=1}^{d} \|A^i\|_2^2$) is the maximum norm of the vector it can produce if the input is a unit vector. The Lipschitz constant of the full network is at most $\prod_{i=1}^d \|A^i\|_2.$ 
+
+\ 
+
+We prove the theorem in two steps. First, we want to compress a matrix $A$ to a low rank matrix $\hat{A}$. In particular, if $\hat{A}$ has rank $r$, it can be expressed as a product of two matrices $B_1,B_2$ of inner dimension $r$, and so $\hat{A}$ has $2hr$ parameters. We can then round the entries of $B_1,B_2$ to compress $A$ to a finite set of functions. The second step is to show that if we replace the layers $\{A^{i}\}$ by $\{\hat{A}_{i}\}$, then the output of our network doesn't change significantly. 
+
+\
+
+\begin{lemma} For any matrix $A\in \mathbb{R}^{m\times n}$, let $\hat{A}$ be the truncated version of $A$ where singular values that are smaller than $\delta\|A\|_2$ are removed. Then $\|\hat{A}-A\|_2\leq \delta\|A\|_2$ and $\hat{A}$ has rank at most $\|A\|_F^2/(\delta^2\|A\|_2^2)$.
+\end{lemma}
+
+
+\begin{proof}
+Let $r$ be the rank of $\hat{A}$. By construction, the maximum singular value of $\hat{A}-A$ is at most $\delta\|A\|_2$. Since the remaining singular values are at least $\delta\|A\|_2$, we have $\|A\|_F \ge \|\hat{A}\|_F \ge \sqrt{r} \delta\|A\|_2$. These inequalities come from that fact that if $A=UDV^{T}$ is the SVD of $A$ with singular values $\{\delta_i\}$, then 
+
+\begin{equation}
+\|A\|_{F}^2 = tr[AA^{T}]=tr[UDV^{T}VD^{T}U^{T}]=tr[DD^{T}U^{T}U]=tr[DD^{T}]=\sum_{i} \delta_{i}^2
+\end{equation}
+
+i.e. the frobenius norm squared of a matrix is just the sum of the squared signular values of that matrix. 
+
+\end{proof}
+
+\begin{lemma} Let $f^{i}_{A}$ denote the output of the $i$th layer a $d$ layer neural network with layers $A^{1},...,A^{d}$. Let $\Delta_i= \|f^i_{A+B}(x)-f^i_{A}(x)\|_2$. Suppose for all layers $i$ we have $\|B^{i}\|\leq \frac{1}{d}\|A^{i}\|$. Then:
+\begin{equation*}
+\Delta_i \leq \left(1+\frac{1}{d}\right)^i \left(\prod_{j=1}^i \|A_j\|_2\right)\|x\|_2\sum_{j=1}^i \frac{\|B_j\|_2}{\|A_j\|_2}.
+\end{equation*}
+\end{lemma}
+
+\begin{proof}
+For the induction case:
+\begin{align*}
+\Delta_{i+1} &= \|\left(A^{i+1}+B^{i+1}\right)\phi_i(f^i_{A+B}(x))- A^{i+1}\phi_i(f^i_{A}(x))\|_2 \\
+&= \|\left(A^{i+1}+B^{i+1}\right)\left(\phi_i(f^i_{A+B}(x))- \phi_i(f^i_{A}(x))\right)+ B^{i+1}\phi_i( f^i_{A}(x))\|_2\\ 
+&\leq \left(\|A^{i+1}\|_2+\|B^{i+1}\|_2\right)\|\phi_i(f^i_{A+B}(x))- \phi_i(f^i_{A}(x))\|_2+ \|B^{i+1}\|_2\|\phi_i(f^i_{A}(x))\|_2\\ 
+&\leq \left(\|A^{i+1}\|_2+\|B^{i+1}\|_2\right)\|f^i_{A+B}(x)-f^i_{A}(x)\|_2+ \|B^{i+1}\|_2\|f^i_{A}(x)\|_2\\
+&=\Delta_i\left(\|A^{i+1}\|_2+\|B^{i+1}\|_2\right)+ \|B^{i+1}\|_2\|f^i_{A}(x)\|_2,
+\end{align*}
+
+
+And so we get
+
+\begin{align*}
+\Delta_{i+1} &\leq \Delta_i\left(1+\frac{1}{d}\right)\|A^{i+1}\|_2+ \|B^{i+1}\|_2 \|x\|_2\prod_{j=1}^i \|A^j\|_2\\
+&\leq \left(1+\frac{1}{d}\right)^{i+1} \left(\prod_{j=1}^{i+1}\|A^j\|_2\right)\|x\|_2\sum_{j=1}^i \frac{\|B^j\|_2}{\|A^j\|_2}+ \frac{\|B^{i+1}\|_2}{\|A^{i+1}\|_2}\|x\|_2\prod_{j=1}^{i+1}\|A^i\|_2\\
+&\leq \left(1+\frac{1}{d}\right)^{i+1} \left(\prod_{j=1}^{i+1}\|A^j\|_2\right)\|x\|_2\sum_{j=1}^{i+1} \frac{\|B^j\|_2}{\|A^j\|_2}
+\end{align*}
+\end{proof}
+
+
+Combining these lemmas, we can prove the theorem:
+
+\begin{proof}
+For each $i$, replace $A^{i}$ by its compression $\hat{A}^{i}$ with parameter $\delta=\gamma \max_{x} (e\|x\|d\prod_{i=1}^d \|A^{i}\|_{2})^{-1}$. The network $f_{\hat{A}}$ then has error at most 
+
+\begin{equation*}
+\Delta_{d} \leq e \left(\prod_{j=1}^d \|A_j\|_2\right)\|x\|_2\sum_{j=1}^d \frac{\|\hat{A}_j-A_{j}\|_2}{\|A_j\|_2}\leq e \left(\prod_{j=1}^d \|A_j\|_2\right)\|x\|_2d\delta=\gamma.
+\end{equation*}
+
+and the total number of parameters of the network is at most 
+
+\begin{equation*}
+\sum_{i=1}^d \frac{\|A\|_F^2}{(\delta^2\|A\|_2^2)} 2h=2h \delta^{-2}\sum_{i=1}^d \frac{\|A\|_F^2}{(\delta^2\|A\|_2^2)} = 2e^{2}d^2 h\|x\|^2\prod_{i=1}^d \|A^{i}\|^{2}_{2}\sum_{i=1}^d \frac{\|A^{i}\|^{2}_{F}}{\|A^{i}\|^{2}_{2}}/\gamma^2.
+\end{equation*}
+
+
+\textbf{Claim:} We can round the weights in the rank $r$ representation of each $\hat{A}_{i}$ to the nearest $\|A\|_{F}/h^{2}$ while keeping the approximation error sufficiently small. Note that the precise parameters for how we discretize will ordinarily not show up in the $\tilde{O}$ term, because there is only a logarithmic dependence of the model complexity on the number of discrete values each parameter has. 
+
+
+\ 
+
+Applying our $(\gamma,S)$-compressibility theorem from the previous section, we get that our compressed net has error at most 
+
+\begin{equation}
+L_{0}(g_{A}) \leq \hat{L}_{\gamma}(f)+\tilde{O}\left(\sqrt{\frac{hd^2\max_{x\in S}\|x\| \prod_{i=1}^{d} \|A^i\|_2^2 \sum_{i=1}^d \frac{\|A^i\|_F^2}{\|A^i\|_2^2}}{\gamma^2m}}\right)
+\end{equation}
+
+Since $f$ has output margin $\gamma$, it has the same error as $g_{A}$, and hence the same generalization bound applies.
+
+\end{proof}
+
+\textbf{Comment:} There is a technical issue with the above proof as presented in the paper, which requires us to be careful when invoking $(\gamma,S)$-compressibility. In particular, we are supposed to only choose the set of models we compress $f$ to $\textbf{before}$ we see the training set, but the above proof chooses this set based on properties of $f$ after training. In order to deal with this, we should really choose the rank $r$ and precision of descritization we compress our matrices to in advance, and then get a generalization bound based on this choice assuming we can compress $f$ to this set of models we chose in advance. 
+
+\section{Definition of quantities measuring noise sensitivity}
+
+These are quantities measuring the sensitivity to noise of the neural network, and which are used in proving Theorem~\ref{fc-net-theorem}. 
+
+    Let $S$ be the training set.
+    \begin{enumerate}
+        \item {\bf Layer cushion ($\mu_{i}$)}: For any layer $i$, we define the layer cushion $\mu_i$ as the largest number such that for any $x\in S$:
+        $$
+        \mu_{i}\|A^i\|_F\|\phi(x^{i-1})\| \leq \|A^i\phi(x^{i-1})\|
+        $$
+        \item {\bf Interlayer cushion ($\mu_{i,j}$)}: For any two layers $i\leq j$, we define interlayer cushion $\mu_{i,j}$ as the largest number such that for any $x\in S$:
+        $$
+        \mu_{i,j}\|J^{i,j}_{x^i}\|_F\|x^i\| \leq  \|J^{i,j}_{x^i}x^i\|
+        $$
+        Furthermore, we define minimal interlayer cushion $\icu = \min_{i\leq j\leq d} \mu_{i,j} = \min\{1/\sqrt{h^i},\min_{i< j\leq d} \mu_{i,j}\}$.
+        \item {\bf Activation contraction ($c$)}: The activation contaction $c$ is defined as the smallest number such that for any layer $i$ and any $x\in S$,
+        $$
+        \|x^i\| \leq c \|\phi(x^i)\|
+        $$
+        \item {\bf Interlayer smoothness ($\rho_{\delta}$)}: Interlayer smoothness is defined the smallest number such that with probability $1-\delta$ over noise $\eta$ for any two layers $i<j$ any $x\in S$:
+        $$
+        \|M^{i,j}(x^{i}+\eta)-J_{x^i}^{i,j}(x^{i}+\eta)\| \leq \frac{\|\eta\|\|x^{j}\|}{\rho_{\delta}\|x^{i}\|}
+        $$
+    \end{enumerate}
+
+
+\section{Fully connected networks}
+
+The intuition behind this result is that if we can find a network $f_{\tilde{A}}$, which does well on the training set, and belongs to a small hypothesis class (independent of the training set), then we can bound its generalization error. The way we ensure it does well on the training set is by ensuring its outputs are not very different from $f_A$ which already does well on the training set (if $\hat{L}_{\gamma}(f_A)$ is small). The way we ensure it belongs to a small hypothesis class is by constructing $f_{\tilde{A}}$ in a way that it is parametrized by few parameters
+
+\begin{theorem}\label{fc-net-theorem} For any fully connected network $f_A$ with $\rho_\delta \geq 3d$, any probability $0 < \delta \leq 1$ and any margin $\gamma$, Algorithm~\ref{alg:matrix-proj} generates weights $\tilde{A}$ for the network $f_{\tilde{A}}$ such that with probability $1-\delta$ over the training set and $f_{\tilde{A}}$ , the expected error $L_0(f_{\tilde{A}})$ is bounded by 
+\begin{equation*}
+    \hat{L}_\gamma(f_A) + \tilde{O}\left ( \sqrt{\frac{c^2 d^2 \max_{x \in S} || f_A(x) ||_2^2 \sum_{i=1}^d \frac{1}{\mu_i^2 \mu^2_{i\rightarrow}}}{\gamma^2 m}} \right)
+\end{equation*}
+
+where $\mu_i$, $\mu_{i\rightarrow}$, $c$ and $\rho_\delta$ are layer cushion, interlayer cushion, activation contraction and interlayer smoothness.
+
+\end{theorem}
+
+\begin{algorithm}
+    \caption{Matrix-Project ($A$, $\eps$, $\eta$)}
+    \begin{algorithmic}
+        \REQUIRE Layer matrix $A\in \R^{h_1\times h_2}$, error parameter $\eps$, $\eta$.
+        \ENSURE Returns $\hat{A}$ s.t. $\forall$ fixed vectors $u,v$, $$\Pr[|u^\top \hat{A} v - u^\top Av\| \ge \eps\|A\|_F\|u\|\|v\|] \le \eta.$$
+        \STATE Sample $k = \log(1/\eta)/\eps^2$ random matrices $M_1,\dots,M_k$ with entries i.i.d. $\pm 1$ (\textquotedblleft helper string\textquotedblright)
+        \FOR{$k'=1$ to $k$}
+        \STATE Let $Z_{k'} = \inner{A,M_{k'}} M_{k'}$.
+        \ENDFOR
+        \STATE Let $\hat{A} =\frac{1}{k}\sum_{k'=1}^k Z_{k'}$
+    \end{algorithmic}
+    \label{alg:matrix-proj}
+\end{algorithm}
+
+
+To prove this, the crucial step is to show that $f_A$ can be ``compressed'' to a $f_{\tilde{A}}$ with less parameters. This means that the output of $f_{\tilde{A}}$ doesn't differ much from $f_A$ for any input in the training set $x \in S$. This will be shown in Lemma 3 (which relies on Lemma 2). This in turn means that $f_{\tilde{A}}$ can't do much worse than $f_A$ on the training set, in the sense that its margin can't be much smaller than that for $f_A$, which will allow us to say $\hat{L}_0(f_{\tilde{A}}) \leq \hat{L}_\gamma(f_{A})$, shown in Lemma 10. Finally, by using an $\epsilon$-cover of the hypothesis class of $f_{\tilde{A}}$, we can bound the difference between $\hat{L}_0(f_{\tilde{A}})$ and $L_0(f_{\tilde{A}})$ which depends on the number of parameters of $f_{\tilde{A}}$, proving Theorem 4.1.
+
+We begin with the technical Lemma~\ref{lem:perturblayer:highprob}
+
+\begin{lemma}\label{lem:perturblayer:highprob}
+For any $0<\delta,\eps\leq 1$, et $G=\{(U^i,x^i)\}_{i=1}^m$ be a set of matrix/vector pairs of size $m$ where $U\in\R^{n\times h_1}$ and $x\in\R^{h_2}$, let $\hat{A}\in \R^{h_1\times h_2}$ be the output of Algorithm~\ref{alg:matrix-proj} with $\eta = \delta/mn$ and $\Delta = \hat{A} - A$. With probability at least $1-\delta$ we have for any $(U,x)\in G$, $\|U \Delta x\| \leq \eps\|A\|_F\|U\|_F\|x\|$.
+\end{lemma}
+
+\begin{proof}
+For any fixed vectors $u,v$, we have (from definition of $\hat{A}$ by Algorithm~\ref{alg:matrix-proj})
+$$
+u^\top \hat{A}v = \frac{1}{k}\sum_{k'=1}^k u^\top Z_{k'} v = \frac{1}{k} \sum_{k'=1}^k \inner{A,M_{k'}}\inner{uv^\top, M_{k'}}.
+$$
+
+This is a sum of independent terms (as the $M_{k'}$ are independent). Furthermore, its expected value is 
+
+\begin{align*}
+E\left[ \frac{1}{k} \sum_{k'=1}^k \inner{A,M_{k'}}\inner{uv^\top, M_{k'}} \right] =
+ \frac{1}{k} \sum_{k'=1}^k E\left[ \inner{A,M_{k'}}\inner{uv^\top, M_{k'}} \right] = \inner{A,uv^\top}
+ \end{align*}
+ 
+ where the last equality is because only the terms involving the same element of $M_{k'}$ contribute to the expectation. We can then use Hoeffding's inequality
+ 
+ $$Pr\left[ | \frac{1}{k} \sum_{k'=1}^k \inner{A,M_{k'}}\inner{uv^\top, M_{k'}} - \inner{A,uv^\top}| \geq \eps h^2 \|A\|_F \|uv^\top\|_F \right] \leq 2 e^{-k \eps^2/2},$$
+ 
+\textbf{This is not exactly what they got. In particular that $h^2$ which is $\max{\|M_{k'}\|_F}$. I'm going to ignore this difference in the rest of the section..} as $|\inner{A,M_{k'}}\inner{uv^\top, M_{k'}}| \leq h^2 \|A\|_F \|uv^\top\|_F $
+
+Therefore for the choice of $k=\log(1/\eta)/\eps^2$ we know
+    $$\Pr\left[|u^\top \hat{A} v - u^\top Av\| \ge \eps\|A\|_F\|u\|\|v\|
+    \right] \le \eta.$$
+
+    Now for any pair of matrix/vector $(U,x)\in G$, let $u_i$ be the $i$-th row of $U$. There are $mn$ such rows, and the inequality of interest holds with probability $\eta=\frac{\delta}{mn}$ for each. Therefore, by union bound we know with probability at least $1-\delta$ for all $u_i$ we have $|u_i^\top \Delta v\| \le \eps\|A\|_F\|u_i\|\|v\|$. Since $\|U\Delta x\|^2 = \sum_{i=1}^n (u_i^\top \Delta x)^2$ and $\|U\|_F^2 = \sum_{i=1}^n \|u_i\|^2$, we immediately get
+    $\|U \Delta x\| \ge \eps\|A\|_F\|U\|_F\|x\|$.
+
+
+\end{proof}
+
+Now, we show Lemma~\ref{lem:rotate-compress}, which shows that the compressed network doesn't differ much in its outputs with $f_A$.
+
+\begin{lemma}\label{lem:rotate-compress}
+    For any fully connected network $f_A$ with $\rho_\delta\geq 3d$, any probability $0 < \delta \leq 1$ and any error $0< \eps \leq 1$, Algorithm~\ref{alg:matrix-proj} generates weights $\tilde{A}$ for a network with $\frac{72c^2d^2\log (mdh/\delta)}{\eps^2}\cdot \sum_{i=1}^d \frac{1}{\mu_i^2\mu_{i\rightarrow}^2}$ total parameters such that with probability $1-\delta/2$ over the generated weights $\tilde{A}$, for any $x\in S$:
+    $$
+    \|f_A(x) - f_{\tilde{A}}(x)\| \le \eps\|f_A(x)\|.
+    $$
+    where $\mu_i$, $\mu_{i\rightarrow}$, $c$ and $\rho_{\delta}$ are layer cushion, interlayer cushion, activation contraction and interlayer smoothness.
+\end{lemma}
+
+\begin{proof}
+This is proven by induction on the layers $i$. For any layer $i\geq 0$, let $\hat{x}^j_i$ be the output at layer $j$ if the weights $A^1,\dots,A^i$ in the first $i$ layers are replaced with $\tilde{A}^1,\dots,\tilde{A}^i$. The induction hypothesis is then the following:
+
+    Consider any layer $i\geq 0$ and any $0<\eps\leq 1$. The following is true with probability $1-\frac{i\delta}{2d}$ over $\tilde{A}^1,\dots,\tilde{A}^i$ for any $j\geq i$:
+    $$
+    \|\tilde{x}^j_i - x^j\|\le (i/d)\eps\|x^j\|.
+    $$
+
+    For the base case $i = 0$, since we are not perturbing the input, the inequality is trivial. Now assuming that the induction hypothesis is true for $i-1$, we consider what happens at layer $i$. Let $\tilde{A}^i$ be the result of Algorithm~\ref{alg:matrix-proj} on $A^i$ with $\eps_i=\frac{\eps\mu_i\icu}{4cd}$ and $\eta = \frac{\delta}{6d^2h^2m}$ (\textbf{not sure why this choice of $\eta$}). Now let's analyze the difference in activations between the network with the extra perturbation and the unperturbed network. For any $j \ge i$ we have, using the triangle inequality
+    \begin{equation}
+    \|\tilde{x}^j_i - x^j\| = \|(\tilde{x}^j_i - \tilde{x}^j_{i-1})+(\tilde{x}^j_{i-1} - x^j)\| \leq \|(\tilde{x}^j_i - \tilde{x}^j_{i-1})\| +\|\tilde{x}^j_{i-1} - x^j\|.
+    \label{eq:activation-error}
+    \end{equation}
+    The second term can be bounded by $(i-1)\eps\|x^j\|/d$ by the induction hypothesis. Therefore, in order to prove the induction, it is enough to show that the first term is bounded by $\eps/d \|x^j\|$. 
+
+    First, we define some notation. For any two layer $i\leq j$, denote by $M^{i,j}$ the operator for composition of these layers and $J^{i,j}_x$ be the Jacobian of this operator at input $x$ (a matrix whose $p, q$ is the partial derivative of the $p$th output coordinate with respect to the $q$'th input input). Therefore, we have $x^j = M^{i,j}(x^i)$\footnote{Remember that $x^i$ are the preactivations feeding into layer $i$}. Furthermore, since the activation functions are ReLU, we have $M^{i,j}(x^i) =J^{i,j}_{x^i} x^i$.
+
+    We decompose the first term in Eq.~\ref{eq:activation-error} into two error terms one of which corresponds to the error propagation through the network if activation (which ReLU units are $0$) were fixed and the other one is the error caused by change in the activations:
+    \begin{align*}
+    \|(\tilde{x}^j_i - \tilde{x}^j_{i-1})\|
+    & = \|M^{i,j}(\tilde{A}^i \phi(\tilde{x}^{i-1})) - M^{i,j}(A^i \phi(\tilde{x}^{i-1}))\|\\
+    & = \|M^{i,j}(\tilde{A}^i \phi(\tilde{x}^{i-1})) - M^{i,j}(A^i \phi(\tilde{x}^{i-1})) + J^{i,j}_{x^i}(\Delta^i \phi(\tilde{x}^{i-1})) - J^{i,j}_{x^i}(\Delta^i \phi(\tilde{x}^{i-1}))\| \\
+    & \leq \|J^{i,j}_{x^i}(\Delta^i \phi(\tilde{x}^{i-1}))\| + \|M^{i,j}(\tilde{A}^i \phi(\tilde{x}^{i-1})) - M^{i,j}(A^i \phi(\tilde{x}^{i-1})) - J^{i,j}_{x^i}(\Delta^i \phi(\tilde{x}^{i-1}))\| 
+    \end{align*}
+
+    where $\Delta^i = \tilde{A}^i - A^i$. To bound the first term, we can apply Lemma~\ref{lem:perturblayer:highprob} with the set $G=\{(J^{i,j}_{x^i},x^i)|x\in S,j\geq i\}$ which has size at most $dm$ (at most $d$ $J^{i,j}_{x^i}$ for each of the $m$ $x_i$). We will also need to define several quantities that measure how much error propagates through the network. The term can be bounded as follows:
+    \begin{align*}
+    & \|J^{i,j}_{x^i}\Delta^i \phi(\tilde{x}^{i-1})\|\\
+    & \le (\eps\mu_i\icu/6cd)\|J^{i,j}_{x^i}\|_F\|A^i\|_F\|\phi(\tilde{x}^{i-1})\|&& \mbox{Lemma~\ref{lem:perturblayer:highprob}}\\
+    & \le (\eps\mu_i\icu/6cd)\|J^{i,j}_{x^i}\|\|A^i\|_F\|\tilde{x}^{i-1}\|&& \mbox{Lipschitzness of the activation function}\\
+    &\le (\eps\mu_i\icu/3cd)\|J^{i,j}_{x^i}\|_F\|A^i\|_F\|x^{i-1}\|&& \mbox{Induction hypothesis} \\
+    &\le (\eps\mu_i\icu/3d)\|J^{i,j}_{x^i}\|_F\|A^i\|_F \|\phi(x^{i-1})\|&& \mbox{Activation Contraction} \\
+    &\le (\eps\icu/3d)\|J^{i,j}_{x^i}\|_F\|A^i \phi(x^{i-1})\|&& \mbox{Layer Cushion} \\
+    & = (\eps\icu/3d)\|J^{i,j}_{x^i}\|_F\|x^i\|&& x^i = A^i\phi(x^{i-1})\\
+    & \le (\eps/3d) \|x^j\|&& \mbox{Interlayer Cushion} 
+    \end{align*}
+
+    \textbf{where this holds with probability $1-\frac{\delta}{6dh}$, I think.., because of the first step. However, we want it to hold with probability $1-\frac{\delta}{2d}$ for them to add up correctly?}. The second term can be bounded as:
+    \begin{align*}
+    & \|M^{i,j}(\tilde{A}^i \phi(\tilde{x}^{i-1})) - M^{i,j}(A^i \phi(\tilde{x}^{i-1})) - J^{i,j}_{x^i}(\Delta^i\phi( \tilde{x}^{i-1}))\| \\
+    & = \|(M^{i,j}-J^{i,j}_{x^i})(\tilde{A}^i \phi(\tilde{x}^{i-1})) - (M^{i,j}-J^{i,j}_{x^i})(A^i \phi(\tilde{x}^{i-1}))\| \\
+    & \leq \|(M^{i,j}-J^{i,j}_{x^i})(\tilde{A}^i \phi(\tilde{x}^{i-1}))\| + \|(M^{i,j}-J^{i,j}_{x^i})(A^i \phi(\tilde{x}^{i-1}))\|.
+    \end{align*}
+    Both terms can be bounded using interlayer smoothness condition of the network.
+    First, notice that $A^i\phi(\tilde{x}^{i-1}) = \tilde{x}^i_{i-1}$.
+    Therefore, using by induction hypothesis $\|A^i\phi(\tilde{x}^{i-1}) - x^i\| = \|\tilde{x}^i_{i-1} - x^i\| \le (i-1)\eps\|x^i\|/d \le \eps\|x^i\|$ (as $i-1 < d$).
+    
+    Now by interlayer smoothness property, $\|(M^{i,j}-J^{i,j}_{x^i})(A^i \phi(\tilde{x}^{i-1}))\| \le \frac{\| \tilde{x}^i_{i-1} - x^i\| \| x^j\|}{\|x^i\| \rho_{\delta}} \le \frac{\eps \|x^i\| \| x^j\|}{\|x^i\| \rho_{\delta}} \le (\eps/3d)\|x^j\|$. (as $\rho_{\delta} \geq 3d$, by assumption)
+    On the other hand, we also know $\tilde{A}^i\phi(\tilde{x}^{i-1}) = A^i\phi(\tilde{x}^{i-1}) + \Delta^i\phi(\tilde{x}^{i-1})$, therefore $\|\tilde{A}^i\phi(\tilde{x}^{i-1}) - x^i\| \le \|A^i\phi(\tilde{x}^{i-1}) - x^i\| + \|\Delta^i\phi(\tilde{x}^{i-1})\| \le ((i-1)\eps/d+\eps/3d)\|x^i\| \le \eps \|x^i\|$, so again we have $\|(M^{i,j}-J^{i,j}_{x^i})(\tilde{A}^i \phi(\tilde{x}^{i-1}))\| \le (\eps/3d)\|x^j\|$.
+    
+    Putting everything together completes the induction, which for the last layer gives us the desired result $\|f_A(x) - f_{\tilde{A}}(x)\| \le \eps\|f_A(x)\|$, with probability at least $1-\delta/2$.
+
+\end{proof}
+
+We will now demonstrate that because of the perturbed network producing similar outputs to the original network, its margin of error can't be much smaller. That means that if the original had a certain error with margin $\gamma$, the perturbed one has at most that same error, albeit with a smaller margin (but how much smaller it has to be is bounded). In particular, we focus on the zero margin loss for the perturbed network in Lemma~\ref{lem:bounding_loss}.
+
+\begin{lemma}\label{lem:bounding_loss}
+    For any fully connected network $f_A$ with $\rho_\delta\geq 3d$, any probability $0<\delta\leq 1$ and any margin $\gamma>0$, $f_A$ can be compressed (with respect to a random string) to another fully connected network $f_{\tilde{A}}$ such that for any $x\in S$, $\hat{L}_0(f_{\hat{A}}) \leq \hat{L}_{\gamma}(f_A)$ and the number of parameters in $f_{\tilde{A}}$ is at most:
+    \begin{equation*}
+    \tilde{O}\left(\frac{c^2d^2\max_{x\in S}\|f_A(x)\|_2^2}{\gamma^2}\sum_{i=1}^d \frac{1}{\mu_i^2\icu^2}\right)
+    \end{equation*}
+    where $\mu_i$, $\icu$, $c$ and $\rho_{\delta}$ are layer cushion, interlayer cushion, activation contraction and interlayer smoothness. 
+% defined in Definitions~\ref{def:layercushion},\ref{def:interlayercushion},\ref{def:activationcontraction} and \ref{def:interlayersmoothness} respectively.
+\end{lemma}
+\begin{proof}(of Lemma~\ref{lem:bounding_loss})
+    If $\gamma^2 > 2\max_{x\in S}\|f_A(x)\|_2^2$, for any pair $(x,y)$ in the training set we have $|f_A(x)[y]  - \max_{i\neq y} f_A(x)[j]|^2 \leq 2\max_{x\in S}\|f_A(x)\|_2^2 \leq \gamma^2$ which means the output margin cannot be greater than $\gamma$ and therefore $\hat{L}_{\gamma}(f_A)=1$ which proves the statement.
+    
+If $\gamma^2\leq 2\max_{x\in S}\|f_A(x)\|_2^2$, by setting $\eps^2 = \gamma^2/2\max_{x\in S}\|f_A(x)\|_2^2$ in Lemma~\ref{lem:rotate-compress}, we know that for any $x\in S$, $\|f_A(x) - f_{\tilde{A}}(x)\|_{2}\le \gamma/\sqrt{2}$.
+
+For any $(x,y)$, the margin of the original network $|f_A(x)[y]  - \max_{i\neq y} f_A(x)[j]|$ can be reduced by at most $|f_A - f_{\tilde{A}}| \leq \gamma$. Therefore, if for any $(x,y)$, the margin loss on the right hand side is zero $|f_A(x)[y]  - \max_{i\neq y} f_A(x)[j]| > \gamma $, and $|f_{\tilde{A}}(x)[y]  - \max_{i\neq y} f_{\tilde{A}}(x)[j]| > 0$, and so the classification loss on the left hand size is zero. Therefore whenever $f_A$ classifies well with margin $\gamma$, $f_{\tilde{A}}$ classifies well with margin $0$, which implies the inequality.
+
+% For any $(x,y)$, if the margin loss on the right hand side is one then the inequality holds. Otherwise, the output margin in $f_{\tilde{A}}$ is greater than $\gamma$ which means in order for classification loss of $f_{A}$ to be one, we neet to have $\|f_A(x) - f_{\tilde{A}}(x)\|_{2}> \gamma/\sqrt{2}$ which is not possible and that completes the proof.
+\end{proof}
+
+% In the worst case, where all the difference between f_A and f_tilde{A} goes to the argmax_{i\neq y}, the margin is reduced by ||f_A - f_tilde{A}||_1 \leq \gamma (see relation between 1-norm and 2-norm).
+% Then, wheneber f_A gets an (x,y) right,  f_tilde{A} gets it right. also., implying the inequality in the losses (which are just probabilities of getting it wrong)
+
+Finally, we prove Theorem~\ref{fc-net-theorem}, by bounding the difference between $\hat{L}_0(f_{\tilde{A}})$ and $L_0(f_{\tilde{A}})$ (generalization gap)
+
+\begin{proof}(of Theorem~\ref{fc-net-theorem})
+    We show the generalization by bounding the covering number of the network with weights $\tilde{A}$.
+%     We already demonstrated that the original network with weights $A$ can be approximated with another network with weights $\tilde{A}$ and less number of parameters.
+In order to get a covering number, we need to find out the required accuracy for each parameter in the second network to cover the original network. We start by bounding the norm of the weights $\tilde{A}^i$.
+
+    Because of positive homogeneity of ReLU activations, we can assume without loss of generality that the network is balanced, i.e for any $i\neq j$, $\|A^i\|_F = \|A^j\|_F=\beta$ (otherwise, one could rebalance the network before approximation and cushion is invariant to this rebalancing). Therefore, for any $x\in S$ we have:
+    
+    $$\|A^i\| \leq \frac{\|A^i\phi(x^{i-1})\|}{\mu_i\|\phi(x^{i-1})\|} = \frac{\|x^i\|}{\mu_i\|\phi(x^{i-1})\|} \leq \frac{\|x^i\|c}{\mu_i\|x^{i-1}\|}$$
+    
+    which we can apply layer-wise to get:
+    
+    \begin{align*}
+    \beta^d = \prod_{i=1}^d\|A^i\| \leq \frac{c\|x^1\|}{\|x\| \mu_1}\prod_{i=2}^d\|A^i\|\leq \frac{c^2\|x^2\|}{\|x\| \mu_1\mu_2}\prod_{i=2}^d\|A^i\|\leq \frac{c^{d} \|f_A(x)\|}{\|x\|\prod_{i=1}^d \mu_i}
+    \end{align*}
+    By Lemma~\ref{lem:rotate-compress}, $\|\tilde{A^i}\|_F \leq \beta(1+1/d)$ (\textbf{I can't see why this is. can show using definition with sum that $\tilde{A^i} \leq \beta h^2$..}). We know that $\tilde{A}^i = \frac{1}{k}\sum_{k'=1}^k \langle A^i, M_{k'}\rangle M_{k'}$ where $\langle A^i, M_{k'}\rangle$ are the parameters. Therefore, if $\hat{A}^i$ correspond to the weights after approximating each parameter in $\tilde{A}^i$ with accuracy $\nu$, we have:
+    $\|\hat{A}^i-\tilde{A}^i\|_F \leq \sqrt{k}h\nu \leq \sqrt{q}h\nu$ where $q$ is the total number of parameters. Now by Lemma~\ref{lem:lipschitz}, we get:
+
+    \begin{align*}
+    |\ell_\gamma(f_{\tilde{A}}(x),y) -\ell_\gamma(f_{\hat{A}}(x),y)| &\leq
+    \frac{2e}{\gamma}\|x\|\left(\prod_{i=1}^{d} \|\tilde{A}^i\| \right) \sum_{i=1}^d \frac{\|\tilde{A}^i-\hat{A}^i\|}{\|\tilde{A}^i\|} < \frac{e^2}{\gamma}\|x\| \beta^{d-1}\sum_{i=1}^d \|\tilde{A}^i-\hat{A}^i\|_F\\
+    &\leq \frac{e^2c^d \|f_A(x)\| \sum_{i=1}^d \|\tilde{A}^i-\hat{A}^i\|_F}{\gamma\beta\prod_{i=1}^d \mu_i} \leq \frac{qh\nu}{\beta}\\
+    \end{align*}
+    where the last inequality is because by Lemma~\ref{lem:bounding_loss}, $\frac{e^2d \|f_A(x)\|}{\gamma\prod_{i=1}^d \mu_i } < \sqrt{q}$ (because $\|f_A(x)\| \leq \max_{x\in S} \|f_A(x)\|$), and $c^d$ was ignored because c=1 for ReLU, I think see Lipsicthzness assumption above (\textbf{I think})
+    Since the absolute value of each parameter in layer $i$ is at most $\beta h$, the logarithm of number of choices for each parameter in order to get $\eps$-cover is $\log(qh^2/\eps) \leq 2\log(qh/\eps)$ which results in the covering number $2q\log(kh/\eps)$. Bounding the Rademacher complexity by Dudley entropy integral (See \href{https://cstheory.stackexchange.com/questions/40472/pac-learning-bound-with-epsilon-cover-of-hypothesis-class}{here} and \href{http://www.cs.berkeley.edu/~bartlett/courses/281b-sp06/lecture24.ps}{here}) completes the proof.
+\end{proof}
+
+% \cite{pac-based}
+\begin{lemma}[\cite{neyshabur2017pac}]\label{lem:lipschitz}
+    Let $f_A$ be a $d$-layer network with weights $A=\{A^1,\dots, A^d\}$. Then for any input $x$, weights $A$ and $\hat{A}$, if for any layer $i$, $\|A^i-\hat{A}^i\| \leq \frac{1}{d}\|A^i\|$, then we have:
+    \begin{equation*}
+    \|f_A(x)-f_{\hat{A}}(x)\|_2 \leq e\|x\|\left(\prod_{i=1}^{d} \|A^i\| \right) \sum_{i=1}^d \frac{\|A^i-\hat{A}^i\|}{\|A^i\|}
+    \end{equation*}
+\end{lemma}
+
