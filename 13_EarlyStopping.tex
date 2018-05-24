@@ -1,11 +1,11 @@
 %!TEX root = optimization1718.tex
 
-\chapter{Early Stoping for Kernel Boosting Algorithms}
+\chapter{Early Stopping for Kernel Boosting Algorithms}
 \emph{Speaker: Fan Wu and Tomas Vaskevicius}\\
 
 
 \section{Introduction}
-Overfitting is a problem occuring in many models. Especially non-parametric models,
+Overfitting is a problem occurring in many models. Especially non-parametric models,
 which offer great flexibility, but can also produce very complex models,
 are prone to this issue. Usually, some form of regularization has to be introduced
 in order to overcome this problem.
@@ -30,7 +30,7 @@ An interesting connection between these two forms of regularization has been sho
 \cite[Section 3.4]{raskutti2014early}.
 It has already been observed through simulations that the prediction error behaves
 similarly for Kernel Ridge Regression with a penalty parameter and gradient descent algorithms with early stopping, see e.g. \cite{friedman2004gradient}.
-\citet{raskutti2014early} provided a theoretical explanation of this observation.
+\cite{raskutti2014early} provided a theoretical explanation of this observation.
 They considered $L^2$ boosting and compared it to KRR.
 They showed that the same bounds on the prediction error holds when the same criterion
 is applied for the penalty parameter in KRR and the stopping time in the boosting algorithm they consider.
@@ -71,7 +71,7 @@ $$
 
 For every $f \in \mathcal{H}_{n}$, we can write $f = \sum_{i = 1}^{n} \alpha_{i} k(\cdot, x_{i})$
 where $\alpha_{i} \in \mathbb{R}$.
-let $f(x_{1:n})$ denote a column vector in $\mathbb{R}^{n}$ with $i$-th enry
+Let $f(x_{1:n})$ denote a column vector in $\mathbb{R}^{n}$ with $i$-th entry
 equal to $f(x_{i})$. Let $K$ be an $n \times n$ matrix with $K_{ij} = k(x_{i}, x_{j})$.
 Then $f(x_{1:n}) = K \alpha$.
 Also, given a vector $z \in \text{range}(K)$, for
@@ -79,7 +79,7 @@ $\beta = K^{\dagger}z$
 \footnote{$K^{\dagger}$ denotes the generalised inverse of K. That is,
 a unique matrix, such that $KK^{\dagger}K = K$},
 we have $z = g(x_{1:n})$ and $g = \sum_{i=1}^{n} \beta_{i}k(\cdot, x_{i})$.
-Hece, instead of working in $\mathcal{H}_{n}$ we can alternatively work in $\mathbb{R}^{n}$.
+Hence, instead of working in $\mathcal{H}_{n}$ we can alternatively work in $\mathbb{R}^{n}$.
 
 We will now derive a formula for applying gradient descent on $\mathbb{R}^{n}$ vectors
 of the form $f(x_{1:n})$.
@@ -104,7 +104,7 @@ we have
 \end{align*}
 Hence we can map functions $f = \sum_{i=1}^{n} \alpha_{i}k(\cdot, x_{i})$ to
 $\theta_{f} = \sqrt{K^{\dagger}}K\alpha$.
-We can now define the loss functino on this reparameterised space as:
+We can now define the loss function on this reparameterised space as:
 $$
 \mathcal{J}(\theta_f) = \mathcal{L}_{n}(f(x_{1:n})) = \mathcal{L}_{n}(\sqrt{K}\theta_f).
 $$
@@ -146,7 +146,7 @@ The empirical Gaussian complexity is given by
   \label{eq:gaussian-complexity}
   \mathcal{G}_{n}(\mathcal{H}) \coloneqq \mathbb{E}_{w_{1:n}}\Big[\sup_{h\in\mathcal{H}}\frac{1}{n}\sum_{i=1}^nw_ih(x_i)\Big],
 \end{equation}
-where $(w_1,...,w_n)$ is an i.i.d. sequence of $N(0,1)$ random variables.
+where $(w_1,\dots,w_n)$ is an i.i.d. sequence of $N(0,1)$ random variables.
 For i.i.d. $w_{1:n}$ given by $\mathbb{P}(w_i=-1)=\mathbb{P}(w_i=1)=\frac{1}{2}$ the above quantity would
 be the Rademacher complexity.
 Intuitively, the Equation~\ref{eq:gaussian-complexity} checks how well our class
@@ -159,19 +159,19 @@ of the order $\mathcal{O}(1/\sqrt{n})$.
 
 As noted in \cite{bartlett2005local}, $\mathcal{G}_{n}(\mathcal{H})$ does not capture the fact
 that the algorithm will typically only choose hypotheses from a small subset of the function space
-containing functions with small empirical erros. Instead, we can consider local sets of the
+containing functions with small empirical error. Instead, we can consider local sets of the
 form
 $$
   \mathcal{E}(\delta):= \{f^{*}-f \mid f\in\mathcal{H}, ||f^{*}-f||_{\mathcal{H}}\le 1, ||f^{*}-f||_n \leq \delta\},
 $$
 and then consider \textit{localised Gaussian complexities} given by
 $\mathcal{G}_{n}(\mathcal{E}(\delta))$. Using these localised complexity measures
-faster error rates can be derived. See \citet{bartlett2005local} for more information.
+faster error rates can be derived. See \cite{bartlett2005local} for more information.
 
 \subsection{Critical Radius}
 
 Let $\sigma$ denote the \textit{noise level} of our data. We follow the definition
-given in \citet{wain17ada}:
+given in \cite{wain17ada}:
 $$
 \sigma \coloneqq
 \begin{cases}
@@ -190,7 +190,7 @@ which is guaranteed to be unique and exist.
 It turns out that the critical radius is a key quantity in relating the quantity
 $\norm{f^{T} - f^{*}}_{n}$ to the localised Gaussian complexity.
 More information on that is available in scribe lecture notes\footnote{\url{http://www.stat.cmu.edu/~arinaldo/Teaching/36755/F16/Scribed_Lectures/AST_Nov14_Scribe.pdf}} and in a soon to
-be published book \citet{wainwright2017high}.
+be published book \cite{wainwright2017high}.
 
 As we shall see later, an optimal stopping rule will be proportional to $\frac{1}{\delta_{n}^{2}}$.
 Note that increasing dataset size $n$ will make $\mathcal{G}_{n}(\mathcal{E}(\delta)$ smaller,
@@ -203,7 +203,7 @@ overfitting.
 
 In general, there is no easy way to compute the critical radius.
 One of the reasons why we have to restrict ourselves to RKHSs instead of doing
-boosting in full generality, is that there are known inequalities able to sandwitch
+boosting in full generality, is that there are known inequalities able to sandwich
 $\mathcal{G}(\mathcal{E}(\delta))$ by quantities that we can compute from the data.
 Define
 $$
@@ -213,7 +213,7 @@ where $\hat{\mu}_{i}$ for $i = 1, \dots, n$ are the eigenvalues of the normalise
 kernel matrix $\frac{1}{n}K$.
 Up to a universal constant, the above value upperbounds $\mathcal{G}_{n}{\mathcal{E}(\delta)}$
 for all $\delta \geq 0$. Up to another universal constant it is also a lower bound for all
-$\delta \geq \frac{1}{\sqrt{n}}$. In RKHSs case, this will allow us to find the order
+$\delta \geq \frac{1}{\sqrt{n}}$. In RKHS case, this will allow us to find the order
 of the critical radius.
 
 
@@ -240,7 +240,7 @@ holds. This can be seen by considering the Taylor expansion of $\mathcal{L}(f)$.
 \item $\mathbf{\phi'-boundedness}$\\
 When considering other cost functions than least-squares, we need to further assume that
 \begin{equation}
-\max_{i=1,...,n}\left\lvert \frac{\partial\phi(y,\theta)}{\partial \theta}\right\rvert_{\theta=f(x_i)} \le B
+\max_{i=1,\dots,n}\left\lvert \frac{\partial\phi(y,\theta)}{\partial \theta}\right\rvert_{\theta=f(x_i)} \le B
 \end{equation}
 for all $f\in \mathcal{B}_{\mathcal{H}}(f^*,C_{\mathcal{H}}^2)$ and $y\in \mathcal{Y}$.
 
@@ -261,7 +261,7 @@ The following bounds will apply to this averaged estimator rather than the lates
 
 \begin{theorem}
 \label{thmbound}
-(\cite{wain17ada}) Let $\phi$ be a cost function satisfying $\phi'$-boundedness and $\mathcal{L}$ the corresponding population loss function satisfying the m-smooth M-strongly convex condition. Let the sample size $n$ be large enough such that $\delta_n\le \frac{M}{m}$, and $\{f^t\}_{t=1,2,...}$ be functions generated by the iteration REFERENCE using some step size $\alpha\in (0,\min\{\frac{1}{M}, M\}]$ and initialization $f^0=0$. Then, for all iterations $T\in \{0,1,...,\lfloor\frac{m}{8M\delta_n^2}\rfloor$\}, the averaged functions $\bar{f}^T$ satisfies the bounds
+(\cite{wain17ada}) Let $\phi$ be a cost function satisfying $\phi'$-boundedness and $\mathcal{L}$ the corresponding population loss function satisfying the m-smooth M-strongly convex condition. Let the sample size $n$ be large enough such that $\delta_n\le \frac{M}{m}$, and $\{f^t\}_{t=1,2,\dots}$ be functions generated by the iteration REFERENCE using some step size $\alpha\in (0,\min\{\frac{1}{M}, M\}]$ and initialization $f^0=0$. Then, for all iterations $T\in \{0,1,\dots,\lfloor\frac{m}{8M\delta_n^2}\rfloor$\}, the averaged functions $\bar{f}^T$ satisfies the bounds
 \begin{align}
 \mathcal{L}(\bar{f}^T) - \mathcal{L}(f^*) &\le \frac{C}{M}\Big(\frac{1}{\alpha m T} + \frac{\delta_n^2}{m^2}\Big), \label{bound1} \\
 ||\bar{f}^T-f^*||_n^2 &\le C\Big(\frac{1}{\alpha m T} + \frac{\delta_n^2}{m^2}\Big), \label{bound2}
@@ -272,7 +272,7 @@ with probability at least $1-c_1\exp\big(-C_2\frac{m^2n\delta_n^2}{\sigma^2}\big
 \begin{proof}
 We will proof the theorem assuming three technical lemmas, which are stated with the assumptions of theorem \ref{thmbound} in place and for which a proof can be found in \cite{wain17ada}.
 
-Recall that for a function $f\in \mathcal{H}$ we write $\theta_f := f(x_1^n) = (f(x_1),...,f(x_n))\in \mathbb{R}^n$, usually omitting the subscript $f$. Updates on the function values $\theta^t\in \mathbb{R}^n$ correspond uniquely to updates of the functions $f^t\in\mathcal{H}$, so we can consider these instead. For vectors $\Delta\in \operatorname{range}(K)$ we define the Hilbert norm $||\Delta||_{\mathcal{H}}^2 = \frac{1}{n}\Delta^TK^{\dagger}\Delta$ and the empirical norm $||\Delta||_n^2 = \frac{1}{n}||\Delta||_2^2$ (here we abused the notation and used that $\Delta$ can be interpreted both as element in $\mathbb{R}^n$ and in $\mathcal{H}$. We will continue and not make this distinction in the following).
+Recall that for a function $f\in \mathcal{H}$ we write $\theta_f := f(x_1^n) = (f(x_1),\dots,f(x_n))\in \mathbb{R}^n$, usually omitting the subscript $f$. Updates on the function values $\theta^t\in \mathbb{R}^n$ correspond uniquely to updates of the functions $f^t\in\mathcal{H}$, so we can consider these instead. For vectors $\Delta\in \operatorname{range}(K)$ we define the Hilbert norm $||\Delta||_{\mathcal{H}}^2 = \frac{1}{n}\Delta^TK^{\dagger}\Delta$ and the empirical norm $||\Delta||_n^2 = \frac{1}{n}||\Delta||_2^2$ (here we abused the notation and used that $\Delta$ can be interpreted both as element in $\mathbb{R}^n$ and in $\mathcal{H}$. We will continue and not make this distinction in the following).
 
 Define $\Delta^t := \theta^t-\theta^*$. The first lemma provides a bound on this error in the empirical norm $||\cdot||_n^2$.\\
 \textbf{Lemma 1}
@@ -379,7 +379,7 @@ n^{-\frac{2\beta}{2\beta + 1}} \quad\text{for $\beta$-polynomial decay}
 \end{cases}
 \end{equation*}
 \section{Simulations}
-Assume we have some data $n$ points $\{x_i\}_{i=1,...,n}$ distributed equidistantly on $[0,1]$. Given these data points, we sample observations $y_i$ according to
+Assume we have some data $n$ points $\{x_i\}_{i=1,\dots,n}$ distributed equidistantly on $[0,1]$. Given these data points, we sample observations $y_i$ according to
 \begin{align*}
 y_i \sim \operatorname{Bin}(p(x_i), 5), \quad
 p(x_i)=\frac{\exp(f^*(x_i))}{1+\exp(f^*(x_i))}, \quad f^*(x) = |x-\frac{1}{2}| - \frac{1}{4}.
@@ -391,9 +391,9 @@ We consider the logistic cost function $\phi(y,\theta)=\log(1+e^{-y\theta})$. In
 \begin{equation*}
 \frac{\partial\phi(y,\theta)}{\partial\theta} = \frac{-ye^{-y\theta}}{1+e^{-y\theta}}, \text{ and } \frac{\partial^2\phi(y,\theta)}{\partial\theta^2} = \frac{y^2}{(e^{-\frac{y\theta}{2}}+e^{\frac{y\theta}{2}})^2}
 \end{equation*}
-respectively. Clearly, the first derivative is bounded by 1 ($\phi'$-boundedness holds with $B=1$) and the second derivative is bounded from above by $M=\frac{1}{4}$. The an lower bound on the second derivative we have to use the fact that we make the asswumptions only locally. In particular, $\theta=f(x)$ must come from a function $f$ with $||f||_{\mathcal{H}}\le D := C_{\mathcal{H}} + ||f^*||_{\mathcal{H}}$. By the reproducing property we then know that $f(x)|\le MD$ for some constant $M$, and therefore we can lower bound $\frac{\partial^2\phi(y,\theta)}{\partial\theta^2}$ by $m=\frac{1}{e^{MD}+e^{-MD}+2}$.
+respectively. Clearly, the first derivative is bounded by 1 ($\phi'$-boundedness holds with $B=1$) and the second derivative is bounded from above by $M=\frac{1}{4}$. For the lower bound on the second derivative we have to use the fact that we make the assumptions only locally. In particular, $\theta=f(x)$ must come from a function $f$ with $||f||_{\mathcal{H}}\le D := C_{\mathcal{H}} + ||f^*||_{\mathcal{H}}$. By the reproducing property we then know that $f(x)|\le MD$ for some constant $M$, and therefore we can lower bound $\frac{\partial^2\phi(y,\theta)}{\partial\theta^2}$ by $m=\frac{1}{e^{MD}+e^{-MD}+2}$.
 
-We initialize the algorithm at $f^0=0$ and run it for a total of $7n$ steps with a constant step size of $\alpha=0.75$. We then compare different stopping times ($T=(2n)^{\kappa}$ for $\kappa=\frac{1}{3},\frac{2}{3},1$) and the oracle gold standard, which chooses the stopping time $G=\operatorname{arg}\min_{t=1,...,2n}||f^t-f^*||_n^2$, that is the best estimate observed during the whole run. For different sample sizes $n$ we run the algorithm 40 times each and average the mean-squared errors.
+We initialize the algorithm at $f^0=0$ and run it for a total of $7n$ steps with a constant step size of $\alpha=0.75$. We then compare different stopping times ($T=(2n)^{\kappa}$ for $\kappa=\frac{1}{3},\frac{2}{3},1$) and the oracle gold standard, which chooses the stopping time $G=\operatorname{arg}\min_{t=1,\dots,2n}||f^t-f^*||_n^2$, that is the best estimate observed during the whole run. For different sample sizes $n$ we run the algorithm 40 times each and average the mean-squared errors.
 
 \begin{figure}
   \includegraphics[width=\textwidth]{img/early_stopping_logit_plot.jpg}
@@ -406,16 +406,16 @@ Indeed, the derived stopping rule using $\kappa=\frac{2}{3}$ performs best among
 The two other stopping rules both perform worse. A stopping too early ($\kappa=\frac{1}{3}$) corresponds to underfitting, whereas stopping too late ($\kappa=1$) corresponds to overfitting.
 
 \section{Discussion}
-The results of \cite{wain17ada} also show that the derived stopping rule matches a minimax lower bound for a broad class of kernels up to constant factors and is therefore unimprovable. In fact, when stopping at $T=\lfloor \frac{1}{\delta_n^2 \max\{8,M\}}\rfloor$, using a stepsize of $\alpha=\frac{m}{M}$ and initialization $f^0=0$, then for any function $f^*$ with $||f^*||_{\mathcal{H}}\le 1$
+The results of \cite{wain17ada} also show that the derived stopping rule matches a minimax lower bound for a broad class of kernels up to constant factors and is therefore optimal. In fact, when stopping at $T=\lfloor \frac{1}{\delta_n^2 \max\{8,M\}}\rfloor$, using a stepsize of $\alpha=\frac{m}{M}$ and initialization $f^0=0$, then for any function $f^*$ with $||f^*||_{\mathcal{H}}\le 1$
 \begin{equation}
 \mathbb{E}||\bar{f}^T-f^*||_n^2 \asymp \inf_{\hat{f}}\sup_{||f||_{\mathcal{H}}\le 1} \mathbb{E}||\hat{f}-f^*||_n^2.
 \end{equation}
 Another important aspect of this paper is the role kernels play for these results.
 Eigenvalue decay conditions of certain kernels can be used in order to obtain explicit bounds for the critical radius $\delta_n$, which would otherwise be hard to obtain.
-Also, we used the the fact that the Hilbert space $\mathcal{H}$ is an RKHS, and that we can therefore restrict our attention to the subspace $\mathcal{H}_n = \operatorname{span}(\{K(\cdot, x_i)\}_{i=1,...,n})$ due to the Representer theorem. This allows us to identify functions in $\mathcal{H}_n$ with vectors in $\mathbb{R}^n$, which is much more convenient to work with.
+Also, we used the fact that the Hilbert space $\mathcal{H}$ is an RKHS, and that we can therefore restrict our attention to the subspace $\mathcal{H}_n = \operatorname{span}(\{K(\cdot, x_i)\}_{i=1,\dots,n})$ due to the Representer theorem. This allows us to identify functions in $\mathcal{H}_n$ with vectors in $\mathbb{R}^n$, which is much more convenient to work with.
 
 Finally, throughout these notes we assumed that the covariates $x_{i}$ are fixed.
-It is also shown in \citet{wain17ada} that this condition can be relaxed.
+It is also shown in \cite{wain17ada} that this condition can be relaxed.
 Define the $L_{2}(\mathbb{P}_{X})$ norm as $\norm{\cdot}_{2}$ to be given by
 $$
 \norm{\hat{f} - f^{*}}_{2}^{2} = \mathbb{E}_{X}[(\hat{f}(X) - f^{*}(X))^{2}].

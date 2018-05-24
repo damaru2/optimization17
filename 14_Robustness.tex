@@ -1,80 +1,194 @@
 %!TEX root = optimization1718.tex
 
+\newcommand*\one{\mathbf{1}}                            % Vector of Ones
+\newcommand*\risk{r(\theta)}                            % Population risk
+\newcommand*\Risk{R(\theta)}                            % Empirical Risk
+\newcommand*\robRisk{R_n(\theta, \rho)}                 % robust Risk
+\newcommand\rad[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}   % Radon-Nikodym derivative
+\newcommand*\empirical{\widehat{P}_n}                   % Empirical distribution
+\newcommand*\phidiv{D_{\phi}\pa{P\|\empirical}}         % \phi divergence between P and \empirical
+\newcommand*\Pn{\mathcal{P}_n}                          % Space of distributions
+\newcommand*\mean[1]{\bar{#1}}                          % Mean
+\newcommand*\loss{\ell}                                 % Loss
+\newcommand*\radworst{\mathfrak{R}^{\text{sup}}_n}      % Worst case Rademacher complexity
+\newcommand*\rob{\text{rob}}
+
+
+
+% Integral with \mu(dx) as the measure.
+% \intf {liminf} {limsup} {integrand} {meas} {dif}
+% OBS: 4 arguments could be misinterpreted as liminf limsup integrand measure!
+
+% 3 -> liminf integrand meas
+% 4 -> liminf integrand meas dif
+% 5 -> liminf limsup integrand meas dif
+
+\NewDocumentCommand\intf{mmmgg}{%
+    \ensuremath{\int_{#1}%
+        \IfNoValueTF{#5}%
+        {\IfNoValueTF{#4}%
+            {#2\, \mathrm{d}#3}%
+            {#2\, #3\pa{\mathrm{d}#4}}%
+        }%
+        {^{#2} #3\, #4\pa{\mathrm{d}#5}}%
+    }%
+}
+
+% Define set as $\set{x | x \in X}$
+\catcode`\|=\active
+\DeclarePairedDelimiterX\set[1]{\lbrace}{\rbrace}
+  {\mathcode`\|="8000 \def|{\:\delimsize\vert\:}#1}
+\catcode`\|=12 %
+
+\DeclarePairedDelimiter\card{\lvert}{\rvert}                    % Cardinality of a set
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}                     % Absolute value
+\DeclarePairedDelimiter\pa{\lparen}{\rparen}                    % Shortcut for ()
+\DeclarePairedDelimiter\cor{\lbrack}{\rbrack}                   % Shortcut for []
+\DeclarePairedDelimiterX{\scalar}[2]{\langle}{\rangle}{#1, #2}  % Shortcut for <,>
+\NewDocumentCommand{\enorm}{ m }{ \norm{#1}_2 }                % Euclidean Norm
+
 \chapter{Robustness}
 \emph{Speakers: Amartya Sanyal, Mario Lezcano Casado and David Martínez Rubio }\\
 
 % Change of notation with respect to the paper to maintain the symbols we have been using in the reading group:
-%   Paper                          Us
+%   Paper                          Us                Command
 % --------------------------------------------------------------------------------
-%   R(\theta)                      r(\theta)         - True risk
-%     -                            R(\theta)         - Empirical risk
-%   R(\theta, \mathcal{P}_n)     R(\theta, \rho)   - robust risk
+%   R(\theta)                      r(\theta)         \risk      - True risk
+%     -                            R(\theta)         \Risk      - Empirical risk
+%   R(\theta, \Pn)                 R(\theta, \rho)   \robRisk   - Robust risk
 %
 %
 
 
 \section{Introduction}
-The generalization problem we have mostly been focusing on. Let $\mathcal{X}$ be a sample space $P$ an unknown distribution on $\mathcal{X}$ from which we can sample and $\Theta$ a parameter space. Given a loss function $\ell : \Theta \times \mathcal{X} \rightarrow \mathcal{R}$, we want to minimize over $\Theta$ the risk
+Let $\mathcal{X}$ be a sample space, $P_0$ an unknown distribution on $\mathcal{X}$ from which we can sample, and $\Theta$ the parameter space. Given a loss function $\loss : \Theta \times \mathcal{X} \rightarrow \R$, we want to minimize over $\Theta$ the risk
 \[
-    r(\theta) := \mathbb{E}_{X\sim P} [\ell(\theta, X)]\\
+    r(\theta) := \E_{X\sim P_0} \loss(\theta, X).
 \]
-
-for solving this task, we take samples $x_1, \dots, x_n$ i.i.d. from $P$ and then one usually compute the empirical risk
+To solve this task, we take samples $X_1, \dots, X_n$ i.i.d. from $P$ and then one usually computes the empirical risk
 \[
-    R(\theta) := \frac{1}{n} \sum_{i=1}^n \ell(\theta, x_i)
+    R(\theta) := \frac{1}{n} \sum_{i=1}^n \loss(\theta, X_i)
 \]
-and minimize it over $\Theta$. In the literature we can find in different bounds contexts bounds of the following form, with high probability:
+and minimize it over $\Theta$. In the literature we can find in different contexts bounds of the following form:
 \[
-    r(\theta) \leq \frac{1}{n} \sum_{i=0}^n \ell(\theta, x_i) + C_1 \sqrt{\frac{\Var(\ell(\theta, X))}{n}} + \frac{C_2}{n} \text{ for all } \theta \in \Theta
+    r(\theta) \leq \frac{1}{n} \sum_{i=1}^n \loss(\theta, X_i) + C_1 \sqrt{\frac{\Var(\loss(\theta, X))}{n}} + \frac{C_2}{n} \text{ for all } \theta \in \Theta
 \]
-where $C_1$ and $C_2$ depend on the parameters of the problem and the desired confidence guarantee. These bounds justify empirical risk minimization (ERM), i.e. minimizing $R(\theta)$. ERM is the most natural way to tackle our problem, we take an unbiased estimator of the value we want to minimize and minimize that one instead. However, while choosing $\theta$ we do not make any attempt to control the variance of our losses and thus the quantity we really want to bound could be big. 
+with high probability, where $C_1$ and $C_2$ depend on the parameters of the problem and the desired confidence guarantee. These bounds justify empirical risk minimization (ERM), i.e. minimizing $R(\theta)$. ERM is the most natural way to tackle our problem, we take an unbiased estimator of the value we want to minimize and minimize that one instead. However, while choosing $\theta$ we do not make any attempt to control the variance of our losses and thus the quantity we really want to bound could be big.
 
 It seems natural to ask if we can get trade-offs between bias and variance in the generalization error, or more concretely if minimizing the weighted sum
 \begin{equation}\label{empirical_biased_estimator}
-R(\theta) + C\sqrt{\frac{\Var_{\hat{P}_n}(\ell(\theta, X))}{n}}
+R(\theta) + C\sqrt{\frac{\Var_{\hat{P}_n}(\loss(\theta, X))}{n}}
 \end{equation}
-we can get a lower generalization error. This idea was considered previously, but unfortunately the previous expression is not necessarily convex when $\ell$ is convex.  The paper we present, \textit{Variance-based regularization with convex objectives} \cite{duchi17roubust} proposes a different estimator, convex on $\theta$, that under some assumptions it is close to \eqref{empirical_biased_estimator}. They call their estimator the \textit{robustly regularized risk} and prove some generalization guarantees depending on the Rademacher complexities, covering numbers or localized Rademacher complexities.
+we can get a lower generalization error. This idea was considered previously in~\cite{maurer2009empirical}, but unfortunately the previous expression is not necessarily convex even when $\loss$ is convex. The paper we present, \textit{Variance-based regularization with convex objectives} \cite{duchi17roubust} proposes a different estimator, convex on $\theta$, that under some assumptions it is close to \eqref{empirical_biased_estimator}. They call their estimator the \textit{robustly regularized risk} and prove generalization guarantees that depend on the Rademacher complexities, covering numbers or localized Rademacher complexities.
 
 \section{Robustly Regularized Risk}
 
 Before defining the robustly regularized risk, we need to define first some concepts.
 
-Let $\phi : \mathbb{R}_+ \rightarrow \mathbb{R}$ be a convex function with $\phi(1) = 0$. Then the $\phi$-\textit{divergence} between distributions $P$ and $Q$ defined on a space $\mathcal{X}$ is 
+Let $\phi : \R_+ \rightarrow \R$ be a convex function with $\phi(1) = 0$. Then the $\phi$-\textit{divergence} between the distributions $P$ and $Q$ defined on a space $\mathcal{X}$ is
 \[
-    D_{\phi}(P\|Q) = \int \phi\left(\frac{dP}{dQ} dQ\right) = \int_{\mathcal{X}} \phi\left(\frac{p(X)}{q(X)}\right) q(X) d\mu(X),
+    D_{\phi}(P\| Q) = \intf{\mathcal{X}}{\phi\left(\rad{P}{Q}(X)\right)}{Q}{X} = \intf{\mathcal{X}}{ \phi\left(\frac{p(X)}{q(X)}\right) q(X)}{\mu}{X},
 \]
-where $\mu$ is any measure for which $P,Q  \ll \mu$, and $p= \frac{dP}{d\mu}$, $q = \frac{dQ}{d\mu}$. The paper makes use of the $\chi^2$-divergence, which corresponds with $\phi(t)=(t-1)^2$. Given $\phi$ and a sample $X_1, \dots, X_n$, we define the \textit{local neighborhood of the empirical distribution with radius} $\rho$ by 
+where $\mu$ is any measure for which $P,Q  \ll \mu$, and $p= \rad{P}{\mu}$, $q = \rad{Q}{\mu}$. The paper makes use of the $\chi^2$-divergence, which corresponds to $\phi(t)=\frac{1}{2}(t-1)^2$. Given $\phi$ and a sample $X_1, \dots, X_n$, we define the \textit{local neighborhood of the empirical distribution with radius} $\rho$ by
 \[
-    \mathcal{P}_n := \left\{ \text{distributions } P \text{ such that } D_\phi\left(P \| \hat{P}_n\right)\leq \frac{\rho}{n } \right\}
+    \Pn := \left\{ \text{discrete distributions } P \text{ such that } \phidiv \leq \frac{\rho}{n} \right\}
 \]
-where $\hat{P}_n$ denotes the empirical distribution of the sample. Then, the robustly regularized risk is defined as
+where $\empirical$ denotes the empirical distribution of the sample. Then, the robustly regularized risk is defined as
 \[
-    R_n(\theta, \rho) := \sup_{P\in\mathcal{P}_n} \mathbb{E}_P [\ell(\theta, X)] = \sup_{P}\left\{\mathbb{E}_P[\ell(\theta, X)]: D_{\phi}(P\|\hat{P}_n) \leq \frac{\rho}{n}\right\}.
+    \robRisk := \sup_{P\in\Pn} \E_P \loss(\theta, X).
 \]
-It is convex on $\theta$ because it is defined as the supremum of convex functions. The proposed estimation is to choose a parameter $\hat{\theta}^\rob$ that minimizes $R_n(\theta, \rho)$. The authors prove that this estimator is close to \eqref{empirical_biased_estimator}, in particular it is $O(1/n)$ lower than  \eqref{empirical_biased_estimator} uniformly in $\theta$ and if the variance of $\ell(\theta, X)$ is big enough we will see that with high probability the two estimators are the same.
+It is convex on $\theta$ because it is defined as the supremum of convex functions. Note that this estimator is nothing but the supremum over a compact subset of the simplex, and thus could be seen as the maximum of some weights given by the vector of the simplex that describes $P$ multiplied by the empirical losses $\loss(\theta, X_i)$. The proposed estimation is obtained by choosing a parameter $\hat{\theta}^\rob$ that minimizes $\robRisk$. The authors prove that this estimator is close to \eqref{empirical_biased_estimator}, in particular it is $O(1/n)$ lower than  \eqref{empirical_biased_estimator} uniformly in $\theta$ and if the variance of $\loss(\theta, X)$ is big enough we will see that with high probability the two estimators are the same.
 
-\section{Variance expansion}
-We want to see that the risk $R_n(\theta, \rho)$ is a good approximation to the empirical risk plus a variance term. In order to understand this kind of variance expansion it is useful to study first the following problem
+\section{Variance expansion}~\label{sec:var_expansion}
+We want to see that the risk $\robRisk$ is a good approximation to the empirical risk plus a variance term. In order to understand this kind of variance expansion it is useful to study first the following problem
 \begin{align}\label{variance_expansion}
 	\begin{aligned}
-         &\text{maximize}_{p} \sum_{i=1}^n p_i z_i \\
-         &\text{subject to } p \in \mathcal{P}_n = \left\{p\in \mathbb{R}_+^n : \frac{1}{2} \|np-\textbf{1}\|_2^2 \leq \rho, \langle \textbf{1}, p \rangle = 1\right\},
+         &\max_{p} \sum_{i=1}^n p_i z_i \\
+         &\text{subject to } p \in \Pn = \left\{p\in \R_+^n : \frac{1}{2} \enorm{np-\one}^2 \leq \rho, \scalar{\one}{p} = 1\right\},
 	\end{aligned}
 \end{align}
-where $z \in \mathbb{R}^n$ is a vector. Let $s_n^2 := \frac{1}{n} \|z\|_2^2 - (\bar{z})^2 $ be the empirical variance of the vector $z$, where $\bar{z} = \frac{1}{n} \langle \textbf{1}, z\rangle$ is the mean value of $z$. Then by introducing the variable $u=p-\frac{1}{n} \textbf{1}$, the objective in problem \eqref{variance_expansion} satisfies $\langle p, z \rangle = \bar{z} + \langle u, z \rangle = \bar{z} + \langle u, z-\bar{z} \rangle$ because $\langle u, \textbf{1}=0\rangle$. Thus problem \eqref{variance_expansion} is equivalent to solving
+where $z \in \R^n$ is a vector. Let $s_n^2 := \frac{1}{n} \enorm{z}^2 - (\mean{z})^2 $ be the empirical variance of the vector $z$, where $\mean{z} = \frac{1}{n} \scalar{\one}{z}$ is the mean value of $z$. Then by introducing the variable $u=p-\frac{1}{n} \one$, the objective in problem \eqref{variance_expansion} satisfies $\scalar{p}{z} = \mean{z} + \scalar{u}{z} = \mean{z} + \scalar{u}{z-\mean{z}}$ because $\scalar{u}{\one}=0$. Thus problem \eqref{variance_expansion} is equivalent to solving
 \[
-    \text{maximize}_{u\in \mathbb{R}^n}  \bar{z} + \langle  u, z-\bar{z}\rangle \text{  subject to } \|u\|_2^2 \leq \frac{2\rho}{n^2}, \langle \textbf{1}, u\rangle = 0, u \geq -\frac{1}{n}.
+    \max_{u \in \R^n} \mean{z} + \scalar{u}{z-\mean{z}} \quad \text{subject to } \enorm{u}^2 \leq \frac{2\rho}{n^2}, \scalar{\one}{u} = 0, u \geq -\frac{1}{n}\one.
 \]
-If there is $u \propto z-\bar{z}$ that satisfies the constraints, the maximum is attained at such vector. This would be 
+If there is $u \propto z-\mean{z}$ that satisfies the constraints, by Cauchy-Schwarz the maximum is attained at such vector. This would be
 \[
-    u_i = \frac{\sqrt{2\rho}(z_i -\bar{z})}{n\|z-\bar{z}\|_2} = \frac{\sqrt{2\rho} (z_i -\bar{z})}{n\sqrt{ns^2_n}}.
+    u_i = \frac{\sqrt{2\rho}(z_i -\mean{z})}{n\enorm{z-\mean{z}}} = \frac{\sqrt{2\rho} (z_i -\mean{z})}{n\sqrt{ns^2_n}}.
 \]
-It is possible to satisfy the constraint $u_i \geq -1/n$  if and only if 
+It is possible to satisfy the constraint $u_i \geq -1/n$  if and only if
+\[\label{eq:cond_u}
+    \min_{i\in [n]} \frac{\sqrt{2\rho}(z_i - \mean{z})}{\sqrt{ns_n^2}} \geq -1.
+\]
+Thus if variance is large enough and the previous inequality holds for the vector $z$ we have that
 \[
-    \min_{i\in [n]} \frac{\sqrt{2\rho}(z_i - \bar{z})}{\sqrt{ns_n^2}} \geq -1.
+    \sup_{p\in\Pn} \scalar{p}{z} = \mean{z} + \sqrt{\frac{2\rho}{n} s_n^2}.
 \]
-Thus if variance is large enough and thus the previous inequality holds for the vector $z$ we have 
+This condition corresponds to an equality between $\robRisk$ and \eqref{variance_expansion}.
+
+Based on this insight, we are ready to present the main theorem.
+\begin{theorem}\label{thm:1}
+    Let $Z$ be a random variable taking values in $[M_0, M_1]$ and let $M = M_1 - M_0$. Let $\sigma^2 = \Var(Z)$ and $s^2_n = \E_{\empirical} Z^2 - \pa{\E_{\empirical} Z}^2$ denote the population and sample variance of $Z$. Fix $\rho \geq 0$. Then
+    \[
+    %\pa[\Big]{\sqrt{\frac{2\rho}{n}s^2_n} - \frac{2M\rho}{n}}_+
+    \sup_{P \in\Pn}\E_P Z = \E_{\empirical} Z + \sqrt{\frac{2\rho}{n}s^2_n}
+    \qquad \text{or} \qquad
+    \E_{\empirical} Z + \sqrt{\frac{2\rho}{n}s^2_n} - \sup_{P \in \Pn}\E_P Z \leq \frac{2M\rho}{n}
+    \]
+    Moreover, if $n \geq \max\set{5, \frac{\rho M^2}{\sigma^2}\max\set{8\sigma, 44}}$, with probability at least $1-\exp\pa{-\frac{n\sigma^2}{11M^2}}$
+    \[
+        \sup_{P \in \Pn} \E_P Z = \E_{\empirical} Z + \sqrt{\frac{2\rho}{n} s^2_n}.
+    \]
+\end{theorem}
+We have slightly rewritten Theorem $1$ in the paper in what we think it is a more clear way of expressing its intentions.
+
+Two things are important to note about this theorem. The first one is that the second inequalities says that the proposed robust estimator is at most $O(1/n)$ away from (below) the estimator given by minimizing the sum of the empirical mean and the square root of the empirical variance. The high probability part of the theorem as stated here says that, if we have enough samples, with high probability the estimators actually coincide. Another way of putting this is saying that if the random variable $Z$ has enough variance, then with high probability we also have this equality. Given that the robust estimator is convex for $Z = \loss(\theta, X)$, in this regime the estimator $\theta \mapsto \E_{\empirical} \loss(\theta, X) + \sqrt{\frac{2\rho}{n}\Var_{\empirical}\loss(\theta, X)}$ would also be convex with high probability.
+\begin{proof}
+    We will prove just the first part of theorem~\ref{thm:1}, given that the second part is rather technical.
+
+    We will use the same notation as in section~\ref{variance_expansion}.Let $Z = z$, let $p$ be the vector that defines the discrete distribution $P$ and let $u = p - \frac{1}{n}\one$. We start by proving that the robust objective is less or equal to the variance-regularized objective. This is a direct consequence of the Cauchy-Schwarz inequality, noting that if $P \in \Pn$,
+    \[
+        \scalar{p}{z} = \mean{z} + \scalar{u}{z-\mean{z}} \leq \mean{z} + \frac{1}{n}\sqrt{2\rho \enorm{z-\mean{z}}} = \mean{z} + \sqrt{\frac{2\rho}{n} s^2_n}
+    \]
+    and taking the supremum over $P \in \Pn$.
+
+    We finish the proof by noting that, given that $\abs{z_i - \mean{z}} \leq M$, it is sufficient to have $s^2_n \geq \frac{2\rho M^2}{n}$ for equation~\eqref{eq:cond_u} to hold. Conversely, if $s^2_n < \frac{2\rho M^2}{n}$, then $\sqrt{\frac{2\rho}{n}s^2_n} < \frac{2\rho M}{n}$ and we get the second inequality just by observing that $0 \leq \sup_{P \in \Pn} \E_P Z - \E_{\empirical} Z$.
+\end{proof}
+
+This proof also hints on how proof the second part. We have that if $s^2_n$ is large enough then the equality holds in our estimator. For this reason, taking $n \geq \frac{44\rho M^2}{\sigma^2}$, if the event $\mathcal{E}_n = \set{s^2_n \geq \frac{3}{64}\sigma^2}$ holds, then we have that $n\geq \frac{2\rho M^2}{s^2_n}$, which is a sufficient condition for the equality of the two estimators. Proving that $\mathcal{E}_n$ has high probability is quite technical though.
+
+Theorem~\ref{thm:1} is the cornerstone for the rest of the paper. The following theorems are versions of theorem~\ref{thm:1} for families of functions in terms of different kinds of complexity.
+
+We define the \emph{worst case Rademacher complexity} as the Rademacher complexity of the absolute value of the Rademacher averages. Formally, if $\mathcal{F}$ is a family of functions defined on a set $\mathcal{X}$, the worst case Rademacher complexity is defined as
 \[
-    \sup_{p\in\mathcal{P}_n} \langle p, z\rangle = \bar{z} + \sqrt{\frac{2\rho s_n^2}{n}}.
+    \radworst(\mathcal{F}) := \sup_{x_1, \dots, x_n \in \mathcal{X}} \E \sup_{f \in \mathcal{F}} \abs[\Big]{\frac{1}{n} \sum_{i=1}^n \epsilon_i f(x_i)}.
 \]
-This will correspond to an equality between $R_n(\theta, \rho)$ and \eqref{variance_expansion} when the variance is large enough.
+Based on this complexity measure, they provide a version of theorem~\ref{thm:1} for families of functions.
+\begin{theorem}\label{thm:2}
+    Let $\mathcal{F}$ be a collection of bounded functions $f\colon \mathcal{X} \to [M_0, M_1]$ where $M = M_1 - M_0$, and $n \geq M$. Then, there exists a universal constant $C$ such that for every $f \in \mathcal{F}$ such that
+    \[
+    \Var(f) \geq \frac{4\rho M^2}{n} + C \cor[\Big]{\radworst(F)^2 \log^3 n  + \frac{M^2}{n}\pa{t + \log\log n}}
+    \]
+    with probability $1 - 3e^{-t}$ we have that
+    \[
+        \sup_{P \in\Pn}\E_P f(X) = \E_{\empirical} f(X) + \sqrt{\frac{2\rho}{n}\Var_{\empirical} f(X)}.
+    \]
+\end{theorem}
+In the proof of this theorem they use the worst-case Rademacher complexity to give sufficient conditions under which $n \geq \frac{4\rho M^2}{\Var_{\empirical}(f)}$ with high probability.
+
+We present here an example of an application of this theorem.
+\begin{example}
+    Consider the standard margin-based classification framework, with data pairs $(x,y) \in \mathcal{X} \times \set{-1, 1}$, and $\mathcal{X} \subset \R^d$. Let $\Theta = \set{\theta \in \R^d | \norm{x} \leq r_{\Theta}}$ and let $\norm{\cdot}_\ast$ the associated dual norm, assuming also that $\mathcal{X} \subset \set{x \in R^d | \norm{x}_\ast \leq r_{\mathcal{X}}}$. Assume that we have a loss function $\loss \colon \R \to \R_+$ such that $\loss(0) = 0$, and consider the risk $\risk := \E \loss(Y\scalar{\theta}{X})$.
+
+    Defining $\mathcal{F} = \set{(x,y) \mapsto \loss(y \scalar{x}{\theta} | \theta \in \Theta}$, an application of the Ledoux-Talagrand contraction inequality gives
+    \[
+    \E \sup_{\theta \in \Theta} \abs[\Big]{\sum_{i=1}^n \epsilon_i\loss(y_i\scalar{\theta}{x_i})}
+    \leq \E \sup_{\theta \in \Theta} \abs[\Big]{\sum_{i=1}^n \epsilon_i \scalar{\theta}{x_i}}
+    \leq r_{\Theta} \E\norm{\sum_{i=1}^n \epsilon_i x_i}_\ast.
+    \]
+
+    In the case of $2$-norm, an application of Jensen's inequality and the independence of the $\epsilon_i$ gives $\E \enorm{\sum \epsilon_i x_i} \leq r_{\mathcal{X}} \sqrt{n}$, and together with theorem~\ref{thm:2}, we have the equality of the estimators for every $\theta$ such that
+    \[
+        \Var(\loss(Y\scalar{\theta}{X})) \geq \frac{r_{\mathcal{X}}^2 r_{\Theta}^2}{n}\cor{4\rho + C\pa{t + \log^3 n}}
+    \]
+    with probability $1-3e^{-t}$.
+\end{example}

@@ -5,7 +5,7 @@
 
 In ensemble methods for machine learning we assume that
 \begin{equation*}
-	(W_1, Y_1), ..., (W_n, Y_n)
+	(W_1, Y_1), \dots, (W_n, Y_n)
 \end{equation*}
 are i.i.d. with $W_i \in \mathcal{W}$. For binary classification, we have $Y_i \in \{\pm 1\}$. We have access to a set $\mathcal{G}$ of base (also called weak) procedures
 \begin{equation*}
@@ -16,7 +16,7 @@ The aim is to construct an aggregate of base procedures which solves the followi
 \begin{align*}
 	\begin{aligned}
 		\min_f\quad   & \E \ell(f(W), Y) \\
-		\text{subject to }\quad & f = \sum_{t=1}^T \alpha_t g_t \text{ with } \alpha_t \ge 0, g_t \in \mathcal{G} \text{ for } t=1, ..., T.
+		\text{subject to }\quad & f = \sum_{t=1}^T \alpha_t g_t \text{ with } \alpha_t \ge 0, g_t \in \mathcal{G} \text{ for } t=1, \dots, T.
 	\end{aligned}
 \end{align*}
 
@@ -25,7 +25,7 @@ As in Section~\ref{sec:intro}, $\ell$ is a loss functions typically of the form 
 	\ell_{01}(f(w), y) &= \mathbf{1}[\text{sign}(f(w)) \ne y] \\
 	\varphi_{01}(u)    &= \mathbf{1}[u \ge 0]
 \end{align*}
-but regrettably this is neither convex nor differentiable. In AdaBoost, we use the Exponential Loss 
+but regrettably this is neither convex nor differentiable. In AdaBoost, we use the Exponential Loss
 \begin{equation*}
 	\varphi_\text{exp}(u) = \exp(u)
 \end{equation*}
@@ -73,12 +73,12 @@ We have just derived the following algorithm
    	\STATE Let $\alpha_t = \tfrac{1}{2}\log \left(\frac{1 - \varepsilon_t}{\varepsilon_t}\right)$
     \STATE Let $f_t$ = $f_{t-1} + \alpha_t g_t$
     \STATE Reweight $D_{t+1}(i) \propto D_{t}(i)\exp(-\alpha_t Y_i g_t(W_i))$
-   \ENDFOR  
+   \ENDFOR
    \STATE Normalize $f = f_T/\sum_{t=1}^T \alpha_t$
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Choice of $\mathcal{G}$}
+\subsection{Choice of \texorpdfstring{$\mathcal{G}$}{G}}
 In classification, it is extremely common to choose the base procedures to be some form of decision tree. Two common cases are:
 \begin{itemize}
 	\item Decision stumps. For $\mathcal{W} = \R^k$, the $(i, c, s)$-decision stump assigns $+s$ to $\{w : w_i \ge c\}$ and $-s$ to the rest. (We need $s=\pm 1, 1 \le i \le k, c \in \R$.)
@@ -112,7 +112,7 @@ Recall the \textbf{Kullback-Leibler} (KL) divergence for distributions $p$ and $
 \begin{equation*}
 	KL(p, q) = \sum_{i=1}^n p(i) \log \frac{p(i)}{q(i)}
 \end{equation*}
-Let $u$ denote the uniform distribution on $1, ..., n$. Consider the following optimization problem
+Let $u$ denote the uniform distribution on $1, \dots, n$. Consider the following optimization problem
 \begin{align*}
 	\begin{aligned}
 		\min_p\quad   & KL(p, u)\\
@@ -122,7 +122,7 @@ Let $u$ denote the uniform distribution on $1, ..., n$. Consider the following o
 \end{align*}
 The Lagrangian for this problem is
 \begin{equation*}
-	L(p, \alpha, \lambda) = \sum_{i=1}^n p(i) \log (np(i)) + \sum_{g \in \mathcal{G}} \alpha_g \left( \sum_{i=1}^n p(i)Y_i g(W_i) \right) + \lambda \left(\sum_{i=1}^n p(i) - 1\right) 
+	L(p, \alpha, \lambda) = \sum_{i=1}^n p(i) \log (np(i)) + \sum_{g \in \mathcal{G}} \alpha_g \left( \sum_{i=1}^n p(i)Y_i g(W_i) \right) + \lambda \left(\sum_{i=1}^n p(i) - 1\right)
 \end{equation*}
 (we have ignored the non-negativity constraints but it turns out we get them for free).
 
@@ -157,7 +157,7 @@ Set $\mathcal{G}$ is a family of \textbf{$\gamma$-weak learners} if for every di
 With this definition, we can begin a theoretical analysis of AdaBoost.
 
 \begin{theorem}[AdaBoost with $\gamma$-weak learners]
-The optimized empirical exponential loss of AdaBoost is 
+The optimized empirical exponential loss of AdaBoost is
 \begin{equation*}
 	\prod_{t=1}^T 2 \sqrt{\varepsilon_t (1 - \varepsilon_t)}.
 \end{equation*}
@@ -175,7 +175,7 @@ From equation~\eqref{eq:adaboost_empirical_loss} taking $t=T$ we first note that
 Using equation~\eqref{eq:adaboost_alpha_optim} we have $e^{\pm \alpha_T} = \left(\frac{1 - \varepsilon_T}{\varepsilon_T}\right)^{\pm 1/2}$, giving
 \begin{align*}
 	\E_n[\exp(-Yf_T(W)] &= 2\sqrt{\varepsilon_T (1-\varepsilon_T)} \E_n [\exp(-Yf_{T-1}(W))] \\
-	&= \prod_{t=1}^T 2\sqrt{\varepsilon_t (1-\varepsilon_t)} 
+	&= \prod_{t=1}^T 2\sqrt{\varepsilon_t (1-\varepsilon_t)}
 \end{align*}
 
 Now suppose $\mathcal{G}$ is a family of $\gamma$-weak learners. Then (considering the empirical law on $(W, Y)$ in the definition of weak learners) we must have each $\varepsilon_t \le \frac{1 - \gamma}{2}$, since the choice of $g_t$ is optimal. Hence $2\sqrt{\varepsilon_t(1 - \varepsilon_t)} \le \sqrt{1 - \gamma^2}$
@@ -208,7 +208,7 @@ In the last three cases, suitable choices of $\mathcal{G}$ ensure that $\text{sp
 
 \subsection{Boosting as variational gradient descent}
 (This section is based on \cite{mason2000boosting}) \\
-We can phrase the optimization problem that boosting targets as 
+We can phrase the optimization problem that boosting targets as
 \begin{equation}
 	\min_{f \in \mathcal{F}} \; C(f)
 \end{equation}
@@ -221,7 +221,7 @@ As an approximation, one could find
 	\label{eq:functional_gradient_approx}
 	g_t = \argmax_{g\in\mathcal{G}} \; -\langle \partial C(f_{t-1}), g \rangle
 \end{equation}
-and then 
+and then
 \begin{equation*}
 	f_t = f_{t-1} + \alpha_t g_t
 \end{equation*}
@@ -261,7 +261,7 @@ The gradient perspective gives a recipe for producing a large number of Gradient
    	\STATE Choose $g_t \in \mathcal{G}$ to maximize $-\langle \partial C(f_{t-1}), g \rangle$, using the inner product of \eqref{eq:boost_inner_prod}
    	\STATE Choose $\alpha_t$ to minimize $C(f_{t-1} + \alpha_t g_t)$
     \STATE Let $f_t$ = $f_{t-1} + \alpha_t g_t$
-   \ENDFOR  
+   \ENDFOR
    \STATE Normalize $f = f_T/\sum_{t=1}^T \alpha_t$
 \end{algorithmic}
 \end{algorithm}
@@ -272,7 +272,7 @@ The gradient perspective gives a recipe for producing a large number of Gradient
 
 \section{Universal consistency of AdaBoost}
 
-References: 
+References:
 \begin{itemize}
 \item \verb|https://bcourses.berkeley.edu/courses/1409209/files/67384944|
 \item \verb|http://statistics.berkeley.edu/sites/default/files/tech-reports/722.pdf|
@@ -282,7 +282,7 @@ We begin with a number of definitions. Recall the \textbf{classification risk}
 \begin{equation*}
 	R(f) = \Prob [f(W) \ne Y]
 \end{equation*}
-Let $R^* = \inf_f R(f)$ where the inf is taken over all classification rules\footnote{Note that classification rules are derived from training data. Classification rules generated from $n$ examples are therefore measurable w.r.t. the $\sigma$-algebra, $\Sigma_n$, generated by $(W_1, Y_1), ..., (W_n, Y_n)$. The class considered here is all classification rules measurable under $\Sigma = \cup_n \Sigma_n$.} $f:\mathcal{W} \to \{\pm 1\}$.
+Let $R^* = \inf_f R(f)$ where the inf is taken over all classification rules\footnote{Note that classification rules are derived from training data. Classification rules generated from $n$ examples are therefore measurable w.r.t. the $\sigma$-algebra, $\Sigma_n$, generated by $(W_1, Y_1), \dots, (W_n, Y_n)$. The class considered here is all classification rules measurable under $\Sigma = \cup_n \Sigma_n$.} $f:\mathcal{W} \to \{\pm 1\}$.
 
 A sequence $(f_n)$ of classification rules is \textbf{universally consistent} if
 \begin{equation}
@@ -310,15 +310,3 @@ and that the empirical risk and population risk get close
 \end{equation}
 
 The concentration inequalities we seek to use require bounded $\varphi$. Hence, we clip them using $\pi_C$.
-
-
-
-
-
-
-
-
-
-
-
-
