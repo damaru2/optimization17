@@ -12,6 +12,8 @@
 \newcommand*\loss{\ell}                                 % Loss
 \newcommand*\radworst{\mathfrak{R}^{\text{sup}}_n}      % Worst case Rademacher complexity
 \newcommand*\rob{\text{rob}}
+\newcommand{\br}[1]{\left({#1}\right)}
+\newcommand{\bc}[1]{\left\{{#1}\right\}}
 
 
 
@@ -116,9 +118,12 @@ If there is $u \propto z-\mean{z}$ that satisfies the constraints, by Cauchy-Sch
     u_i = \frac{\sqrt{2\rho}(z_i -\mean{z})}{n\enorm{z-\mean{z}}} = \frac{\sqrt{2\rho} (z_i -\mean{z})}{n\sqrt{ns^2_n}}.
 \]
 It is possible to satisfy the constraint $u_i \geq -1/n$  if and only if
-\[\label{eq:cond_u}
-    \min_{i\in [n]} \frac{\sqrt{2\rho}(z_i - \mean{z})}{\sqrt{ns_n^2}} \geq -1.
-\]
+
+  \begin{align}
+    \min_{i\in [n]} \frac{\sqrt{2\rho}(z_i - \mean{z})}{\sqrt{ns_n^2}}
+    \geq -1\label{eq:cond_u}
+  \end{align}
+
 Thus if variance is large enough and the previous inequality holds for the vector $z$ we have that
 \[
     \sup_{p\in\Pn} \scalar{p}{z} = \mean{z} + \sqrt{\frac{2\rho}{n} s_n^2}.
@@ -126,6 +131,7 @@ Thus if variance is large enough and the previous inequality holds for the vecto
 This condition corresponds to an equality between $\robRisk$ and \eqref{variance_expansion}.
 
 Based on this insight, we are ready to present the main theorem.
+
 \begin{theorem}\label{thm:1}
     Let $Z$ be a random variable taking values in $[M_0, M_1]$ and let $M = M_1 - M_0$. Let $\sigma^2 = \Var(Z)$ and $s^2_n = \E_{\empirical} Z^2 - \pa{\E_{\empirical} Z}^2$ denote the population and sample variance of $Z$. Fix $\rho \geq 0$. Then
     \[
@@ -177,7 +183,14 @@ In the proof of this theorem they use the worst-case Rademacher complexity to gi
 
 We present here an example of an application of this theorem.
 \begin{example}
-    Consider the standard margin-based classification framework, with data pairs $(x,y) \in \mathcal{X} \times \set{-1, 1}$, and $\mathcal{X} \subset \R^d$. Let $\Theta = \set{\theta \in \R^d | \norm{x} \leq r_{\Theta}}$ and let $\norm{\cdot}_\ast$ the associated dual norm, assuming also that $\mathcal{X} \subset \set{x \in R^d | \norm{x}_\ast \leq r_{\mathcal{X}}}$. Assume that we have a loss function $\loss \colon \R \to \R_+$ such that $\loss(0) = 0$, and consider the risk $\risk := \E \loss(Y\scalar{\theta}{X})$.
+    Consider the standard margin-based classification framework, with
+    data pairs $(x,y) \in \mathcal{X} \times \set{-1, 1}$, and
+    $\mathcal{X} \subset \R^d$. Let $\Theta = \set{\theta \in \R^d |
+      \norm{x} \leq r_{\Theta}}$ and let $\norm{\cdot}_\ast$ the
+    associated dual norm, assuming also that $\mathcal{X} \subset
+    \set{x \in R^d | \norm{x}_\ast \leq r_{\mathcal{X}}}$. Assume that
+    we have a 1-Lipschitz loss function $\loss \colon \R \to \R_+$
+    such that $\loss(0) = 0$, and consider the risk $\risk := \E \loss(Y\scalar{\theta}{X})$.
 
     Defining $\mathcal{F} = \set{(x,y) \mapsto \loss(y \scalar{x}{\theta} | \theta \in \Theta}$, an application of the Ledoux-Talagrand contraction inequality gives
     \[
@@ -192,3 +205,141 @@ We present here an example of an application of this theorem.
     \]
     with probability $1-3e^{-t}$.
 \end{example}
+
+
+    It is also possible to recover similar guarantees using covering
+    numbers instead of Rademacher complexities.
+    \begin{example} \label{ex:cov_num}
+      Let $\V$ be a vector space and $V\in\V$ be a collection of
+      vectors. Let $\norm{\cdot}$ represent a seminorm on $\V$. A few
+      more terms are explained below.
+
+      The collection $V$ is an $\epsilon$-cover of $\V$ if
+      $\forall v\in\V,~\exists v_i\in V$ such that
+      $\norm{v - v_i}\le \epsilon$. The covering number of $\V$ with
+      respect to $\norm{\cdot}$ is hence defined as
+      \[N(\V,\epsilon,\norm{\cdot})\coloneqq
+        \mathrm{inf}\{N\in\mathbb{N} : \exists~\epsilon\text{-cover of
+          $\V$ with respect to }\norm{\cdot} \}\]
+    
+      Next, we look at the $L_\infty$ covering numbers. Let $\F$ be a
+      collection of functions $f:\X\rightarrow\R$ defined on $\V$. The
+      $L^{\infty}(\X)$ norm on $\F$ is defined as
+      \[\norm{f_i-f_j}_{L^{\infty}(\X)} =
+        \underset{x\in\X}{\mathrm{sup}}~|f_i(x) - f_j(x)|\] A relaxed
+      version of the $L_\infty$ covering number is the empirical
+      $L_\infty$ covering number. Let
+      $\F(X) = \{(f(x_1),\cdots,f(x_n))~:~f\in\F\}$. The empirical
+      $L_\infty$ covering number is defined as
+      \[N_{\infty}(\F,\epsilon, n) =
+        \underset{x\in\X}{\mathrm{sup}}~N(\F(x),\epsilon,\norm{\cdot}_{\infty})\]
+    
+      It is easy to see that by definition
+      $N_{\infty}(\F,\epsilon, n) \le N(\F, \epsilon,
+      \norm{\cdot}_{L^{\infty}(\X)})$.
+
+      Finally, the Dudley inequality, as folllows, is used to relate
+      the covering number argument to the Rademacher complexities.
+      \[\radworst(\F) \lesssim\underset{\delta\ge 0}{\mathrm{inf}}
+        \bc{\delta +
+          \dfrac{1}{\sqrt{n}}\int_{\delta}^M\sqrt{\mathrm{log}~N_{\infty}(\F,\epsilon,n)}~d\epsilon}\]
+
+      Let $\Theta\subset\R^d$ and let
+      $l:\Theta\times\X\rightarrow[0,M]$ be a $L$-Lipscitz function in
+      $\Theta$ with respect to the $L_2$ norm. If
+      $\F = \bc{\ell(\theta,\cdot):~\theta\in\Theta}$ and
+      $\epsilon$-cover ($\theta_1\cdots,\theta_n$) of $\Theta$ will be
+      such that
+      $\underset{i}{\mathrm{min}}~|\ell(\theta, x) -
+      \ell(\theta_i,x)|\le L\epsilon$ forall $\theta\in\Theta$ and
+      $x\in\X$. Therefore,
+      \[N(\F, \epsilon, \norm{\cdot}_{L^{\infty}(\X)} )\le
+        N_{\infty}(\Theta,\epsilon/L, \norm{\cdot}_2)\le\br{1 +
+          \dfrac{\mathrm{diam}(\Theta)L}{\epsilon}}^d\] where
+      $\mathrm{diam}(\cdot)$ represents the usual diameter of a
+      set. By combining the above definitions and arguments we get
+      \begin{align*}
+        \radworst(\F) &\lesssim
+                        \dfrac{1}{\sqrt{n}}\int_{0}^M\sqrt{\mathrm{log}~N_{\infty}(\F,\epsilon,n)}~d\epsilon\\
+                      &\le \dfrac{1}{\sqrt{n}}\int_{0}^M\sqrt{\mathrm{log}~N(\F,
+                        \epsilon, \norm{\cdot}_{L^{\infty}(\X)}
+                        )~d\epsilon}\\
+                      &\lesssim
+                        \sqrt{\dfrac{d}{n}} \int_{0}^M \sqrt{\mathrm{log}
+                        \dfrac{\mathrm{diam} (\Theta)L}{\epsilon}~d\epsilon}\\
+                      & \lesssim \mathrm{diam}(\Theta)L\sqrt{\dfrac{d}{n}}
+      \end{align*}
+      Substituting this in Theorem~\ref{thm:2}, we get that with high
+      probability, the variance expansion in~\eqref{thm:2} holds for
+      all $\theta\in\Theta$ such that
+      $\Var(\ell(\theta, X))\ge \frac{M^2\rho}{n}+
+      \frac{CdL^2\mathrm{diam}(\Theta)^2\mathrm{log}^3n}{n}$.
+    \end{example}
+
+
+\section{Optimization by minimization the Robust Loss}
+\label{sec:optim-robust-loss}
+
+In this section, we will see that the robust risk $\robRisk$ is a
+$O(\frac{1}{n})$ approximation of the population risk $\risk$. This is
+better than the crude $O(\frac{1}{\sqrt{n}})$ provided by ERM. Based
+on this intuition, in this section, we will look at finite sample
+convergence guarantees that depend on covering numbers arguments. The
+original paper also lists arguments based on localized Rademacher
+complexities but the theorems are essentially similar and the
+derivations are more intricate for that.
+
+The main result in this section is as follows
+\begin{theorem}\label{thm:3}
+  Let $n\ge 8M^2/t,~t\ge \mathrm{log}~12,~\epsilon\ge0,~\rho\ge 9t$
+  and let $N_\infty = N_\infty(\F,\epsilon,2n)$. Then w.p. atleast $1 -
+  2(3N_\infty +1)e^{-t}$ for $f\in\F$
+  \[ \E[f(X)]\le \underset{P\in\Pn}{\mathrm{sup}}~\E f(X) +
+    \dfrac{11M\rho}{3n} + \br{2 + 4\sqrt{\dfrac{2t}{n}}}\epsilon\]
+
+  Let $\hat{\theta}\in\argmin_{\theta\in\Theta}\robRisk$. The
+  emprirical robust risk minimizer is defined as $\hat{f} =
+  \ell(\hat{\theta},\cdot)$. We have with the same probability 
+ \[ \E[\hat{f}(X)]\le \underset{f\in\F}{\mathrm{inf}}~\bc{~\E f(X)  +
+     2\sqrt{\dfrac{2\rho \Var(f)}{n}}}+
+    \dfrac{19M\rho}{3n} + \br{ 2+ 4\sqrt{\dfrac{2t}{n}}}\epsilon\]
+  
+\end{theorem}
+ Let's look an alternative version of the theorem that provides more
+ insight into its properties. Consider the last example, we looked at
+ during the explanation of Variance Expansion.
+
+ In addition to the conditions of the aforementioned example, we
+ assume that $\underset{\theta\in\Theta}{\mathrm{min}}~\ell(\theta, x)
+ = 0~\forall x\in\X$. If we define $\rho =
+ \mathrm{log}~\frac{2}{\delta} + d\mathrm{log}~(2nDL)$ and set
+ $t=\rho$, $\epsilon=\frac{1}{n}$, and choose $\delta = \frac{1}{n}$
+ in Theorem~\ref{thm:3}, we get
+ \begin{align}
+ \E[\ell(\hat{\theta}; X)] &\le
+   \underset{\theta\in\Theta}{\mathrm{inf}}~\bc{\E[\ell(\theta; X)] + \sqrt{\frac{d\Var(f\ell(\theta;X))}{n}\mathrm{log}~(n)
+     } }+ C\dfrac{dLD\mathrm{log}~n}{n}
+   \label{corr:1}
+ \end{align}
+
+where $C$ is a constant and $D\lesssim n^k, $and $L\lesssim n^k$ for
+some $k$.
+
+
+The first inequality in Theorem~\ref{thm:3} shows that the true
+expectation of $f$ is with high probability within $O(\frac{1}{n})$
+distance away from its robustly regularized counterpart. The second
+part of Theorem~\ref{thm:3} and its variant in~\eqref{corr:1}
+guarantees that, with enough samples, the empirical minimizer
+converges to a risk that is atmost $O(\frac{\mathrm{log}}{n})$
+larger than the best variance corrected risk.
+
+While, this bounds are very interesting, there are rarely any concrete
+examples where the complexity bounds are realized in a class of
+functions. The paper also provides some examples where this algorithm
+performs better than standard ERM techniques. However, it is not very
+clear whether those examples are significant enough.
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "optimization1718"
+%%% End:
